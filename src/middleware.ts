@@ -14,10 +14,10 @@ const CACHE_DURATION = 60 * 1000;
 export async function middleware(request: NextRequest) {
     const publicPaths = ['/api/login', '/api/register', '/login', '/register'];
     const { pathname } = request.nextUrl;
-
-    if (publicPaths.includes(pathname)) {
-        return NextResponse.next();
-    }
+    return NextResponse.next();
+ //  if (publicPaths.includes(pathname)) {
+  //      return NextResponse.next();
+   // }
 
     const tokenCookie = request.cookies.get('token');
     const token = tokenCookie?.value;

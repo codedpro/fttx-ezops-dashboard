@@ -1,23 +1,32 @@
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import sql, { ConnectionPool } from 'mssql';
+import dotenv from 'dotenv';
 
-const credentials = 'cert.pem';
+dotenv.config({ path: '.env.local' });
 
-const uri = 'mongodb+srv://cluster0.cikjihk.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority&appName=Cluster0';
+const config = {
+  user: process.env.DB_USER as string,
+  password: process.env.DB_PASSWORD as string,
+  server: process.env.DB_SERVER as string,
+  database: process.env.DB_NAME as string,
+  options: {
+    encrypt: true, // Use encryption
+    trustServerCertificate: true, // SSL Self Signed ?
+  },
+};
 
-const client = new MongoClient(uri, {
-  tlsCertificateKeyFile: credentials,
-  serverApi: ServerApiVersion.v1
-});
+let pool: ConnectionPool | null = null;
 
-let isConnected = false;
-
-async function connectToDatabase() {
-  if (!isConnected) {
-    await client.connect();
-    console.log('Connected to MongoDB');
-    isConnected = true;
+async function connectToDatabase(): Promise<ConnectionPool | null> {
+  if (!pool) {
+    try {
+      pool = await sql.connect(config);
+      console.log('Connected to SQL Server');
+    } catch (error) {
+      console.error('Failed to connect to SQL Server:', error);
+      pool = null;
+    }
   }
-  return client.db('myclass');
+  return pool;
 }
 
 export { connectToDatabase };

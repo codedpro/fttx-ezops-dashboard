@@ -1,20 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLaout";
 import Signin from "@/components/Auth/Signin";
 import useColorMode from "@/hooks/useColorMode";
+
+import logoDark from "../../../../public/images/logo/logo.svg";
+import logoIcon from "../../../../public/images/logo/logo-icon.svg";
+import gridImage from "../../../../public/images/grids/grid-02.svg";
 
 const SignIn: React.FC = () => {
   const [colorMode, setColorMode] = useColorMode();
 
-
   useEffect(() => {
     setColorMode("dark");
   }, []);
+  
   return (
     <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
       <div className="flex flex-wrap items-center">
@@ -29,14 +30,14 @@ const SignIn: React.FC = () => {
             <Link className="mb-10 inline-block" href="/">
               <Image
                 className="hidden dark:block"
-                src={"/images/logo/logo.png"}
+                src={logoDark}
                 alt="Logo"
                 width={176}
                 height={32}
               />
               <Image
                 className="dark:hidden"
-                src={"/images/logo/logo.png"}
+                src={logoIcon}
                 alt="Logo"
                 width={176}
                 height={32}
@@ -57,8 +58,8 @@ const SignIn: React.FC = () => {
 
             <div className="mt-31">
               <Image
-                src={"/images/grids/grid-02.svg"}
-                alt="Logo"
+                src={gridImage}
+                alt="Grid"
                 width={405}
                 height={325}
                 className="mx-auto dark:opacity-30"

@@ -3,11 +3,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
-import GoogleSigninButton from "../GoogleSigninButton";
-import SigninWithPassword from "../SigninWithPassword";
 
 export default function Signin() {
-  const [form, setForm] = useState({ emailOrPhone: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "" });
   const router = useRouter();
 
   const handleChange = (e: any) => {
@@ -47,12 +45,10 @@ export default function Signin() {
 
   return (
     <>
-      <GoogleSigninButton text="Sign in" />
-
       <div className="my-6 flex items-center justify-center">
         <span className="block h-px w-full bg-stroke dark:bg-dark-3"></span>
         <div className="block w-full min-w-fit bg-white px-3 text-center font-medium dark:bg-gray-dark">
-          Or sign in with email
+          Sign in using Username
         </div>
         <span className="block h-px w-full bg-stroke dark:bg-dark-3"></span>
       </div>
@@ -62,9 +58,9 @@ export default function Signin() {
           <div className="mb-4">
             <input
               type="text"
-              name="emailOrPhone"
-              placeholder="Email or Phone Number"
-              value={form.emailOrPhone}
+              name="username"
+              placeholder="User"
+              value={form.username}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
@@ -90,9 +86,9 @@ export default function Signin() {
 
       <div className="mt-6 text-center">
         <p>
-          Don’t have any account?{" "}
+        Having trouble using your account ? {" "}
           <Link href="/auth/signup" className="text-primary">
-            Sign Up
+            Contact us
           </Link>
         </p>
       </div>

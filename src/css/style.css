@@ -6,7 +6,7 @@
 
 @layer base {
     body {
-        @apply relative z-1 bg-gray-2 font-satoshi text-base font-normal text-dark-5 dark:bg-[#020D1A] dark:text-dark-6;
+        @apply relative z-1 bg-gray-2  text-base font-normal text-dark-5 dark:bg-[#020D1A] dark:text-dark-6;
     }
 }
 

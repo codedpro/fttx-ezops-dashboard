@@ -1,15 +1,8 @@
 import Cookies from "js-cookie";
 
 interface User {
-  _id: string;
+  id: string;
   name: string;
-  family_name: string;
-  email: string;
-  phone_number: string;
-  student_number: string;
-  profile: string;
-  usertype: string;
-  role: string;
 }
 
 export class UserService {
@@ -27,16 +20,14 @@ export class UserService {
       try {
         return JSON.parse(userCookie) as User;
       } catch (error) {
-        console.error("Failed to parse user cookie:", error);
         return null;
       }
     }
     return null;
   }
 
-private getTokenFromCookie(): string | null {
+  private getTokenFromCookie(): string | null {
     const token = Cookies.get("token");
-    console.log("Token retrieved from cookie:", token); // Add this line to debug
     if (token) {
       return token;
     } else {
@@ -44,7 +35,6 @@ private getTokenFromCookie(): string | null {
       return null;
     }
   }
-
 
   public getToken(): string | null {
     return this.token;
@@ -58,32 +48,8 @@ private getTokenFromCookie(): string | null {
     return this.userInfo ? this.userInfo.name : null;
   }
 
-  public getFamilyName(): string | null {
-    return this.userInfo ? this.userInfo.family_name : null;
-  }
-
-  public getEmail(): string | null {
-    return this.userInfo ? this.userInfo.email : null;
-  }
-
-  public getPhoneNumber(): string | null {
-    return this.userInfo ? this.userInfo.phone_number : null;
-  }
-
-  public getStudentNumber(): string | null {
-    return this.userInfo ? this.userInfo.student_number : null;
-  }
-
-  public getProfile(): string | null {
-    return this.userInfo ? this.userInfo.profile : null;
-  }
-
-  public getRole(): string | null {
-    return this.userInfo ? this.userInfo.role : null;
-  }
-
-  public getUserType(): string | null {
-    return this.userInfo ? this.userInfo.usertype : null;
+  public getId(): string | null {
+    return this.userInfo ? this.userInfo.id : null;
   }
 
   public logout(): void {

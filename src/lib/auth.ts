@@ -22,13 +22,11 @@ export const comparePassword = async (
   return await bcrypt.compare(password, hashedPassword);
 };
 
-export const generateToken = (user: any) => {
+export const generateToken = (user: { id: string; name: string }) => {
   return jwt.sign(
     {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-      usertype: user.usertype,
+      id: user.id,
+      name: user.name,
     },
     SECRET_KEY,
     { expiresIn: "1d" }
