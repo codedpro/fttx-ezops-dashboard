@@ -2,20 +2,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
-import { UserService } from "@/services/userService";
 import { useRouter } from "next/navigation";
 
-interface User {
-  name: string | null;
-  family_name: string | null;
-  email: string | null;
-  phone_number: string | null;
-  student_number: string | null;
-  profile: string | null;
-}
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [user, setUser] = useState<User>({
+  /**  const [user, setUser] = useState<User>({
     name: null,
     family_name: null,
     email: null,
@@ -23,10 +14,10 @@ const DropdownUser = () => {
     student_number: null,
     profile: null,
   });
-    const router = useRouter();
-   const userService = new UserService();
-  useEffect(() => {
-   
+  
+   const userService = new UserService();*/
+  const router = useRouter();
+  /** useEffect(() => {
     setUser({
       name: userService.getName() ?? "",
       family_name: userService.getFamilyName() ?? "",
@@ -35,10 +26,10 @@ const DropdownUser = () => {
       student_number: userService.getStudentNumber() ?? "",
       profile: userService.getProfile() ?? "",
     });
-  }, []);
+  }, []); */
   const handleLogout = () => {
-    userService.logout();
-    router.push("/login")
+    //  userService.logout();
+    router.push("/login");
   };
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -47,24 +38,25 @@ const DropdownUser = () => {
         className="flex items-center gap-4"
         href="#"
       >
-        <span className="h-12 w-12 rounded-full">
-          <Image
-            width={112}
-            height={112}
-            src={user?.profile? user.profile : "/images/user/user-02.png"}
-            style={{
-              width: "auto",
-              height: "auto",
-            }}
-            alt="User"
-            className="overflow-hidden rounded-full"
-          />
-        </span>
+        {
+          <span className="h-12 w-12 rounded-full">
+            <Image
+              width={112}
+              height={112}
+              //   src={user?.profile ? user.profile : "/images/user/user-02.png"}
+              src={"/images/user/user-03.png"}
+              style={{
+                width: "auto",
+                height: "auto",
+              }}
+              alt="User"
+              className="overflow-hidden rounded-full"
+            />
+          </span>
+        }
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
-          <span className="hidden lg:block">
-            {user.name} {user.family_name}
-          </span>
+          <span className="hidden lg:block">Amir Hossein Nouri</span>
 
           <svg
             className={`fill-current duration-200 ease-in ${dropdownOpen && "rotate-180"}`}
@@ -90,28 +82,30 @@ const DropdownUser = () => {
           className={`absolute right-0 mt-7.5 flex w-[280px] flex-col rounded-lg border-[0.5px] border-stroke bg-white shadow-default dark:border-dark-3 dark:bg-gray-dark`}
         >
           <div className="flex items-center gap-2.5 px-5 pb-5.5 pt-3.5">
-            <span className="relative block h-12 w-12 rounded-full">
-              <Image
-                width={112}
-                height={112}
-                src={user?.profile? user.profile : "/images/user/user-02.png"}
-                style={{
-                  width: "auto",
-                  height: "auto",
-                }}
-                alt="User"
-                className="overflow-hidden rounded-full"
-              />
+            {
+              <span className="relative block h-12 w-12 rounded-full">
+                <Image
+                  width={112}
+                  height={112}
+                  //      src={user?.profile ? user.profile : "/images/user/user-02.png"}
+                  src="/images/user/user-03.png"
+                  style={{
+                    width: "auto",
+                    height: "auto",
+                  }}
+                  alt="User"
+                  className="overflow-hidden rounded-full"
+                />
 
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green dark:border-gray-dark"></span>
-            </span>
-
+                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green dark:border-gray-dark"></span>
+              </span>
+            }
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">
-                {user.name} {user.family_name}
+                Amir Hossein Nouri
               </span>
               <span className="block font-medium text-dark-5 dark:text-dark-6">
-                {user.email}
+                dev.codedpro@gmail.com
               </span>
             </span>
           </div>

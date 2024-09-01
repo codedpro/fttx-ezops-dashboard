@@ -281,12 +281,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <div className="flex items-center justify-center gap-2 px-6">
           <Link href="/">
             <Image
-              width={556}
-              height={556}
-              src={"/images/logo/logo.png"}
+              width={3000}
+              height={3000}
+              src={"/images/logo/logo-dark.png"}
               alt="Logo"
               priority
-              className=" dark:block w-32 h-32"
+              className="hidden dark:block w-45"
+            />
+            <Image
+              width={3000}
+              height={3000}
+              src={"/images/logo/logo-white.png"}
+              alt="Logo"
+              priority
+              className="block dark:hidden w-45"
             />
           </Link>
 
