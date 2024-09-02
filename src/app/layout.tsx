@@ -3,7 +3,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
-
+import "@/css/globals.css";
 const Loader = dynamic(() => import("@/components/common/Loader"), {
   ssr: false,
 });

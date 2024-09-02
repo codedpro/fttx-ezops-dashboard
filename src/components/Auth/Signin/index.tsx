@@ -1,12 +1,65 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Cookies from "js-cookie";
+import axios from "axios";
+import qs from "qs";
+import { Input } from "@/components/FormElements/InputDark";
+import {
+  LabelInputContainer,
+  BottomGradient,
+} from "@/components/FormElements/InputUtils";
+import { Label } from "@/components/FormElements/Label";
+import { gsap } from "gsap";
 
 export default function Signin() {
   const [form, setForm] = useState({ username: "", password: "" });
   const router = useRouter();
+  const separatorRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (separatorRef.current) {
+      gsap.fromTo(
+        separatorRef.current,
+        { opacity: 0, x: -50 },
+        { opacity: 1, x: 0, duration: 1, ease: "power3.out" }
+      );
+    }
+
+    if (formRef.current) {
+      const fields = formRef.current.querySelectorAll(".form-field");
+      gsap.fromTo(
+        fields,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "back.out(1.7)",
+          stagger: 0.3,
+          delay: 0.5,
+        }
+      );
+    }
+
+    if (buttonRef.current) {
+      gsap.fromTo(
+        buttonRef.current,
+        { opacity: 0, scale: 0.8 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          ease: "elastic.out(1, 0.5)",
+          delay: 1.2,
+        }
+      );
+    }
+  }, []);
 
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,78 +68,95 @@ export default function Signin() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-secret-token": "Too many requests, please try again later.",
-      },
-      body: JSON.stringify(form),
+    const data = qs.stringify({
+      Username: form.username,
+      Password: form.password,
     });
 
-    let data;
-    try {
-      data = await response.json();
-    } catch (error) {
-      console.error("Failed to parse JSON:", error);
-      data = {};
-    }
+    const config = {
+      method: "post",
+      url: process.env.NEXT_PUBLIC_LNM_API_URL + "/login",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      data: data,
+    };
 
-    if (response.ok) {
-      console.log("Login successful:", data.token);
-      Cookies.set("token", data.token, { expires: 1 });
-      Cookies.set("tokens", data.token, { expires: 1 });
-      Cookies.set("user", JSON.stringify(data.user), { expires: 1 });
-      router.push("/");
-    } else {
-      console.error("Failed to login:", data.message);
+    try {
+      const response = await axios(config);
+      const data = response.data;
+
+      if (response.status === 200) {
+        Cookies.set("AcessToken", data.AcessToken, { expires: 1 });
+        Cookies.set("Name", data.Name, { expires: 1 });
+        Cookies.set("Email", data.Email, { expires: 1 });
+        Cookies.set("Role", JSON.stringify(data.Role), { expires: 1 });
+        Cookies.set("UserName", data.Username, { expires: 1 });
+        router.push("/");
+      } else {
+        console.error("Failed to login:", data.message);
+      }
+    } catch (error) {
+      console.error("An error occurred during login:", error);
     }
   };
 
   return (
     <>
-      <div className="my-6 flex items-center justify-center">
-        <span className="block h-px w-full bg-stroke dark:bg-dark-3"></span>
-        <div className="block w-full min-w-fit bg-white px-3 text-center font-medium dark:bg-gray-dark">
+      <div ref={separatorRef} className="my-4 flex items-center justify-center">
+        <span className="block h-px w-full bg-dark-8"></span>
+        <div className="block w-full min-w-fit  px-2 text-center font-medium text-dark-8 ">
           Sign in using Username
         </div>
-        <span className="block h-px w-full bg-stroke dark:bg-dark-3"></span>
+        <span className="block h-px w-full bg-dark-7"></span>
       </div>
 
-      <div>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <input
-              type="text"
-              name="username"
-              placeholder="User"
-              value={form.username}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
+      <div ref={formRef}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="form-field">
+            <LabelInputContainer>
+              <Label htmlFor="UserName" className="block  text-dark-8">
+                UserName
+              </Label>
+              <Input
+                type="text"
+                name="username"
+                placeholder="Amir"
+                value={form.username}
+                onChange={handleChange}
+                className="w-full"
+              />{" "}
+            </LabelInputContainer>
           </div>
-          <div className="mb-6">
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
+          <div className="form-field">
+            <LabelInputContainer>
+              <Label htmlFor="Password" className="block text-dark-8">
+                Password
+              </Label>
+              <Input
+                type="password"
+                name="password"
+                placeholder="•••••••••••"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full"
+              />
+            </LabelInputContainer>
           </div>
           <button
+            ref={buttonRef}
+            className="bg-gradient-to-br relative group/btn from-dark-5 to-dark-6 block w-full text-white rounded-md h-10 font-medium border border-solid border-zinc-800 shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
             type="submit"
-            className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-accent transition-colors"
           >
-            Login
+            Sign in &rarr;
+            <BottomGradient />
           </button>
         </form>
       </div>
 
-      <div className="mt-6 text-center">
+      <div className="mt-4 text-center hidden">
         <p>
-        Having trouble using your account ? {" "}
+          Having trouble using your account?{" "}
           <Link href="/auth/signup" className="text-primary">
             Contact us
           </Link>

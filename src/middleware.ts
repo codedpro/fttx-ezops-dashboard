@@ -13,12 +13,12 @@ const CACHE_DURATION = 60 * 1000;
 export async function middleware(request: NextRequest) {
   const publicPaths = ["/api/login", "/api/register", "/login", "/register"];
   const { pathname } = request.nextUrl;
-  return NextResponse.next();
-  //  if (publicPaths.includes(pathname)) {
-  //      return NextResponse.next();
-  // }
 
-  const tokenCookie = request.cookies.get("token");
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  const tokenCookie = request.cookies.get("AcessToken");
   const token = tokenCookie?.value;
 
   if (!token) {
@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
+    /*     const response = await fetch(
       new URL("/api/verify-token", request.url).href,
       {
         headers: { Cookie: `token=${token}` },
@@ -49,8 +49,8 @@ export async function middleware(request: NextRequest) {
       tokenCache[token] = { timestamp: currentTime, isValid: false };
       return NextResponse.redirect(new URL("/login", request.url));
     }
-
-    tokenCache[token] = { timestamp: currentTime, isValid: true };
+    
+    tokenCache[token] = { timestamp: currentTime, isValid: true }; */
 
     return NextResponse.next();
   } catch (error) {

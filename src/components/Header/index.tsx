@@ -84,7 +84,7 @@ const Header = (props: {
         <div className="hidden xl:block">
           <div>
             <h1 className=" text-heading-5 font-bold text-dark dark:text-white">
-              FFTX Dashboard
+              FTTX Dashboard
             </h1>
           </div>
         </div>

@@ -1,68 +1,139 @@
 "use client";
-import React, { useEffect } from "react";
-import Link from "next/link";
+
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import Image from "next/image";
 import Signin from "@/components/Auth/Signin";
-import useColorMode from "@/hooks/useColorMode";
 
-import logoDark from "../../../../public/images/logo/logo.svg";
-import logoIcon from "../../../../public/images/logo/logo-icon.svg";
+import logoDark from "../../../../public/images/logo/logo-dark.png";
 import gridImage from "../../../../public/images/grids/grid-02.svg";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
-const SignIn: React.FC = () => {
-  const [colorMode, setColorMode] = useColorMode();
+const Logo: React.FC = () => {
+  const logoRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    setColorMode("dark");
+    gsap.fromTo(
+      logoRef.current,
+      { opacity: 0, scale: 0.5, rotation: -180 },
+      {
+        opacity: 1,
+        scale: 1,
+        rotation: 0,
+        duration: 1.5,
+        ease: "elastic.out(1, 0.5)",
+        delay: 0.3,
+      }
+    );
+
+    const logoElement = logoRef.current;
+    if (logoElement && window.innerWidth > 768) {
+      gsap.set(logoElement, { transformPerspective: 1000 });
+
+      const handleMouseMove = (event: MouseEvent) => {
+        const rect = logoElement.getBoundingClientRect();
+        const logoX = rect.left + rect.width / 2;
+        const logoY = rect.top + rect.height / 2;
+        const deltaX = event.clientX - logoX;
+        const deltaY = event.clientY - logoY;
+
+        const rotationY = deltaX / 5;
+        const rotationX = -deltaY / 5;
+
+        gsap.to(logoElement, {
+          rotationY: rotationY,
+          rotationX: rotationX,
+          ease: "power2.out",
+          duration: 0.2,
+        });
+      };
+
+      logoElement.addEventListener("mouseenter", () => {
+        gsap.to(logoElement, {
+          scale: 1.15,
+          ease: "power3.out",
+          duration: 0.6,
+        });
+
+        window.addEventListener("mousemove", handleMouseMove);
+      });
+
+      logoElement.addEventListener("mouseleave", () => {
+        gsap.to(logoElement, {
+          scale: 1,
+          rotationX: 0,
+          rotationY: 0,
+          ease: "power3.out",
+          duration: 0.6,
+        });
+
+        window.removeEventListener("mousemove", handleMouseMove);
+      });
+    }
   }, []);
-  
+
   return (
-    <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
-      <div className="flex flex-wrap items-center">
-        <div className="w-full xl:w-1/2">
-          <div className="w-full p-4 sm:p-12.5 xl:p-15">
-            <Signin />
-          </div>
-        </div>
+    <>
+      <Image
+        className="block select-none "
+        src={logoDark}
+        alt="Logo"
+        width={176}
+        height={32}
+        ref={logoRef}
+        draggable="false"
+      />
+    </>
+  );
+};
 
-        <div className="hidden w-full p-7.5 xl:block xl:w-1/2">
-          <div className="custom-gradient-1 overflow-hidden rounded-2xl px-12.5 pt-12.5 dark:!bg-dark-2 dark:bg-none">
-            <Link className="mb-10 inline-block" href="/">
-              <Image
-                className="hidden dark:block"
-                src={logoDark}
-                alt="Logo"
-                width={176}
-                height={32}
-              />
-              <Image
-                className="dark:hidden"
-                src={logoIcon}
-                alt="Logo"
-                width={176}
-                height={32}
-              />
-            </Link>
-            <p className="mb-3 text-xl font-medium text-dark dark:text-white">
-              Sign in to your account
-            </p>
+const SignIn: React.FC = () => {
+  const contentRef = useRef(null);
 
-            <h1 className="mb-4 text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
-              Welcome Back!
-            </h1>
+  useEffect(() => {
+    const tl = gsap.timeline({ delay: 0.5 });
+    const elements = gsap.utils.toArray(".animate-content");
 
-            <p className="w-full max-w-[375px] font-medium text-dark-4 dark:text-dark-6">
-              Please sign in to your account by completing the necessary fields
-              below
-            </p>
+    tl.fromTo(
+      elements,
+      { opacity: 0, y: 40, rotationX: 90 },
+      {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        duration: 1.2,
+        ease: "back.out(1.7)",
+        stagger: 0.3,
+      }
+    );
+  }, []);
 
-            <div className="mt-31">
+  return (
+    <div className="min-h-screen w-full bg-dark-4 relative flex flex-col items-center justify-center antialiased ">
+      <div className="z-30 hidden sm:flex">
+        <BackgroundBeams />
+      </div>
+      <div className="w-full max-w-md z-40 px-4 md:px-0 my-4 md:my-0 ">
+        <div className="w-full">
+          <div
+            ref={contentRef}
+            className="overflow-hidden rounded-2xl p-6 md:px-10 md:pt-10 bg-dark-6"
+          >
+            <div className="mb-8 flex justify-center items-center animate-content">
+              <Logo />
+            </div>
+            <div className="w-full">
+              <Signin />
+            </div>
+
+            <div className="mt-10 animate-content">
               <Image
                 src={gridImage}
                 alt="Grid"
-                width={405}
-                height={325}
-                className="mx-auto dark:opacity-30"
+                width={300}
+                height={240}
+                className="mx-auto opacity-30"
+                draggable="false"
               />
             </div>
           </div>

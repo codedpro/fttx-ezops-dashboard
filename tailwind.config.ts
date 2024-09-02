@@ -1,5 +1,9 @@
 import type { Config } from "tailwindcss";
 import defaultTheme from "tailwindcss/defaultTheme";
+const colors = require("tailwindcss/colors");
+const {
+  default: flattenColorPalette,
+} = require("tailwindcss/lib/util/flattenColorPalette");
 
 const config: Config = {
   content: [
@@ -23,19 +27,20 @@ const config: Config = {
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",
-        primary: "#5750F1",
+        primary: "#feca00",
         stroke: "#E6EBF1",
         "stroke-dark": "#27303E",
         dark: {
-          DEFAULT: "#111928",
-          2: "#1F2A37",
-          3: "#374151",
-          4: "#4B5563",
-          5: "#6B7280",
-          6: "#9CA3AF",
-          7: "#D1D5DB",
-          8: "#E5E7EB",
+          DEFAULT: "#0a0a0a", // Base black
+          2: "#0c0c0c", // Slightly lighter than DEFAULT
+          3: "#0e0e0e", // A bit lighter than 2
+          4: "#101010", // Slightly lighter than 3
+          5: "#1a1a1a", // Noticeably lighter but still very dark
+          6: "#1d1d1d", // Dark, but moving towards medium-dark
+          7: "#4d4d4d", // Medium-dark, hinting at gray
+          8: "#696969", // Still dark but lighter gray
         },
+
         gray: {
           DEFAULT: "#EFF4FB",
           dark: "#122031",
@@ -285,6 +290,7 @@ const config: Config = {
       },
       boxShadow: {
         default: "0px 4px 7px 0px rgba(0, 0, 0, 0.14)",
+        input: `0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08)`,
         error: "0px 12px 34px 0px rgba(13, 10, 44, 0.05)",
         card: "0px 1px 2px 0px rgba(0, 0, 0, 0.12)",
         "card-2": "0px 8px 13px -3px rgba(0, 0, 0, 0.07)",
@@ -382,6 +388,17 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [addVariablesForColors],
 };
+
+function addVariablesForColors({ addBase, theme }: any) {
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+
+  addBase({
+    ":root": newVars,
+  });
+}
 export default config;
