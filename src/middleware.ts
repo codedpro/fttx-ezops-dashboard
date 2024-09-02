@@ -1,3 +1,4 @@
+import axios from "axios";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -38,24 +39,35 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    /*     const response = await fetch(
-      new URL("/api/verify-token", request.url).href,
-      {
-        headers: { Authorization : `Bearer ${token}` },
-      }
-    );
-
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: "https://lnmback.mtnirancell.ir/api/VerifyToken",
+      headers: {
+        Authorization:
+          "Bearer MWoF3YPbXzG0+lMyOa7qS4PAfrazdmICIln0SktIbNxeWoPoIF1D2wwNj1bGQZ0/",
+      },
+    };
+    const apiUrl = `${process.env.NEXT_PUBLIC_LNM_API_URL}/VerifyToken`;
+    console.log(apiUrl);
+    // const response = await fetch(apiUrl, {
+    //   headers: { 'Authorization': `Bearer ${token}` },
+    //  });
+    console.log(config);
+    const response = await axios(config);
+    console.log("aw");
+    console.log(response.status);
     if (response.status !== 200) {
       tokenCache[token] = { timestamp: currentTime, isValid: false };
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    
-    tokenCache[token] = { timestamp: currentTime, isValid: true }; */
+
+    tokenCache[token] = { timestamp: currentTime, isValid: true };
 
     return NextResponse.next();
   } catch (error) {
     if (error instanceof Error) {
-      console.log(`Error verifying token: ${error.message}`);
+      console.log(`Error verifying token: ${error}`);
     } else {
       console.log("Unknown error occurred during token verification");
     }
