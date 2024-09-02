@@ -6,7 +6,7 @@ import Image from "next/image";
 import Signin from "@/components/Auth/Signin";
 
 import logoDark from "../../../../public/images/logo/logo-dark.png";
-import gridImage from "../../../../public/images/grids/grid-02.svg";
+//import gridImage from "../../../../public/images/grids/grid-02.svg";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 
 const Logo: React.FC = () => {
@@ -110,14 +110,15 @@ const SignIn: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-dark-4 relative flex flex-col items-center justify-center antialiased ">
-      <div className="z-30 hidden sm:flex">
+      <div className="z-30 hidden sm:flex ">
         <BackgroundBeams />
       </div>
-      <div className="w-full max-w-md z-40 px-4 md:px-0 my-4 md:my-0 ">
+
+      <div className="w-full max-w-md z-40 px-4 md:px-0  ">
         <div className="w-full">
           <div
             ref={contentRef}
-            className="overflow-hidden rounded-2xl p-6 md:px-10 md:pt-10 bg-dark-6"
+            className="overflow-hidden rounded-2xl p-6 md:px-10 md:pt-10 bg-dark-6/50"
           >
             <div className="mb-8 flex justify-center items-center animate-content">
               <Logo />
@@ -126,7 +127,7 @@ const SignIn: React.FC = () => {
               <Signin />
             </div>
 
-            <div className="mt-10 animate-content">
+            {/*      <div className="mt-10 animate-content">
               <Image
                 src={gridImage}
                 alt="Grid"
@@ -135,7 +136,7 @@ const SignIn: React.FC = () => {
                 className="mx-auto opacity-30"
                 draggable="false"
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

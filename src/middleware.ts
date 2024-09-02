@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     /*     const response = await fetch(
       new URL("/api/verify-token", request.url).href,
       {
-        headers: { Cookie: `token=${token}` },
+        headers: { Authorization : `Bearer ${token}` },
       }
     );
 

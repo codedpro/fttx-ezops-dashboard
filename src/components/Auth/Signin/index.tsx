@@ -2,9 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Cookies from "js-cookie";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import qs from "qs";
 import { Input } from "@/components/FormElements/InputDark";
 import {
@@ -16,6 +15,12 @@ import { gsap } from "gsap";
 
 export default function Signin() {
   const [form, setForm] = useState({ username: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({
+    username: false,
+    password: false,
+  });
   const router = useRouter();
   const separatorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
@@ -62,11 +67,30 @@ export default function Signin() {
   }, []);
 
   const handleChange = (e: any) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    setFieldErrors({ ...fieldErrors, [name]: false });
+
+    if (form.username && form.password) {
+      setError("");
+    }
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setError("");
+
+    if (!form.username || !form.password) {
+      setFieldErrors({
+        username: !form.username,
+        password: !form.password,
+      });
+      setError("Please fill out all required fields.");
+      return;
+    }
+
+    setLoading(true);
 
     const data = qs.stringify({
       Username: form.username,
@@ -96,8 +120,18 @@ export default function Signin() {
       } else {
         console.error("Failed to login:", data.message);
       }
-    } catch (error) {
-      console.error("An error occurred during login:", error);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response && error.response.status === 401) {
+          setError("Your account is suspended or your password is incorrect.");
+        } else {
+          console.error("An error occurred during login:", error.message);
+        }
+      } else {
+        console.error("An unexpected error occurred:", error);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,7 +149,7 @@ export default function Signin() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-field">
             <LabelInputContainer>
-              <Label htmlFor="UserName" className="block  text-dark-8">
+              <Label htmlFor="UserName" className="block text-dark-8">
                 UserName
               </Label>
               <Input
@@ -124,9 +158,13 @@ export default function Signin() {
                 placeholder="Amir"
                 value={form.username}
                 onChange={handleChange}
+                error={fieldErrors.username}
                 className="w-full"
-              />{" "}
+              />
             </LabelInputContainer>
+            {fieldErrors.username && (
+              <div className="text-red-500 text-sm">Username is required.</div>
+            )}
           </div>
           <div className="form-field">
             <LabelInputContainer>
@@ -139,28 +177,25 @@ export default function Signin() {
                 placeholder="•••••••••••"
                 value={form.password}
                 onChange={handleChange}
+                error={fieldErrors.password}
                 className="w-full"
               />
             </LabelInputContainer>
+            {fieldErrors.password && (
+              <div className="text-red-500 text-sm">Password is required.</div>
+            )}
           </div>
           <button
             ref={buttonRef}
-            className="bg-gradient-to-br relative group/btn from-dark-5 to-dark-6 block w-full text-white rounded-md h-10 font-medium border border-solid border-zinc-800 shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+            className={`bg-gradient-to-br relative group/btn from-dark-5 to-dark-6 block w-full text-white rounded-md h-10 font-medium border border-solid border-zinc-800 shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset] ${loading ? "cursor-not-allowed opacity-70" : ""}`}
             type="submit"
+            disabled={loading}
           >
-            Sign in &rarr;
+            {loading ? "Loading..." : "Sign in →"}
             <BottomGradient />
           </button>
         </form>
-      </div>
-
-      <div className="mt-4 text-center hidden">
-        <p>
-          Having trouble using your account?{" "}
-          <Link href="/auth/signup" className="text-primary">
-            Contact us
-          </Link>
-        </p>
+        {error && <div className="mt-4 text-center text-red-500">{error}</div>}
       </div>
     </>
   );

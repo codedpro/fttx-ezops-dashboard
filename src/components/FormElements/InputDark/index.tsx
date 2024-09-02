@@ -4,10 +4,12 @@ import { cn } from "@/lib/utils";
 import { useMotionTemplate, useMotionValue, motion } from "framer-motion";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  error?: boolean;
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, error, ...props }, ref) => {
     const radius = 100;
     const [visible, setVisible] = React.useState(false);
 
@@ -20,16 +22,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       mouseX.set(clientX - left);
       mouseY.set(clientY - top);
     }
+
     return (
       <motion.div
         style={{
           background: useMotionTemplate`
-        radial-gradient(
-          ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
-          var(--primary),
-          transparent 80%
-        )
-      `,
+            radial-gradient(
+              ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
+             ${error ? "var(--red-500)" : "var(--primary)"} ,
+              transparent 80%
+            )
+          `,
         }}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setVisible(true)}
@@ -39,13 +42,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            `flex h-10 w-full border-none bg-dark-5 text-white  rounded-md px-3 py-2 text-sm  file:border-0 file:bg-transparent 
-          file:text-sm file:font-medium placeholder-text-neutral-600 
-          focus-visible:outline-none focus-visible:ring-[2px]  focus-visible:ring-primary
-           disabled:cursor-not-allowed disabled:opacity-50
-           shadow-[0px_0px_1px_1px_var(--zinc-800)]
-           group-hover/input:shadow-none transition duration-400
-           `,
+            `flex h-10 w-full border-none bg-dark-5 text-white rounded-md px-3 py-2 text-sm
+            file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder-text-neutral-600
+            focus-visible:outline-none focus-visible:ring-[2px] ${
+              error
+                ? "focus-visible:ring-red-500"
+                : "focus-visible:ring-primary"
+            }
+            disabled:cursor-not-allowed disabled:opacity-50
+            ${
+              error
+                ? "shadow-[0px_0px_1px_1px_var(--red-500)]"
+                : "shadow-[0px_0px_1px_1px_var(--zinc-800)]"
+            }
+            group-hover/input:shadow-none transition duration-400`,
             className
           )}
           ref={ref}
