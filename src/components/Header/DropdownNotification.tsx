@@ -44,7 +44,7 @@ const DropdownNotification = () => {
             setDropdownOpen(!dropdownOpen);
           }}
           href="#"
-          className="relative flex h-12 w-12 items-center justify-center rounded-full border border-stroke bg-gray-2 text-dark hover:text-primary dark:border-dark-4 dark:bg-dark-3 dark:text-white dark:hover:text-white"
+          className="relative flex h-12 w-12 items-center justify-center rounded-full border border-stroke bg-gray-2 text-dark hover:text-primary dark:border-secondary-2/30 dark:bg-secondary dark:text-white dark:hover:text-white"
         >
           <span className="relative">
             <svg

@@ -11,11 +11,11 @@ const Header = (props: {
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
   const placeholders = [
-    "Looking for your class ?",
-    "write your class code here",
-    "e.g. T2314",
-    "are you lost?",
-    "looking for something?",
+    "Search For Modem ID",
+    "Write Your Model ID Here",
+    "e.g. 29295002123",
+    "Find Your Modem Here",
+    "quick search for your modem",
   ];
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.value);
@@ -106,7 +106,7 @@ const Header = (props: {
             {/* <!-- Dark Mode Toggle --> */}
 
             {/* <!-- Notification Menu Area --> */}
-            <DropdownNotification />
+        {/*     <DropdownNotification /> */}
             {/* <!-- Notification Menu Area --> */}
           </ul>
 

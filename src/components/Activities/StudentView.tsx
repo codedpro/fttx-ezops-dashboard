@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import DefaultLayout from "@/components/Layouts/DefaultLaout";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { Exercise, ClassExercise, ClassActivity, Student } from "@/types/ClassActivity";
 
 interface StudentViewProps {

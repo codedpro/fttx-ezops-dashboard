@@ -55,7 +55,7 @@ const DropdownUser = () => {
           </span>
         }
 
-        <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
+        <span className="flex items-center gap-2 font-medium text-dark dark:text-gray-300">
           <span className="hidden lg:block">Amir Hossein Nouri</span>
 
           <svg
@@ -104,7 +104,7 @@ const DropdownUser = () => {
               <span className="block font-medium text-dark dark:text-white">
                 Amir Hossein Nouri
               </span>
-              <span className="block font-medium text-dark-5 dark:text-dark-6">
+              <span className="block font-medium text-dark-5 dark:text-gray-200">
                 dev.codedpro@gmail.com
               </span>
             </span>
@@ -113,7 +113,7 @@ const DropdownUser = () => {
             <li>
               <Link
                 href="/profile"
-                className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+                className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-white lg:text-base"
               >
                 <svg
                   className="fill-current"
@@ -143,7 +143,7 @@ const DropdownUser = () => {
             <li>
               <Link
                 href="/profile/settings"
-                className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+                className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-white lg:text-base"
               >
                 <svg
                   className="fill-current"
@@ -173,7 +173,7 @@ const DropdownUser = () => {
           <div className="p-2.5">
             <button
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+              className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-white lg:text-base"
             >
               <svg
                 className="fill-current"

@@ -28,6 +28,7 @@ const config: Config = {
         transparent: "transparent",
         white: "#FFFFFF",
         primary: "#feca00",
+        secondary: { DEFAULT: "#122031", 2: "#021223" },
         stroke: "#E6EBF1",
         "stroke-dark": "#27303E",
         dark: {

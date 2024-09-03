@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SwitcherThree from "../FormElements/Switchers/SwitcherThree";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import DefaultLayout from "@/components/Layouts/DefaultLaout";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Alert from "@/components/Alerts/Alert";
 import { FiEdit } from "react-icons/fi";
 import { Student, ClassExercise, ClassActivity } from "@/types/ClassActivity";
