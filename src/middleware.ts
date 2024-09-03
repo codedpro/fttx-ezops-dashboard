@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const tokenCookie = request.cookies.get("AcessToken");
+  const tokenCookie = request.cookies.get("AccessToken");
   const token = tokenCookie?.value;
 
   if (!token) {

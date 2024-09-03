@@ -1,5 +1,5 @@
+"use client";
 import "@/css/style.css";
-import React from "react";
 import dynamic from "next/dynamic";
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
@@ -7,22 +7,28 @@ import "@/css/globals.css";
 const Loader = dynamic(() => import("@/components/common/Loader"), {
   ssr: false,
 });
+import { useInitializeFTTHModems } from "../hooks/useInitializeFTTHModems";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useInitializeFTTHModems();
+
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <noscript>
-          <strong>We're sorry but your site doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+          <strong>
+            We're sorry but your site doesn't work properly without JavaScript
+            enabled. Please enable it to continue.
+          </strong>
         </noscript>
         <div id="initial-loader">
           <Loader />
         </div>
-        <div id="app-content" style={{ display: 'none' }}>
+        <div id="app-content" style={{ display: "none" }}>
           {children}
         </div>
         <script

@@ -9,7 +9,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   if (!token) {
     return new NextResponse("Token not provided", { status: 401 });
   }
-
+  console.log(token)
   const isValid = await verifyToken(token);
 
   if (isValid) {
