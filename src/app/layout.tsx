@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import "jsvectormap/dist/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/globals.css";
+import Cookies from "js-cookie";
 const Loader = dynamic(() => import("@/components/common/Loader"), {
   ssr: false,
 });
@@ -14,7 +15,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useInitializeFTTHModems();
+  useInitializeFTTHModems(Cookies.get("AccessToken") ?? "a");
 
   return (
     <html lang="en">

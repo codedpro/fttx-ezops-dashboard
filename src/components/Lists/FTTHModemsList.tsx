@@ -9,15 +9,16 @@ const FTTHModemsList = () => {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  // Ensure modems is an array before mapping
   return (
     <div>
       <h1>FTTH Modems</h1>
-      {Array.isArray(modems) && modems.length > 0 ? (
+      {modems.length > 0 ? (
         <ul>
           {modems.map((modem) => (
             <li key={modem.Modem_ID}>
-              Modem ID: {modem.Modem_ID}, Location: ({modem.Lat}, {modem.Long}), OLT: {modem.OLT}, POP: {modem.POP}, FAT: {modem.FAT}, Symbol: {modem.Symbol}
+              Modem ID: {modem.Modem_ID}, Location: ({modem.Lat}, {modem.Long}),
+              OLT: {modem.OLT}, POP: {modem.POP}, FAT: {modem.FAT}, Symbol:{" "}
+              {modem.Symbol}, Error: {modem.Error}
             </li>
           ))}
         </ul>

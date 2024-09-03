@@ -2,10 +2,10 @@
 import { useEffect } from "react";
 import { useFTTHModemsStore } from "../store/FTTHModemsStore";
 
-export const useInitializeFTTHModems = () => {
+export const useInitializeFTTHModems = (token: string) => {
   const startFetching = useFTTHModemsStore((state) => state.startFetching);
 
   useEffect(() => {
-    startFetching();
-  }, [startFetching]);
+    startFetching(token);
+  }, [startFetching, token]);
 };

@@ -1,11 +1,11 @@
 "use client"
-import FTTHModemsList from "@/components/Lists/FTTHModemsList";
+import FTTHModemsMap from "@/components/Maps/Main";
 
-const FTTHModemsPage = () => {
+const FTTHModemsPage: React.FC = () => {
   return (
     <div>
-      <h1>FTTH Modems Data</h1>
-      <FTTHModemsList />
+      <h1>FTTH Modems Map</h1>
+      <FTTHModemsMap />
     </div>
   );
 };

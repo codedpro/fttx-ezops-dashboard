@@ -1,20 +1,24 @@
 import create from "zustand";
 import { FTTHModem } from "../types/FTTHModem";
-import Cookies from "js-cookie";
+
 interface FTTHModemsState {
   modems: FTTHModem[];
   error: string | null;
   isLoading: boolean;
-  startFetching: () => void;
+  startFetching: (token: string) => void;
   stopFetching: () => void;
+  hasStarted: boolean;
 }
 
-export const useFTTHModemsStore = create<FTTHModemsState>((set) => ({
+export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
   modems: [],
   error: null,
   isLoading: false,
-  startFetching: () => {
-    set({ isLoading: true, error: null });
+  hasStarted: false,
+  startFetching: (token: string) => {
+    if (get().hasStarted) return;
+
+    set({ isLoading: true, error: null, hasStarted: true });
 
     const fetchModems = async () => {
       try {
@@ -23,30 +27,44 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set) => ({
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${Cookies.get("AccessToken")}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
 
-        const data = await response.json();
-        console.log(data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const textData = await response.text();
+
+        let data: FTTHModem[];
+
+        try {
+          data = JSON.parse(textData);
+          if (typeof data === "string") {
+            data = JSON.parse(data);
+          }
+        } catch (parseError: any) {
+          throw new Error("Failed to parse JSON data: " + parseError.message);
+        }
 
         if (Array.isArray(data)) {
           set({ modems: data, isLoading: false });
-        } else if (data && Array.isArray(data.modems)) {
-          set({ modems: data.modems, isLoading: false });
         } else {
-          set({ modems: [], isLoading: false });
+          throw new Error("Invalid data format: expected an array of modems");
         }
-      } catch (error) {
-        set({ error: "Failed to fetch FTTH Modems data", isLoading: false });
+      } catch (error: any) {
+        set({ error: error.message, isLoading: false });
       }
     };
 
     fetchModems();
-    const intervalId = setInterval(fetchModems, 60000);
+    const intervalId = setInterval(fetchModems, 6000);
     set({ stopFetching: () => clearInterval(intervalId) });
   },
-  stopFetching: () => {},
+  stopFetching: () => {
+    set({ hasStarted: false });
+  },
 }));
