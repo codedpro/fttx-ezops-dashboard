@@ -1,98 +1,89 @@
 import React, { useRef, useEffect } from "react";
-import mapboxgl from "mapbox-gl";
-import { useFTTHModemsStore } from "@/store/FTTHModemsStore";
-import { Feature, FeatureCollection, Geometry } from "geojson";
+import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 
-const FTTHModemsMap: React.FC = () => {
+interface FTTHMapProps {
+  layers: Array<{ id: string; source: GeoJSONSourceSpecification | null; visible: boolean }>;
+}
+
+const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const modems = useFTTHModemsStore((state) => state.modems);
-
-  const createGeoJSON = (): FeatureCollection<Geometry> => ({
-    type: "FeatureCollection",
-    features: modems.map((modem): Feature => ({
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [modem.Long, modem.Lat],
-      },
-      properties: {
-        Modem_ID: modem.Modem_ID,
-        OLT: modem.OLT,
-        POP: modem.POP,
-        FAT: modem.FAT,
-        Symbol: modem.Symbol,
-        Error: modem.Error,
-      },
-    })),
-  });
 
   useEffect(() => {
-    console.log("Modems data:", modems); 
     if (!mapContainerRef.current) return;
 
-    if (mapRef.current === null) {
-      mapRef.current = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: "mapbox://styles/mapbox/streets-v11",
-        center: [51.4699361114553, 35.7580195079693],
-        zoom: 12,
-      });
-
-      // Add the GeoJSON layer for modems
-      mapRef.current.on("load", () => {
-        mapRef.current!.addSource("modems", {
-          type: "geojson",
-          data: createGeoJSON(),
+    const initializeMap = () => {
+      if (mapRef.current === null && mapContainerRef.current) {
+        mapRef.current = new mapboxgl.Map({
+          container: mapContainerRef.current,
+          style: "mapbox://styles/mapbox/streets-v11",
+          center: [51.4699361114553, 35.7580195079693],
+          zoom: 12,
         });
 
-        mapRef.current!.addLayer({
-          id: "modems",
-          type: "circle",
-          source: "modems",
-          paint: {
-            "circle-radius": 6,
-            "circle-color": "#007cbf",
-          },
-        });
+        mapRef.current.on("load", () => {
+          layers.forEach(({ id, source, visible }) => {
+            if (source && mapRef.current && !mapRef.current.getSource(id)) {
+              mapRef.current.addSource(id, source);
+              mapRef.current.addLayer({
+                id: id,
+                type: "circle",
+                source: id,
+                paint: {
+                  "circle-radius": 6,
+                  "circle-color": "#007cbf",
+                },
+              });
 
-        // Add popups
-        mapRef.current!.on("click", "modems", (e) => {
-          const coordinates = (e.features![0].geometry as any).coordinates.slice();
-          const { Modem_ID, OLT, POP, FAT, Symbol, Error } = e.features![0].properties as any;
-
-          new mapboxgl.Popup()
-            .setLngLat(coordinates as [number, number])
-            .setHTML(
-              `<h3>Modem ID: ${Modem_ID}</h3>
-               <p>OLT: ${OLT}</p>
-               <p>POP: ${POP}</p>
-               <p>FAT: ${FAT}</p>
-               <p>Symbol: ${Symbol}</p>
-               <p>Error: ${Error}</p>`
-            )
-            .addTo(mapRef.current!);
+              mapRef.current.setLayoutProperty(
+                id,
+                "visibility",
+                visible ? "visible" : "none"
+              );
+            }
+          });
         });
+      } else if (mapRef.current) {
+        layers.forEach(({ id, source, visible }) => {
+          const existingSource = mapRef.current!.getSource(id);
+          if (existingSource && source) {
+            (existingSource as mapboxgl.GeoJSONSource).setData(
+              source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+            );
+          } else if (source) {
+            mapRef.current!.addSource(id, source);
+            mapRef.current!.addLayer({
+              id: id,
+              type: "circle",
+              source: id,
+              paint: {
+                "circle-radius": 6,
+                "circle-color": "#007cbf",
+              },
+            });
+          }
 
-        // Change the cursor to a pointer when hovering over modems
-        mapRef.current!.on("mouseenter", "modems", () => {
-          mapRef.current!.getCanvas().style.cursor = "pointer";
+          mapRef.current!.setLayoutProperty(
+            id,
+            "visibility",
+            visible ? "visible" : "none"
+          );
         });
+      }
+    };
 
-        // Change the cursor back to normal when not hovering over modems
-        mapRef.current!.on("mouseleave", "modems", () => {
-          mapRef.current!.getCanvas().style.cursor = "";
-        });
-      });
-    } else if (mapRef.current.getSource("modems")) {
-      // Update the data in the existing source
-      (mapRef.current.getSource("modems") as mapboxgl.GeoJSONSource).setData(createGeoJSON());
+    if (!mapRef.current) {
+      initializeMap();
+    } else if (mapRef.current.isStyleLoaded()) {
+      initializeMap();
+    } else {
+      mapRef.current.once("style.load", initializeMap);
     }
-  }, [modems]);
+  }, [layers]);
 
-  return <div ref={mapContainerRef} style={{ width: "50%", height: "1000px" }} />;
+  return <div ref={mapContainerRef} style={{ width: "100%", height: "1000px" }} />;
 };
 
-export default FTTHModemsMap;
+export default FTTHMap;

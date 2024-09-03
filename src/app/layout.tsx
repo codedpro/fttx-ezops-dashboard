@@ -9,14 +9,18 @@ const Loader = dynamic(() => import("@/components/common/Loader"), {
   ssr: false,
 });
 import { useInitializeFTTHModems } from "../hooks/useInitializeFTTHModems";
+import { useInitializeFTTHFats } from "@/hooks/useInitializeFTTHFats";
+import { useInitializeFTTHOthers } from "@/hooks/useInitializeFTTHOthers";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useInitializeFTTHModems(Cookies.get("AccessToken") ?? "a");
-
+  let token = Cookies.get("AccessToken") ?? "a";
+  useInitializeFTTHModems(token);
+  useInitializeFTTHFats(token);
+  useInitializeFTTHOthers(token);
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
