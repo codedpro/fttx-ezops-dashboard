@@ -3,7 +3,6 @@ import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Image from "next/image";
-import SearchForm from "@/components/Header/SearchForm";
 import { PlaceholdersAndVanishInput } from "../ui/placeholders-and-vanish-input";
 
 const Header = (props: {
@@ -17,13 +16,16 @@ const Header = (props: {
     "Find Your Modem Here",
     "quick search for your modem",
   ];
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.value);
   };
+
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("submitted");
   };
+
   return (
     <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark">
       <div className="flex flex-grow items-center justify-between px-4 py-5 shadow-2 md:px-5 2xl:px-10">
@@ -68,36 +70,43 @@ const Header = (props: {
               </span>
             </span>
           </button>
-          <Link className="block flex-shrink-0 lg:hidden" href="/">
+          {/*        <Link className="block flex-shrink-0 lg:hidden" href="/">
             <Image
               width={100}
               height={100}
-              src={"/images/logo/logo.png"}
+              src={"/images/logo/logo-dark.png"}
               alt="Logo"
             />
-          </Link>
+          </Link> */}
         </div>
 
+        {/* Title for the dashboard */}
         <div className="hidden xl:block">
-          <div>
-            <h1 className=" text-heading-5 font-bold text-dark dark:text-white">
-              FTTX Dashboard
-            </h1>
-          </div>
+          <h1 className="text-heading-5 font-bold text-dark dark:text-white">
+            FTTX Dashboard
+          </h1>
         </div>
 
+        {/* Search input and other elements */}
         <div className="flex items-center justify-normal gap-2 2xsm:gap-4 lg:w-full lg:justify-between xl:w-auto xl:justify-normal">
           <ul className="flex items-center gap-2 2xsm:gap-4">
-            <div className="invisible md:visible">
+            {/* Search input (now visible on larger screens) */}
+            <div className="md:block">
               <PlaceholdersAndVanishInput
                 placeholders={placeholders}
                 onChange={handleChange}
                 onSubmit={onSubmit}
               />
             </div>
-            <DarkModeSwitcher />
+            <div className="hidden sm:block">
+              <DarkModeSwitcher />
+            </div>{" "}
+            {/* 
+  
+            <DropdownNotification /> */}
           </ul>
 
+          {/* User profile dropdown */}
           <DropdownUser />
         </div>
       </div>
