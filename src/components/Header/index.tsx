@@ -12,7 +12,7 @@ const Header = (props: {
 }) => {
   const placeholders = [
     "Search For Modem ID",
-    "Write Your Model ID Here",
+    "Search For LAT & LONG",
     "e.g. 29295002123",
     "Find Your Modem Here",
     "quick search for your modem",
@@ -28,7 +28,6 @@ const Header = (props: {
     <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark">
       <div className="flex flex-grow items-center justify-between px-4 py-5 shadow-2 md:px-5 2xl:px-10">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-          {/* <!-- Hamburger Toggle BTN --> */}
           <button
             aria-controls="sidebar"
             onClick={(e) => {
@@ -69,8 +68,6 @@ const Header = (props: {
               </span>
             </span>
           </button>
-          {/* <!-- Hamburger Toggle BTN --> */}
-
           <Link className="block flex-shrink-0 lg:hidden" href="/">
             <Image
               width={100}
@@ -91,7 +88,6 @@ const Header = (props: {
 
         <div className="flex items-center justify-normal gap-2 2xsm:gap-4 lg:w-full lg:justify-between xl:w-auto xl:justify-normal">
           <ul className="flex items-center gap-2 2xsm:gap-4">
-            {/* <!-- Search Form --> */}
             <div className="invisible md:visible">
               <PlaceholdersAndVanishInput
                 placeholders={placeholders}
@@ -99,20 +95,10 @@ const Header = (props: {
                 onSubmit={onSubmit}
               />
             </div>
-            {/* <!-- Search Form --> */}
-
-            {/* <!-- Dark Mode Toggle --> */}
             <DarkModeSwitcher />
-            {/* <!-- Dark Mode Toggle --> */}
-
-            {/* <!-- Notification Menu Area --> */}
-        {/*     <DropdownNotification /> */}
-            {/* <!-- Notification Menu Area --> */}
           </ul>
 
-          {/* <!-- User Area --> */}
           <DropdownUser />
-          {/* <!-- User Area --> */}
         </div>
       </div>
     </header>
