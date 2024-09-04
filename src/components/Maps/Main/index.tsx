@@ -33,7 +33,6 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
         mapRef.current.on("load", () => {
           layers.forEach(({ id, source, visible, type, icons }) => {
             if (source && mapRef.current && !mapRef.current.getSource(id)) {
-           
               mapRef.current.addSource(id, source);
 
               if (type === "point") {
@@ -117,7 +116,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
     }
   }, [layers]);
 
-  return <div ref={mapContainerRef} style={{ width: "100%", height: "1000px" }} />;
+  return <div ref={mapContainerRef} className="w-full h-screen" />;
 };
 
 export default FTTHMap;

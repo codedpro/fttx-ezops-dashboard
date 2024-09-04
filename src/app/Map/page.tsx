@@ -13,6 +13,20 @@ import { useMetroLineLayer } from "@/components/Maps/Main/Layers/MetroLineLayer"
 import { useODCLineLayer } from "@/components/Maps/Main/Layers/ODCLineLayer";
 import { useDropCableLineLayer } from "@/components/Maps/Main/Layers/DropCableLineLayer";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import { FaSatelliteDish, FaWifi, FaNetworkWired, FaMapMarkerAlt, FaProjectDiagram } from "react-icons/fa"; // Icons
+
+// Define a common type for point and line layers
+type LayerType = "point" | "line";
+
+interface Layer {
+  id: string;
+  visible: boolean;
+  toggle: React.Dispatch<React.SetStateAction<boolean>>;
+  label: string;
+  icon: React.ReactNode;
+  source: mapboxgl.GeoJSONSourceSpecification | null;
+  type: LayerType;
+}
 
 const FTTHModemsMap: React.FC = () => {
   const modemLayer = useFTTHModemLayer();
@@ -39,69 +53,69 @@ const FTTHModemsMap: React.FC = () => {
   const [isODCLineLayerVisible, setIsODCLineLayerVisible] = useState(true);
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
 
-  const layers = [
-    { ...modemLayer, visible: isModemLayerVisible },
-    { ...mFatLayer, visible: isMFATLayerVisible },
-    { ...sFatLayer, visible: isSFATLayerVisible },
-    { ...hhLayer, visible: isHHLayerVisible },
-    { ...oltLayer, visible: isOLTLayerVisible },
-    { ...odcLayer, visible: isODCLayerVisible },
-    { ...tcLayer, visible: isTCLayerVisible },
-    { ...fatLineLayer, visible: isFATLayerVisible },
-    { ...metroLineLayer, visible: isMetroLayerVisible },
-    { ...odcLineLayer, visible: isODCLineLayerVisible },
-    { ...dropCableLineLayer, visible: isDropCableLayerVisible },
+  const pointLayers: Layer[] = [
+    { ...modemLayer, visible: isModemLayerVisible, toggle: setIsModemLayerVisible, label: "Modem Layer", icon: <FaWifi />, type: "point" },
+    { ...mFatLayer, visible: isMFATLayerVisible, toggle: setIsMFATLayerVisible, label: "MFAT Layer", icon: <FaSatelliteDish />, type: "point" },
+    { ...sFatLayer, visible: isSFATLayerVisible, toggle: setIsSFATLayerVisible, label: "SFAT Layer", icon: <FaNetworkWired />, type: "point" },
+    { ...hhLayer, visible: isHHLayerVisible, toggle: setIsHHLayerVisible, label: "HH Layer", icon: <FaMapMarkerAlt />, type: "point" },
+    { ...oltLayer, visible: isOLTLayerVisible, toggle: setIsOLTLayerVisible, label: "OLT Layer", icon: <FaProjectDiagram />, type: "point" },
+  ];
+
+  const lineLayers: Layer[] = [
+    { ...fatLineLayer, visible: isFATLayerVisible, toggle: setIsFATLayerVisible, label: "FAT Line Layer", icon: <FaNetworkWired />, type: "line" },
+    { ...metroLineLayer, visible: isMetroLayerVisible, toggle: setIsMetroLayerVisible, label: "Metro Line Layer", icon: <FaMapMarkerAlt />, type: "line" },
+    { ...odcLineLayer, visible: isODCLineLayerVisible, toggle: setIsODCLineLayerVisible, label: "ODC Line Layer", icon: <FaProjectDiagram />, type: "line" },
+    { ...dropCableLineLayer, visible: isDropCableLayerVisible, toggle: setIsDropCableLayerVisible, label: "Drop Cable Layer", icon: <FaNetworkWired />, type: "line" },
   ];
 
   return (
     <DefaultLayout>
-      <div style={{ marginBottom: "20px" }}>
-        <button onClick={() => setIsModemLayerVisible((prev) => !prev)}>
-          Toggle Modem Layer
-        </button>
-        <button onClick={() => setIsMFATLayerVisible((prev) => !prev)}>
-          Toggle MFAT Layer
-        </button>
-        <button onClick={() => setIsSFATLayerVisible((prev) => !prev)}>
-          Toggle SFAT Layer
-        </button>
-        <button onClick={() => setIsHHLayerVisible((prev) => !prev)}>
-          Toggle HH Layer
-        </button>
-        <button onClick={() => setIsOLTLayerVisible((prev) => !prev)}>
-          Toggle OLT Layer
-        </button>
-        <button onClick={() => setIsODCLayerVisible((prev) => !prev)}>
-          Toggle ODC Layer
-        </button>
-        <button onClick={() => setIsTCLayerVisible((prev) => !prev)}>
-          Toggle TC Layer
-        </button>
-        <button onClick={() => setIsFATLayerVisible((prev) => !prev)}>
-          Toggle FAT Line Layer
-        </button>
-        <button onClick={() => setIsMetroLayerVisible((prev) => !prev)}>
-          Toggle Metro Line Layer
-        </button>
-        <button onClick={() => setIsODCLineLayerVisible((prev) => !prev)}>
-          Toggle ODC Line Layer
-        </button>
-        <button onClick={() => setIsDropCableLayerVisible((prev) => !prev)}>
-          Toggle Drop Cable Line Layer
-        </button>
-      </div>
+      <div className="w-full h-[80vh] relative">
+        {/* Top left container for point layers */}
+        <div className="absolute top-0 z-30 left-0 m-4 p-4 bg-white bg-opacity-30 backdrop-blur-md rounded-lg shadow-lg">
+          <h3 className="font-bold mb-2">Point Layers</h3>
+          <div className="space-y-2">
+            {pointLayers.map((layer) => (
+              <div className="flex items-center" key={layer.id}>
+                {layer.icon}
+                <input
+                  type="checkbox"
+                  checked={layer.visible}
+                  onChange={() => layer.toggle((prev) => !prev)}
+                  className="ml-2"
+                />
+                <label className="ml-2">{layer.label}</label>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      {modemLayer.source &&
-        mFatLayer.source &&
-        sFatLayer.source &&
-        hhLayer.source &&
-        oltLayer.source &&
-        odcLayer.source &&
-        fatLineLayer.source &&
-        metroLineLayer.source &&
-        odcLineLayer.source &&
-        dropCableLineLayer.source &&
-        tcLayer.source && <FTTHMap layers={layers} />}
+        {/* Bottom left container for line layers */}
+        <div className="absolute bottom-0 z-30 left-0 m-4 p-4 bg-white bg-opacity-30 backdrop-blur-md rounded-lg shadow-lg">
+          <h3 className="font-bold mb-2">Line Layers</h3>
+          <div className="space-y-2">
+            {lineLayers.map((layer) => (
+              <div className="flex items-center" key={layer.id}>
+                {layer.icon}
+                <input
+                  type="checkbox"
+                  checked={layer.visible}
+                  onChange={() => layer.toggle((prev) => !prev)}
+                  className="ml-2"
+                />
+                <label className="ml-2">{layer.label}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Map */}
+        <div className="z-20">
+          {pointLayers.concat(lineLayers).every(layer => layer.source) && (
+            <FTTHMap layers={pointLayers.concat(lineLayers)} />
+          )}
+        </div>
+      </div>
     </DefaultLayout>
   );
 };
