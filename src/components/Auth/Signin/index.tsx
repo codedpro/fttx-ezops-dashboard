@@ -12,6 +12,7 @@ import {
 } from "@/components/FormElements/InputUtils";
 import { Label } from "@/components/FormElements/Label";
 import { gsap } from "gsap";
+import https from "https";
 
 export default function Signin() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -104,6 +105,9 @@ export default function Signin() {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       data: data,
+
+      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      timeout: 30000, 
     };
 
     try {
@@ -126,6 +130,7 @@ export default function Signin() {
           setError("Your account is suspended or your password is incorrect.");
         } else {
           console.error("An error occurred during login:", error.message);
+          console.error(error);
         }
       } else {
         console.error("An unexpected error occurred:", error);

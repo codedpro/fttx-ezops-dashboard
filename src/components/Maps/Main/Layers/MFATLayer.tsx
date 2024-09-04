@@ -46,5 +46,6 @@ export const useMFATLayer = () => {
     id: "mfat-layer",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

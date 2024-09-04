@@ -46,5 +46,6 @@ export const useSFATLayer = () => {
     id: "sfat-layer",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

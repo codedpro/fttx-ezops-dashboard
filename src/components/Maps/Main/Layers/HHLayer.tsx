@@ -43,5 +43,6 @@ export const useHHLayer = () => {
     id: "hh-layer",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

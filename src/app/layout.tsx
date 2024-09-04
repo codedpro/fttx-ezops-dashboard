@@ -11,6 +11,7 @@ const Loader = dynamic(() => import("@/components/common/Loader"), {
 import { useInitializeFTTHModems } from "../hooks/useInitializeFTTHModems";
 import { useInitializeFTTHFats } from "@/hooks/useInitializeFTTHFats";
 import { useInitializeFTTHOthers } from "@/hooks/useInitializeFTTHOthers";
+import { useInitializeFTTHPoints } from "@/hooks/useInitializeFTTHPoints";
 
 export default function RootLayout({
   children,
@@ -21,6 +22,7 @@ export default function RootLayout({
   useInitializeFTTHModems(token);
   useInitializeFTTHFats(token);
   useInitializeFTTHOthers(token);
+  useInitializeFTTHPoints(token)
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>

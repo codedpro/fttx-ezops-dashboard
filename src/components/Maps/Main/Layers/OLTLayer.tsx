@@ -43,5 +43,6 @@ export const useOLTLayer = () => {
     id: "olt-layer",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

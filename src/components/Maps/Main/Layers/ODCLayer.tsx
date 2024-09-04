@@ -43,5 +43,6 @@ export const useODCLayer = () => {
     id: "odc-layer",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { FTTHModem } from "../types/FTTHModem";
+import { FTTHPoint } from "../types/FTTHPoint";
 
-interface FTTHModemsState {
-  modems: FTTHModem[];
+interface FTTHPointsState {
+  points: FTTHPoint[];
   error: string | null;
   isLoading: boolean;
   fetchingInProgress: boolean;
@@ -11,8 +11,8 @@ interface FTTHModemsState {
   hasStarted: boolean;
 }
 
-export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
-  modems: [],
+export const useFTTHPointsStore = create<FTTHPointsState>((set, get) => ({
+  points: [],
   error: null,
   isLoading: false,
   fetchingInProgress: false,
@@ -22,22 +22,20 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
 
     set({ isLoading: true, error: null, hasStarted: true });
 
-    const fetchModems = async () => {
+    const fetchPoints = async () => {
       if (get().fetchingInProgress) return;
 
       set({ fetchingInProgress: true });
 
       try {
-        const response = await fetch(
-          "https://lnmback.mtnirancell.ir/api/FTTHModems",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const response = await fetch(url + "/FTTHPoints", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -45,7 +43,7 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
 
         const textData = await response.text();
 
-        let data: FTTHModem[];
+        let data: FTTHPoint[];
 
         try {
           data = JSON.parse(textData);
@@ -57,9 +55,9 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
         }
 
         if (Array.isArray(data)) {
-          set({ modems: data, isLoading: false });
+          set({ points: data, isLoading: false });
         } else {
-          throw new Error("Invalid data format: expected an array of modems");
+          throw new Error("Invalid data format: expected an array of points");
         }
       } catch (error: any) {
         set({ error: error.message, isLoading: false });
@@ -68,8 +66,8 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
       }
     };
 
-    fetchModems();
-    const intervalId = setInterval(fetchModems, 6000);
+    fetchPoints();
+    const intervalId = setInterval(fetchPoints, 6000);
     set({ stopFetching: () => clearInterval(intervalId) });
   },
   stopFetching: () => {

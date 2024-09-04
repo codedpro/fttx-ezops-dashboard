@@ -41,5 +41,6 @@ export const useFTTHModemLayer = () => {
     id: "modems",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

@@ -43,5 +43,6 @@ export const useTCLayer = () => {
     id: "tc-layer",
     source,
     visible: true,
+    type: "point" as const, 
   };
 };

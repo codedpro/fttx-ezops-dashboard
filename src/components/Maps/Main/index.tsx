@@ -1,10 +1,17 @@
 import React, { useRef, useEffect } from "react";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 
 interface FTTHMapProps {
-  layers: Array<{ id: string; source: GeoJSONSourceSpecification | null; visible: boolean }>;
+  layers: Array<{
+    id: string;
+    source: GeoJSONSourceSpecification | null;
+    visible: boolean;
+    type: "point" | "line";
+    icons?: { [key: string]: string };
+  }>;
 }
 
 const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
@@ -24,48 +31,68 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
         });
 
         mapRef.current.on("load", () => {
-          layers.forEach(({ id, source, visible }) => {
+          layers.forEach(({ id, source, visible, type, icons }) => {
             if (source && mapRef.current && !mapRef.current.getSource(id)) {
               mapRef.current.addSource(id, source);
-              mapRef.current.addLayer({
-                id: id,
-                type: "circle",
-                source: id,
-                paint: {
-                  "circle-radius": 6,
-                  "circle-color": "#007cbf",
-                },
-              });
+
+              if (type === "point") {
+                const defaultIcon = "marker-15";
+
+                mapRef.current.addLayer({
+                  id: id,
+                  type: "symbol",
+                  source: id,
+                  layout: {
+                    "icon-image": icons ? ["get", "icon"] : defaultIcon,
+                    "icon-size": 1,
+                    "icon-allow-overlap": true,
+                  },
+                });
+              } else if (type === "line") {
+                mapRef.current.addLayer({
+                  id: id,
+                  type: "line",
+                  source: id,
+                  paint: {
+                    "line-width": 3,
+                    "line-color": "#ff0000",
+                    "line-opacity": 0.8,
+                  },
+                });
+              }
 
               mapRef.current.setLayoutProperty(
                 id,
                 "visibility",
                 visible ? "visible" : "none"
               );
+
+              if (icons && type === "point") {
+                Object.keys(icons).forEach((key) => {
+                  if (!mapRef.current?.hasImage(key)) {
+                    mapRef.current?.loadImage(icons[key], (error, image) => {
+                      if (!error && image) {
+                        mapRef.current?.addImage(key, image);
+                      }
+                    });
+                  }
+                });
+              }
             }
           });
         });
       } else if (mapRef.current) {
         layers.forEach(({ id, source, visible }) => {
-          const existingSource = mapRef.current!.getSource(id);
+          const existingSource = mapRef.current?.getSource(id);
           if (existingSource && source) {
             (existingSource as mapboxgl.GeoJSONSource).setData(
               source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
             );
           } else if (source) {
-            mapRef.current!.addSource(id, source);
-            mapRef.current!.addLayer({
-              id: id,
-              type: "circle",
-              source: id,
-              paint: {
-                "circle-radius": 6,
-                "circle-color": "#007cbf",
-              },
-            });
+            mapRef.current?.addSource(id, source);
           }
 
-          mapRef.current!.setLayoutProperty(
+          mapRef.current?.setLayoutProperty(
             id,
             "visibility",
             visible ? "visible" : "none"
@@ -76,14 +103,16 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
 
     if (!mapRef.current) {
       initializeMap();
-    } else if (mapRef.current.isStyleLoaded()) {
+    } else if (mapRef.current?.isStyleLoaded()) {
       initializeMap();
     } else {
-      mapRef.current.once("style.load", initializeMap);
+      mapRef.current?.once("style.load", initializeMap);
     }
   }, [layers]);
 
-  return <div ref={mapContainerRef} style={{ width: "100%", height: "1000px" }} />;
+  return (
+    <div ref={mapContainerRef} style={{ width: "100%", height: "1000px" }} />
+  );
 };
 
 export default FTTHMap;
