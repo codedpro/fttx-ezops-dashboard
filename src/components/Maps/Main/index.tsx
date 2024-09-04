@@ -33,18 +33,18 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
         mapRef.current.on("load", () => {
           layers.forEach(({ id, source, visible, type, icons }) => {
             if (source && mapRef.current && !mapRef.current.getSource(id)) {
+           
               mapRef.current.addSource(id, source);
 
               if (type === "point") {
                 const defaultIcon = "marker-15";
-
                 mapRef.current.addLayer({
                   id: id,
                   type: "symbol",
                   source: id,
                   layout: {
                     "icon-image": icons ? ["get", "icon"] : defaultIcon,
-                    "icon-size": 1,
+                    "icon-size": 1.5, 
                     "icon-allow-overlap": true,
                   },
                 });
@@ -71,7 +71,9 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
                 Object.keys(icons).forEach((key) => {
                   if (!mapRef.current?.hasImage(key)) {
                     mapRef.current?.loadImage(icons[key], (error, image) => {
-                      if (!error && image) {
+                      if (error) {
+                        console.error(`Error loading icon ${key}:`, error);
+                      } else if (image) {
                         mapRef.current?.addImage(key, image);
                       }
                     });
@@ -80,23 +82,6 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
               }
             }
           });
-        });
-      } else if (mapRef.current) {
-        layers.forEach(({ id, source, visible }) => {
-          const existingSource = mapRef.current?.getSource(id);
-          if (existingSource && source) {
-            (existingSource as mapboxgl.GeoJSONSource).setData(
-              source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
-            );
-          } else if (source) {
-            mapRef.current?.addSource(id, source);
-          }
-
-          mapRef.current?.setLayoutProperty(
-            id,
-            "visibility",
-            visible ? "visible" : "none"
-          );
         });
       }
     };
@@ -108,11 +93,31 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
     } else {
       mapRef.current?.once("style.load", initializeMap);
     }
+
+    if (mapRef.current) {
+      layers.forEach(({ id, source, visible }) => {
+        const layerExists = mapRef.current?.getLayer(id);
+        const existingSource = mapRef.current?.getSource(id);
+
+        if (existingSource && source) {
+          (existingSource as mapboxgl.GeoJSONSource).setData(
+            source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+          );
+        }
+        if (layerExists) {
+          mapRef.current?.setLayoutProperty(
+            id,
+            "visibility",
+            visible ? "visible" : "none"
+          );
+        } else {
+          console.error(`Layer with id ${id} does not exist.`);
+        }
+      });
+    }
   }, [layers]);
 
-  return (
-    <div ref={mapContainerRef} style={{ width: "100%", height: "1000px" }} />
-  );
+  return <div ref={mapContainerRef} style={{ width: "100%", height: "1000px" }} />;
 };
 
 export default FTTHMap;

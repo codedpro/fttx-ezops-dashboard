@@ -28,16 +28,14 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
       set({ fetchingInProgress: true });
 
       try {
-        const response = await fetch(
-          "https://lnmback.mtnirancell.ir/api/FTTHModems",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const response = await fetch(url + "/FTTHModems", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

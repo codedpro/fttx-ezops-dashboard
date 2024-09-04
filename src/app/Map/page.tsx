@@ -40,55 +40,22 @@ const FTTHModemsMap: React.FC = () => {
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
 
   const layers = [
-    {
-      ...modemLayer,
-      visible: isModemLayerVisible,
-    },
-    {
-      ...mFatLayer,
-      visible: isMFATLayerVisible,
-    },
-    {
-      ...sFatLayer,
-      visible: isSFATLayerVisible,
-    },
-    {
-      ...hhLayer,
-      visible: isHHLayerVisible,
-    },
-    {
-      ...oltLayer,
-      visible: isOLTLayerVisible,
-    },
-    {
-      ...odcLayer,
-      visible: isODCLayerVisible,
-    },
-    {
-      ...tcLayer,
-      visible: isTCLayerVisible,
-    },
-    {
-      ...fatLineLayer,
-      visible: isFATLayerVisible,
-    },
-    {
-      ...metroLineLayer,
-      visible: isMetroLayerVisible,
-    },
-    {
-      ...odcLineLayer,
-      visible: isODCLineLayerVisible,
-    },
-    {
-      ...dropCableLineLayer,
-      visible: isDropCableLayerVisible,
-    },
+    { ...modemLayer, visible: isModemLayerVisible },
+    { ...mFatLayer, visible: isMFATLayerVisible },
+    { ...sFatLayer, visible: isSFATLayerVisible },
+    { ...hhLayer, visible: isHHLayerVisible },
+    { ...oltLayer, visible: isOLTLayerVisible },
+    { ...odcLayer, visible: isODCLayerVisible },
+    { ...tcLayer, visible: isTCLayerVisible },
+    { ...fatLineLayer, visible: isFATLayerVisible },
+    { ...metroLineLayer, visible: isMetroLayerVisible },
+    { ...odcLineLayer, visible: isODCLineLayerVisible },
+    { ...dropCableLineLayer, visible: isDropCableLayerVisible },
   ];
 
   return (
-    <>
-      <DefaultLayout>
+    <DefaultLayout>
+      <div style={{ marginBottom: "20px" }}>
         <button onClick={() => setIsModemLayerVisible((prev) => !prev)}>
           Toggle Modem Layer
         </button>
@@ -122,19 +89,20 @@ const FTTHModemsMap: React.FC = () => {
         <button onClick={() => setIsDropCableLayerVisible((prev) => !prev)}>
           Toggle Drop Cable Line Layer
         </button>
-        {modemLayer.source &&
-          mFatLayer.source &&
-          sFatLayer.source &&
-          hhLayer.source &&
-          oltLayer.source &&
-          odcLayer.source &&
-          fatLineLayer.source &&
-          metroLineLayer.source &&
-          odcLineLayer.source &&
-          dropCableLineLayer.source &&
-          tcLayer.source && <FTTHMap layers={layers} />}
-      </DefaultLayout>{" "}
-    </>
+      </div>
+
+      {modemLayer.source &&
+        mFatLayer.source &&
+        sFatLayer.source &&
+        hhLayer.source &&
+        oltLayer.source &&
+        odcLayer.source &&
+        fatLineLayer.source &&
+        metroLineLayer.source &&
+        odcLineLayer.source &&
+        dropCableLineLayer.source &&
+        tcLayer.source && <FTTHMap layers={layers} />}
+    </DefaultLayout>
   );
 };
 
