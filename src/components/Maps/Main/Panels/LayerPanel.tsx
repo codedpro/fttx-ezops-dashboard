@@ -80,10 +80,8 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
                   </svg>
                 </div>
                 <span
-                  className={`ml-2 text-xs font-medium transition-all duration-500 ease-in-out ${
-                    layer.visible
-                      ? "text-primary animate-fadeIn"
-                      : "text-gray-700 dark:text-gray-300 animate-fadeOut"
+                  className={`ml-2 text-xs font-medium transition-colors duration-300 ${
+                    layer.visible ? "text-primary" : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   {layer.label}

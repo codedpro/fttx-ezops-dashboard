@@ -13,6 +13,7 @@ import { useMetroLineLayer } from "@/components/Maps/Main/Layers/MetroLineLayer"
 import { useODCLineLayer } from "@/components/Maps/Main/Layers/ODCLineLayer";
 import { useDropCableLineLayer } from "@/components/Maps/Main/Layers/DropCableLineLayer";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import StylePanel from "@/components/Maps/Main/Panels/StylePanel";
 import {
   FaSatelliteDish,
   FaWifi,
@@ -58,10 +59,12 @@ const FTTHModemsMap: React.FC = () => {
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
 
   const [loading, setLoading] = useState(true);
-
+  const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/streets-v11");
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
-
+  const handleStyleChange = (newStyle: string) => {
+    setMapStyle(newStyle);
+  };
   const pointLayers: Layer[] = [
     {
       ...modemLayer,
@@ -186,8 +189,9 @@ const FTTHModemsMap: React.FC = () => {
             toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
             customPosition="bottom-left"
           />
+             <StylePanel onStyleChange={handleStyleChange} selectedStyle={mapStyle} />
           <div className="z-20">
-            <FTTHMap layers={pointLayers.concat(lineLayers)} />
+          <FTTHMap layers={pointLayers.concat(lineLayers)} mapStyle={mapStyle} /> 
           </div>
         </div>
       )}
