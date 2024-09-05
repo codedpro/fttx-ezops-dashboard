@@ -26,5 +26,10 @@ export const useODCLineLayer = () => {
     source,
     visible: true,
     type: "line" as const, 
+    paint: {
+        "line-color": "#ff0000",
+        "line-width": 5,
+        "line-opacity": 0.8,
+      },
   };
 };

@@ -23,6 +23,7 @@ import {
   FaProjectDiagram,
 } from "react-icons/fa";
 import LayerPanel from "@/components/Maps/Main/Panels/LayerPanel";
+import { useSearchParams } from "next/navigation";
 
 interface Layer {
   id: string;
@@ -30,9 +31,11 @@ interface Layer {
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
   label: string;
   icon: React.ReactNode;
-  source: mapboxgl.GeoJSONSourceOptions | null;
+  source: mapboxgl.GeoJSONSourceSpecification | null;
   type: "point" | "line";
 }
+import { useFTTHModemsStore } from "@/store/FTTHModemsStore";
+import { useFTTHComponentsOtherStore } from "@/store/FTTHComponentsOtherStore";
 
 const FTTHModemsMap: React.FC = () => {
   const modemLayer = useFTTHModemLayer();
@@ -48,26 +51,30 @@ const FTTHModemsMap: React.FC = () => {
   const dropCableLineLayer = useDropCableLineLayer();
 
   const [isModemLayerVisible, setIsModemLayerVisible] = useState(true);
-  const [isMFATLayerVisible, setIsMFATLayerVisible] = useState(true);
-  const [isSFATLayerVisible, setIsSFATLayerVisible] = useState(true);
-  const [isHHLayerVisible, setIsHHLayerVisible] = useState(true);
+  const [isMFATLayerVisible, setIsMFATLayerVisible] = useState(false);
+  const [isSFATLayerVisible, setIsSFATLayerVisible] = useState(false);
+  const [isHHLayerVisible, setIsHHLayerVisible] = useState(false);
   const [isOLTLayerVisible, setIsOLTLayerVisible] = useState(false);
   const [isODCLayerVisible, setIsODCLayerVisible] = useState(false);
   const [isTCLayerVisible, setIsTCLayerVisible] = useState(false);
-  const [isFATLayerVisible, setIsFATLayerVisible] = useState(false);
-  const [isMetroLayerVisible, setIsMetroLayerVisible] = useState(false);
-  const [isODCLineLayerVisible, setIsODCLineLayerVisible] = useState(false);
+  const [isFATLayerVisible, setIsFATLayerVisible] = useState(true);
+  const [isMetroLayerVisible, setIsMetroLayerVisible] = useState(true);
+  const [isODCLineLayerVisible, setIsODCLineLayerVisible] = useState(true);
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
 
   const [loading, setLoading] = useState(true);
   const [mapStyle, setMapStyle] = useState(
-    "mapbox://styles/mapbox/streets-v11"
+    "mapbox://styles/mapbox/dark-v10"
   );
+
+  const modems = useFTTHModemsStore((state) => state.modems);
+  const others = useFTTHComponentsOtherStore((state) => state.others);
 
   const [zoomLocation, setZoomLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+  const searchParams = useSearchParams();
 
   const handleCityClick = (city: { lat: number; lng: number }) => {
     setZoomLocation(city);
@@ -173,6 +180,37 @@ const FTTHModemsMap: React.FC = () => {
   ];
 
   const areVisibleLayersLoaded = lineLayers.every((layer) => layer.source);
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (!search) return;
+
+    if (search.includes(",")) {
+      const [lat, lng] = search.split(",").map(Number);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setZoomLocation({ lat, lng });
+      }
+    }
+
+    if (search.startsWith("8411")) {
+      const modem = modems.find(
+        (modem) => modem.Modem_ID.toString() === search
+      );
+      if (modem) {
+        setZoomLocation({ lat: modem.Lat, lng: modem.Long });
+      }
+    }
+
+    const oltPattern = /^[A-Z]\d{4}$/;
+    if (oltPattern.test(search)) {
+      const oltData = others.filter(
+        (component) => component.Type === "OLT" && component.Name === search
+      );
+      if (oltData.length > 0) {
+        const olt = oltData[0];
+        setZoomLocation({ lat: olt.Lat, lng: olt.Long });
+      }
+    }
+  }, [searchParams]); 
 
   useEffect(() => {
     if (areVisibleLayersLoaded) {

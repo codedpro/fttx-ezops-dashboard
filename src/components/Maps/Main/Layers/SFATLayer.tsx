@@ -30,6 +30,8 @@ export const useSFATLayer = () => {
               Is_Plan: fat.Is_Plan,
               Chain_ID: fat.Chain_ID,
               Type: fat.Type,
+              icon: "SFAT",
+              iconSize: 1,
             },
           })
         ),
@@ -47,5 +49,6 @@ export const useSFATLayer = () => {
     source,
     visible: true,
     type: "point" as const, 
+    icons: { SFAT: "/images/map/SFAT.png" },
   };
 };

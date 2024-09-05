@@ -8,7 +8,7 @@ export const useHHLayer = () => {
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    const hhData = others.filter(component => component.Type === "HH");
+    const hhData = others.filter((component) => component.Type === "HH");
 
     if (hhData.length > 0) {
       const geoJsonData: FeatureCollection<Geometry> = {
@@ -27,6 +27,8 @@ export const useHHLayer = () => {
               Chain_ID: component.Chain_ID,
               Type: component.Type,
               Is_Plan: component.Is_Plan,
+              icon: "handHoldIcon",
+              iconSize: 1,
             },
           })
         ),
@@ -43,6 +45,7 @@ export const useHHLayer = () => {
     id: "hh-layer",
     source,
     visible: true,
-    type: "point" as const, 
+    type: "point" as const,
+    icons: { handHoldIcon: "/images/map/HandHole.png" },
   };
 };

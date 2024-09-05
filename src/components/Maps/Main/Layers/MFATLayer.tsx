@@ -8,7 +8,7 @@ export const useMFATLayer = () => {
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    const mFatData = fats.filter(fat => fat.Type === "MFAT");
+    const mFatData = fats.filter((fat) => fat.Type === "MFAT");
 
     if (mFatData.length > 0) {
       const geoJsonData: FeatureCollection<Geometry> = {
@@ -30,6 +30,8 @@ export const useMFATLayer = () => {
               Is_Plan: fat.Is_Plan,
               Chain_ID: fat.Chain_ID,
               Type: fat.Type,
+              icon: "MFATIcon",
+              iconSize: 1,
             },
           })
         ),
@@ -46,6 +48,7 @@ export const useMFATLayer = () => {
     id: "mfat-layer",
     source,
     visible: true,
-    type: "point" as const, 
+    type: "point" as const,
+    icons: { MFATIcon: "/images/map/MFAT.png" },
   };
 };

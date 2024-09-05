@@ -27,6 +27,8 @@ export const useTCLayer = () => {
               Chain_ID: component.Chain_ID,
               Type: component.Type,
               Is_Plan: component.Is_Plan,
+              icon: "TCIcon",
+              iconSize: 1,
             },
           })
         ),
@@ -44,5 +46,6 @@ export const useTCLayer = () => {
     source,
     visible: true,
     type: "point" as const, 
+    icons: { TCIcon: "/images/map/TC.png" },
   };
 };

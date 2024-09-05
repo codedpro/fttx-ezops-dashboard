@@ -9,10 +9,13 @@ export const useDropCableLineLayer = () => {
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    const dropCablePoints = points.filter(point => point.Type === "Drop Cable");
+    const dropCablePoints = points.filter(
+      (point) => point.Type === "Drop Cable"
+    );
 
     if (dropCablePoints.length > 0) {
-      const geoJsonData: FeatureCollection<Geometry> = groupPointsByChainAndCreateLine(dropCablePoints);
+      const geoJsonData: FeatureCollection<Geometry> =
+        groupPointsByChainAndCreateLine(dropCablePoints);
 
       setSource({
         type: "geojson",
@@ -25,6 +28,11 @@ export const useDropCableLineLayer = () => {
     id: "drop-cable-line-layer",
     source,
     visible: true,
-    type: "line" as const, 
+    type: "line" as const,
+    paint: {
+      "line-color": "#000000",
+      "line-width": 5,
+      "line-opacity": 0.8,
+    },
   };
 };

@@ -25,6 +25,8 @@ export const useFTTHModemLayer = () => {
               FAT: modem.FAT,
               Symbol: modem.Symbol,
               Error: modem.Error,
+              icon: "ftthModemIcon",
+              iconSize: 1,
             },
           })
         ),
@@ -41,6 +43,7 @@ export const useFTTHModemLayer = () => {
     id: "modems",
     source,
     visible: true,
-    type: "point" as const, 
+    type: "point" as const,
+    icons: { ftthModemIcon: "/images/map/FTTHModem.png" },
   };
 };

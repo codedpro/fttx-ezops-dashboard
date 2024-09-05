@@ -6,7 +6,7 @@ const mapStyles = [
   {
     id: "streets",
     name: "Streets",
-    style: "mapbox://styles/mapbox/streets-v11",
+    style: "mapbox://styles/mapbox/streets-v12",
     icon: <FaMap />,
   },
   {

@@ -51,7 +51,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
     <div
       className={`absolute z-30 m-2 p-2 bg-white bg-opacity-30 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all duration-200 ease-in-out transform ${
         positionClasses
-      } ${isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : "w-64"}`}
+      } ${isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : ""}`}
     >
       <button
         onClick={toggleMinimized}

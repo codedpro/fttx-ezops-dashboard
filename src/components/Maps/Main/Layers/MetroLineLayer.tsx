@@ -9,10 +9,11 @@ export const useMetroLineLayer = () => {
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    const metroPoints = points.filter(point => point.Type === "Metro");
+    const metroPoints = points.filter((point) => point.Type === "Metro");
 
     if (metroPoints.length > 0) {
-      const geoJsonData: FeatureCollection<Geometry> = groupPointsByChainAndCreateLine(metroPoints);
+      const geoJsonData: FeatureCollection<Geometry> =
+        groupPointsByChainAndCreateLine(metroPoints);
 
       setSource({
         type: "geojson",
@@ -25,6 +26,11 @@ export const useMetroLineLayer = () => {
     id: "metro-line-layer",
     source,
     visible: true,
-    type: "line" as const, 
+    type: "line" as const,
+    paint: {
+      "line-color": "#ddddff",
+      "line-width": 5,
+      "line-opacity": 0.8,
+    },
   };
 };

@@ -8,7 +8,7 @@ export const useOLTLayer = () => {
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    const oltData = others.filter(component => component.Type === "OLT");
+    const oltData = others.filter((component) => component.Type === "OLT");
 
     if (oltData.length > 0) {
       const geoJsonData: FeatureCollection<Geometry> = {
@@ -27,6 +27,8 @@ export const useOLTLayer = () => {
               Chain_ID: component.Chain_ID,
               Type: component.Type,
               Is_Plan: component.Is_Plan,
+              icon: "OLTIcon",
+              iconSize: 0.1,
             },
           })
         ),
@@ -43,6 +45,7 @@ export const useOLTLayer = () => {
     id: "olt-layer",
     source,
     visible: true,
-    type: "point" as const, 
+    type: "point" as const,
+    icons: { OLTIcon: "/images/map/OLT.png" },
   };
 };

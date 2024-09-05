@@ -27,6 +27,8 @@ export const useODCLayer = () => {
               Chain_ID: component.Chain_ID,
               Type: component.Type,
               Is_Plan: component.Is_Plan,
+              icon: "ODCIcon",
+              iconSize: 0.3,
             },
           })
         ),
@@ -44,5 +46,6 @@ export const useODCLayer = () => {
     source,
     visible: true,
     type: "point" as const, 
+    icons: { ODCIcon: "/images/map/ODC.png" },
   };
 };

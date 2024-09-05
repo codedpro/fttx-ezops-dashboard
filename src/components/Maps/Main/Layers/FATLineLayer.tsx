@@ -26,5 +26,10 @@ export const useFATLineLayer = () => {
     source,
     visible: true,
     type: "line" as const, 
+    paint: {
+        "line-color": "#0360f5",
+        "line-width": 5,
+        "line-opacity": 0.8,
+      },
   };
 };

@@ -181,40 +181,36 @@ export function PlaceholdersAndVanishInput({
     e.preventDefault();
     vanishAndSubmit();
 
-    // Update URL params and trigger vanish animation
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("search", value);
 
-    // Wait for the animation to finish before clearing the input and updating the URL
     setTimeout(() => {
-      setValue(''); // Clear input after vanish animation
+      setValue("");
       router.replace(`?${searchParams.toString()}`);
-    }, 500); // Ensure animation completes
+    }, 500);
     onSubmit && onSubmit(e);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setValue(suggestion);
-    vanishAndSubmit(); // Trigger the vanish animation for suggestions
+    vanishAndSubmit();
 
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("search", suggestion);
 
-    // Wait for the vanish animation before updating the URL and clearing the input
     setTimeout(() => {
-      setValue(''); // Clear input after vanish animation
+      setValue("");
       router.replace(`?${searchParams.toString()}`);
-    }, 500); // Ensure the animation completes
+    }, 500);
   };
 
   useEffect(() => {
     let newSuggestions: string[] = [];
 
-    // Get current search value from URL
     const searchParams = new URLSearchParams(window.location.search);
     const searchValue = searchParams.get("search");
-
-    if (value.startsWith("T")) {
+    const oltPattern = /^[A-Z]\d{1}$/;
+    if (oltPattern.test(value)) {
       newSuggestions = others
         .filter(
           (component) =>
@@ -232,7 +228,6 @@ export function PlaceholdersAndVanishInput({
       }
     }
 
-    // Exclude the value already in the URL from the suggestions
     newSuggestions = newSuggestions.filter(
       (suggestion) => suggestion !== searchValue
     );

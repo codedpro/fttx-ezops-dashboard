@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import mapboxgl, { GeoJSONSourceOptions } from "mapbox-gl";
+import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
@@ -7,16 +7,25 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 interface FTTHMapProps {
   layers: Array<{
     id: string;
-    source: GeoJSONSourceOptions | null;
+    source: GeoJSONSourceSpecification | null;
     visible: boolean;
     type: "point" | "line";
     icons?: { [key: string]: string };
+    paint?: {
+      "line-color"?: string;
+      "line-width"?: number;
+      "line-opacity"?: number;
+    };
   }>;
   mapStyle: string;
   zoomLocation: { lat: number; lng: number } | null;
 }
 
-const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle, zoomLocation}) => {
+const FTTHMap: React.FC<FTTHMapProps> = ({
+  layers,
+  mapStyle,
+  zoomLocation,
+}) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -55,14 +64,14 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle, zoomLocation}) => {
     if (mapRef.current && zoomLocation) {
       mapRef.current.flyTo({
         center: [zoomLocation.lng, zoomLocation.lat],
-        zoom: 14,
-        essential: true, // This ensures the animation is essential
+        zoom: 20,
+        essential: true,
       });
     }
   }, [zoomLocation]);
 
   const addLayersToMap = () => {
-    layers.forEach(({ id, source, visible, type, icons }) => {
+    layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
       if (source && mapRef.current && !mapRef.current.getSource(id)) {
         const geoJsonSource = {
           ...source,
@@ -72,47 +81,56 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle, zoomLocation}) => {
         mapRef.current.addSource(id, geoJsonSource);
 
         if (type === "point") {
-          const defaultIcon = "marker-15";
-          mapRef.current.addLayer({
-            id: id,
-            type: "symbol",
-            source: id,
-            layout: {
-              "icon-image": icons ? ["get", "icon"] : defaultIcon,
-              "icon-size": 1.5,
-              "icon-allow-overlap": true,
-            },
+          const iconPromises = Object.keys(icons || {}).map((key) => {
+            return new Promise<void>((resolve, reject) => {
+              if (!mapRef.current?.hasImage(key)) {
+                mapRef.current?.loadImage(icons[key], (error, image) => {
+                  if (error) {
+                    console.error(`Error loading icon ${key}:`, error);
+                    reject(error);
+                  } else if (image) {
+                    mapRef.current?.addImage(key, image);
+                    resolve();
+                  }
+                });
+              } else {
+                resolve();
+              }
+            });
           });
+
+          Promise.all(iconPromises)
+            .then(() => {
+              mapRef.current?.addLayer({
+                id: id,
+                type: "symbol",
+                source: id,
+                layout: {
+                  "icon-image": ["get", "icon"],
+                  "icon-size": ["get", "iconSize"],
+                  "icon-allow-overlap": true,
+                },
+              });
+
+              mapRef.current?.setLayoutProperty(
+                id,
+                "visibility",
+                visible ? "visible" : "none"
+              );
+            })
+            .catch((error) => {
+              console.error("Error loading icons:", error);
+            });
         } else if (type === "line") {
           mapRef.current.addLayer({
             id: id,
             type: "line",
             source: id,
             paint: {
-              "line-width": 3,
-              "line-color": "#ff0000",
-              "line-opacity": 0.8,
+              "line-color": paint?.["line-color"] || "#ff0000",
+              "line-width": paint?.["line-width"] || 5,
+              "line-opacity": paint?.["line-opacity"] || 0.8,
             },
-          });
-        }
-
-        mapRef.current.setLayoutProperty(
-          id,
-          "visibility",
-          visible ? "visible" : "none"
-        );
-
-        if (icons && type === "point") {
-          Object.keys(icons).forEach((key) => {
-            if (!mapRef.current?.hasImage(key)) {
-              mapRef.current?.loadImage(icons[key], (error, image) => {
-                if (error) {
-                  console.error(`Error loading icon ${key}:`, error);
-                } else if (image) {
-                  mapRef.current?.addImage(key, image);
-                }
-              });
-            }
           });
         }
       }
