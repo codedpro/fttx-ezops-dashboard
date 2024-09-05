@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
+import mapboxgl, { GeoJSONSourceOptions } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
@@ -7,7 +7,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 interface FTTHMapProps {
   layers: Array<{
     id: string;
-    source: GeoJSONSourceSpecification | null;
+    source: GeoJSONSourceOptions | null; // Correct type for the source
     visible: boolean;
     type: "point" | "line";
     icons?: { [key: string]: string };
@@ -33,7 +33,13 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
         mapRef.current.on("load", () => {
           layers.forEach(({ id, source, visible, type, icons }) => {
             if (source && mapRef.current && !mapRef.current.getSource(id)) {
-              mapRef.current.addSource(id, source);
+              // Ensure the type is 'geojson'
+              const geoJsonSource = {
+                ...source,
+                type: 'geojson' as const, // Correct type specification
+              };
+
+              mapRef.current.addSource(id, geoJsonSource);
 
               if (type === "point") {
                 const defaultIcon = "marker-15";
@@ -43,7 +49,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers }) => {
                   source: id,
                   layout: {
                     "icon-image": icons ? ["get", "icon"] : defaultIcon,
-                    "icon-size": 1.5, 
+                    "icon-size": 1.5,
                     "icon-allow-overlap": true,
                   },
                 });
