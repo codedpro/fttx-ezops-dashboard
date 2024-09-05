@@ -1,17 +1,13 @@
+import Image from "next/image";
 import React from "react";
-import {
-  IoMdArrowDropdown,
-  IoMdArrowDropup,
-  IoMdArrowDropleft,
-  IoMdArrowDropright,
-} from "react-icons/io";
+import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
 interface Layer {
   id: string;
   visible: boolean;
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
   label: string;
-  icon: React.ReactNode;
+  icon: string; // For "line" type layers, this will be a color code
   type: "point" | "line";
 }
 
@@ -35,9 +31,9 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
   const ArrowIcon = () => {
     if (isMinimized) {
       return customPosition === "top-left" ? (
-        <IoMdArrowDropright size={20} />
+        <IoMdArrowDropdown size={20} />
       ) : (
-        <IoMdArrowDropleft size={20} />
+        <IoMdArrowDropup size={20} />
       );
     }
     return customPosition === "top-left" ? (
@@ -49,14 +45,16 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
 
   return (
     <div
-      className={`absolute z-30 m-2 p-2 bg-white bg-opacity-30 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all duration-200 ease-in-out transform ${
+      className={`absolute z-30 m-2 p-2 bg-white bg-opacity-50 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all duration-200 ease-in-out transform ${
         positionClasses
       } ${isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : ""}`}
     >
       <button
         onClick={toggleMinimized}
         className={`${
-          isMinimized ? "w-full h-full flex items-center justify-center" : "flex justify-between items-center w-full"
+          isMinimized
+            ? "w-full h-full flex items-center justify-center"
+            : "flex justify-between items-center w-full"
         } transition-opacity duration-100`}
       >
         {!isMinimized && <h3 className="font-bold mb-2">{title}</h3>}
@@ -67,7 +65,20 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
         <div className="space-y-3 transition-all duration-100 ease-in-out transform">
           {layers.map((layer) => (
             <div className="flex items-center space-x-2" key={layer.id}>
-              {layer.icon}
+              {layer.type === "point" ? (
+                <Image
+                  src={layer.icon}
+                  alt={layer.label}
+                  width={24}
+                  height={24}
+                  className="w-4 h-4"
+                />
+              ) : (
+                <div
+                  style={{ backgroundColor: layer.icon }}
+                  className="w-4 h-4 rounded-full"
+                ></div>
+              )}
               <label className="relative flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -87,7 +98,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
                   className={`ml-2 text-xs font-medium transition-colors duration-0 whitespace-nowrap overflow-hidden text-ellipsis ${
                     layer.visible
                       ? "text-primary"
-                      : "text-gray-500 dark:text-gray-400"
+                      : "text-gray-300 dark:text-gray-400"
                   }`}
                 >
                   {layer.label}

@@ -20,8 +20,8 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
 
   return (
     <div
-      className={`absolute top-4 right-4 z-30 m-2 p-2 bg-white bg-opacity-30 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all ${
-        isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : "w-32"
+      className={`absolute top-4 right-4 z-30 m-2 p-2 bg-white bg-opacity-50 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all ${
+        isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : "w-24"
       }`}
     >
       <div className={`flex justify-between items-center ${isMinimized ? "hidden" : ""}`}>
