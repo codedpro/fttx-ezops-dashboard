@@ -13,13 +13,13 @@ interface FTTHMapProps {
     icons?: { [key: string]: string };
   }>;
   mapStyle: string;
+  zoomLocation: { lat: number; lng: number } | null;
 }
 
-const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle }) => {
+const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle, zoomLocation}) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  // Initialize the map only once
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -27,7 +27,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle }) => {
       if (mapRef.current === null && mapContainerRef.current) {
         mapRef.current = new mapboxgl.Map({
           container: mapContainerRef.current,
-          style: mapStyle, // Initial style
+          style: mapStyle,
           center: [51.4699361114553, 35.7580195079693],
           zoom: 12,
         });
@@ -39,20 +39,28 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle }) => {
     };
 
     initializeMap();
-  }, []); // Empty dependency array ensures this effect runs only once
+  }, []);
 
-  // Re-apply layers when the style changes
   useEffect(() => {
     if (mapRef.current) {
-      mapRef.current.setStyle(mapStyle); // Change the map style
+      mapRef.current.setStyle(mapStyle);
 
       mapRef.current.once("styledata", () => {
-        addLayersToMap(); // Add the layers again after style changes
+        addLayersToMap();
       });
     }
   }, [mapStyle]);
 
-  // Function to add layers to the map
+  useEffect(() => {
+    if (mapRef.current && zoomLocation) {
+      mapRef.current.flyTo({
+        center: [zoomLocation.lng, zoomLocation.lat],
+        zoom: 14,
+        essential: true, // This ensures the animation is essential
+      });
+    }
+  }, [zoomLocation]);
+
   const addLayersToMap = () => {
     layers.forEach(({ id, source, visible, type, icons }) => {
       if (source && mapRef.current && !mapRef.current.getSource(id)) {
@@ -111,7 +119,6 @@ const FTTHMap: React.FC<FTTHMapProps> = ({ layers, mapStyle }) => {
     });
   };
 
-  // Update visibility or data when layers change
   useEffect(() => {
     if (mapRef.current) {
       layers.forEach(({ id, source, visible }) => {

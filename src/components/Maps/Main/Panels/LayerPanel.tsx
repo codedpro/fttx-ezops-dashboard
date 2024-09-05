@@ -1,5 +1,10 @@
 import React from "react";
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import {
+  IoMdArrowDropdown,
+  IoMdArrowDropup,
+  IoMdArrowDropleft,
+  IoMdArrowDropright,
+} from "react-icons/io";
 
 interface Layer {
   id: string;
@@ -27,40 +32,39 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
 }) => {
   const positionClasses =
     customPosition === "top-left" ? "top-4 left-4" : "bottom-4 left-4";
-
-  const isBottomLeft = customPosition === "bottom-left";
+  const ArrowIcon = () => {
+    if (isMinimized) {
+      return customPosition === "top-left" ? (
+        <IoMdArrowDropright size={20} />
+      ) : (
+        <IoMdArrowDropleft size={20} />
+      );
+    }
+    return customPosition === "top-left" ? (
+      <IoMdArrowDropup size={20} />
+    ) : (
+      <IoMdArrowDropdown size={20} />
+    );
+  };
 
   return (
     <div
-      className={`absolute z-30 m-4 p-4 bg-white bg-opacity-30 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all ${positionClasses} ${
-        isMinimized ? "h-12" : "h-auto"
-      }`}
+      className={`absolute z-30 m-2 p-2 bg-white bg-opacity-30 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all duration-200 ease-in-out transform ${
+        positionClasses
+      } ${isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : "w-64"}`}
     >
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold mb-2">{title}</h3>
-        <button
-          onClick={toggleMinimized}
-          className="flex items-center justify-center p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition duration-200"
-        >
-          {isMinimized ? (
-            <IoMdArrowDropdown
-              size={20}
-              className={`transition-transform duration-200 ${
-                isBottomLeft ? "rotate-180" : ""
-              }`}
-            />
-          ) : (
-            <IoMdArrowDropup
-              size={20}
-              className={`transition-transform duration-200 ${
-                isBottomLeft ? "rotate-180" : ""
-              }`}
-            />
-          )}
-        </button>
-      </div>
+      <button
+        onClick={toggleMinimized}
+        className={`${
+          isMinimized ? "w-full h-full flex items-center justify-center" : "flex justify-between items-center w-full"
+        } transition-opacity duration-100`}
+      >
+        {!isMinimized && <h3 className="font-bold mb-2">{title}</h3>}
+        <ArrowIcon />
+      </button>
+
       {!isMinimized && (
-        <div className="space-y-3">
+        <div className="space-y-3 transition-all duration-100 ease-in-out transform">
           {layers.map((layer) => (
             <div className="flex items-center space-x-2" key={layer.id}>
               {layer.icon}
@@ -73,15 +77,17 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
                 />
                 <div className="w-4 h-4 border-2 border-gray-400 peer-checked:border-primary rounded-sm bg-white dark:bg-gray-700 peer-checked:bg-primary transition-all duration-300 relative">
                   <svg
-                    className="absolute inset-0 w-full h-full fill-current text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300"
+                    className="absolute inset-0 w-full h-full fill-current text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-100"
                     viewBox="0 0 24 24"
                   >
                     <path d="M20.285 5.794l-11.243 11.243-5.657-5.657 1.414-1.414 4.243 4.243 9.829-9.829z" />
                   </svg>
                 </div>
                 <span
-                  className={`ml-2 text-xs font-medium transition-colors duration-300 ${
-                    layer.visible ? "text-primary" : "text-gray-500 dark:text-gray-400"
+                  className={`ml-2 text-xs font-medium transition-colors duration-0 whitespace-nowrap overflow-hidden text-ellipsis ${
+                    layer.visible
+                      ? "text-primary"
+                      : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
                   {layer.label}

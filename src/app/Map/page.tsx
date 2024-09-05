@@ -14,6 +14,7 @@ import { useODCLineLayer } from "@/components/Maps/Main/Layers/ODCLineLayer";
 import { useDropCableLineLayer } from "@/components/Maps/Main/Layers/DropCableLineLayer";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import StylePanel from "@/components/Maps/Main/Panels/StylePanel";
+import CityPanel from "@/components/Maps/Main/Panels/CityPanel";
 import {
   FaSatelliteDish,
   FaWifi,
@@ -59,7 +60,19 @@ const FTTHModemsMap: React.FC = () => {
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
 
   const [loading, setLoading] = useState(true);
-  const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/streets-v11");
+  const [mapStyle, setMapStyle] = useState(
+    "mapbox://styles/mapbox/streets-v11"
+  );
+
+  const [zoomLocation, setZoomLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  const handleCityClick = (city: { lat: number; lng: number }) => {
+    setZoomLocation(city);
+  };
+
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
   const handleStyleChange = (newStyle: string) => {
@@ -175,6 +188,7 @@ const FTTHModemsMap: React.FC = () => {
         </div>
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
+          <CityPanel onCityClick={handleCityClick} />
           <LayerPanel
             title="Point Layers"
             layers={pointLayers}
@@ -189,9 +203,16 @@ const FTTHModemsMap: React.FC = () => {
             toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
             customPosition="bottom-left"
           />
-             <StylePanel onStyleChange={handleStyleChange} selectedStyle={mapStyle} />
+          <StylePanel
+            onStyleChange={handleStyleChange}
+            selectedStyle={mapStyle}
+          />
           <div className="z-20">
-          <FTTHMap layers={pointLayers.concat(lineLayers)} mapStyle={mapStyle} /> 
+            <FTTHMap
+              layers={pointLayers.concat(lineLayers)}
+              mapStyle={mapStyle}
+              zoomLocation={zoomLocation}
+            />
           </div>
         </div>
       )}
