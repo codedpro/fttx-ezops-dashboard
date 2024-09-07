@@ -8,7 +8,7 @@ interface Layer {
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
   label: string;
   icon: string; // For "line" type layers, this will be a color code
-  type: "point" | "line";
+  type: "point" | "line" | "heatmap";
 }
 
 interface LayerPanelProps {
