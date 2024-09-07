@@ -56,7 +56,7 @@ export function PlaceholdersAndVanishInput({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [placeholders]);
-
+  const oltPattern = /^[A-Z]\d{1}$/;
   const draw = useCallback(() => {
     if (!inputRef.current) return;
     const canvas = canvasRef.current;
@@ -194,22 +194,55 @@ export function PlaceholdersAndVanishInput({
   const handleSuggestionClick = (suggestion: string) => {
     setValue(suggestion);
     vanishAndSubmit();
-
+  
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("search", suggestion);
-
-    setTimeout(() => {
-      setValue("");
-      router.replace(`?${searchParams.toString()}`);
-    }, 500);
+  
+    const currentPath = window.location.pathname;
+  
+    if (suggestion.startsWith("8411")) {
+      if (currentPath.startsWith("/map")) {
+        // If on /map, update search param
+        setTimeout(() => {
+          setValue("");
+          router.replace(`/map?${searchParams.toString()}`);
+        }, 500);
+      } else if (currentPath.match(/^\/modem\/\d+/)) {
+        // If on /modem/[id], navigate to the new modem page with the suggestion as the ID
+        setTimeout(() => {
+          setValue("");
+          router.push(`/modem/${suggestion}`);
+        }, 500);
+      }
+    } else if (suggestion.match(oltPattern)) {
+      if (
+        currentPath.startsWith("/preorders") ||
+        currentPath.startsWith("/map")
+      ) {
+        setTimeout(() => {
+          setValue("");
+          router.replace(`${currentPath}?search=${suggestion}`);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          setValue("");
+          router.push(`/map?search=${suggestion}`);
+        }, 500);
+      }
+    } else {
+      setTimeout(() => {
+        setValue("");
+        router.replace(`?${searchParams.toString()}`);
+      }, 500);
+    }
   };
-
+  
   useEffect(() => {
     let newSuggestions: string[] = [];
 
     const searchParams = new URLSearchParams(window.location.search);
     const searchValue = searchParams.get("search");
-    const oltPattern = /^[A-Z]\d{1}$/;
+
     if (oltPattern.test(value)) {
       newSuggestions = others
         .filter(
@@ -267,16 +300,32 @@ export function PlaceholdersAndVanishInput({
           animating && "text-transparent dark:text-transparent"
         )}
       />
-
       {showSuggestions && (
-        <ul className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 z-50 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul className="absolute z-20 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg mt-2 shadow-lg overflow-hidden">
           {suggestions.map((suggestion, index) => (
             <li
               key={index}
-              className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white text-black"
-              onClick={() => handleSuggestionClick(suggestion)}
+              className="flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
             >
-              {suggestion}
+              <span
+                onClick={() => handleSuggestionClick(suggestion)}
+                className="text-black dark:text-gray-200 font-medium cursor-pointer"
+              >
+                {suggestion}
+              </span>
+
+              {suggestion.startsWith("8411") && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent form submission
+                    e.stopPropagation(); // Prevent propagation of the click event
+                    router.push(`/modem/${suggestion}`); // Navigate directly to the modem page
+                  }}
+                  className="ml-4 px-3 py-1 bg-primary text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
+                >
+                  View Details
+                </button>
+              )}
             </li>
           ))}
         </ul>
