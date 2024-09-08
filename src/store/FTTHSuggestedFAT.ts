@@ -1,8 +1,8 @@
+import { SuggestedFAT } from "@/types/SuggestedFAT";
 import { create } from "zustand";
-import { FTTHOtherComponent } from "../types/FTTHOtherComponent";
 
-interface FTTHOtherComponentsState {
-  others: FTTHOtherComponent[];
+interface FTTHSuggestedFATState {
+  suggestedFAT: SuggestedFAT[];
   error: string | null;
   isLoading: boolean;
   fetchingInProgress: boolean;
@@ -11,9 +11,9 @@ interface FTTHOtherComponentsState {
   hasStarted: boolean;
 }
 
-export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
+export const useFTTHSuggestedFATStore = create<FTTHSuggestedFATState>(
   (set, get) => ({
-    others: [],
+    suggestedFAT: [],
     error: null,
     isLoading: false,
     fetchingInProgress: false,
@@ -23,14 +23,14 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
 
       set({ isLoading: true, error: null, hasStarted: true });
 
-      const fetchOthers = async () => {
+      const fetchSuggestedFAT = async () => {
         if (get().fetchingInProgress) return;
 
         set({ fetchingInProgress: true });
 
         try {
           const url = process.env.NEXT_PUBLIC_LNM_API_URL;
-          const response = await fetch(url + "/FTTHComponents/?id=OTHER", {
+          const response = await fetch(url + "/SuggestedFAT", {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -44,7 +44,7 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
 
           const textData = await response.text();
 
-          let data: FTTHOtherComponent[];
+          let data: SuggestedFAT[];
 
           try {
             data = JSON.parse(textData);
@@ -56,10 +56,10 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
           }
 
           if (Array.isArray(data)) {
-            set({ others: data, isLoading: false });
+            set({ suggestedFAT: data, isLoading: false });
           } else {
             throw new Error(
-              "Invalid data format: expected an array of OTHER components"
+              "Invalid data format: expected an array of SuggestedFAT"
             );
           }
         } catch (error: any) {
@@ -69,8 +69,8 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
         }
       };
 
-      fetchOthers();
-      const intervalId = setInterval(fetchOthers, 300000);
+      fetchSuggestedFAT();
+      const intervalId = setInterval(fetchSuggestedFAT, 600000);
       set({ stopFetching: () => clearInterval(intervalId) });
     },
     stopFetching: () => {

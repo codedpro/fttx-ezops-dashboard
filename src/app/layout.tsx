@@ -15,6 +15,7 @@ import { useInitializeFTTHFats } from "@/hooks/useInitializeFTTHFats";
 import { useInitializeFTTHOthers } from "@/hooks/useInitializeFTTHOthers";
 import { useInitializeFTTHPoints } from "@/hooks/useInitializeFTTHPoints";
 import { useInitializeFTTHPreorders } from "@/hooks/useInitializeFTTHPreorders";
+import { useInitializeFTTHSuggestedFAT } from "@/hooks/useInitializeFTTHSuggestedFAT";
 
 export default function RootLayout({
   children,
@@ -22,21 +23,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   let token = Cookies.get("AccessToken") ?? "a";
-  
-  // Hooks initialization
+
   useInitializeFTTHModems(token);
   useInitializeFTTHFats(token);
   useInitializeFTTHOthers(token);
   useInitializeFTTHPoints(token);
   useInitializeFTTHPreorders(token);
-  
+  useInitializeFTTHSuggestedFAT(token);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate a delay for the data fetching process
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 1000); // Adjust the delay as necessary
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -50,17 +50,14 @@ export default function RootLayout({
             enabled. Please enable it to continue.
           </strong>
         </noscript>
-        
+
         {loading ? (
           <div id="initial-loader">
             <Loader />
           </div>
         ) : (
-          <div id="app-content">
-            {children}
-          </div>
+          <div id="app-content">{children}</div>
         )}
-
       </body>
     </html>
   );

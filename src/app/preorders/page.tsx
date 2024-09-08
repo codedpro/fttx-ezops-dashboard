@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import FTTHMap from "@/components/Maps/PreOrders";
 import { useMFATLayer } from "@/components/Maps/Main/Layers/MFATLayer";
 import { useSFATLayer } from "@/components/Maps/Main/Layers/SFATLayer";
@@ -12,6 +12,7 @@ import StylePanel from "@/components/Maps/Main/Panels/StylePanel";
 import CityPanel from "@/components/Maps/Main/Panels/CityPanel";
 import LayerPanel from "@/components/Maps/Main/Panels/LayerPanel";
 import { useSearchParams } from "next/navigation";
+import EditPanel from "@/components/Maps/PreOrders/Panels/EditPanel";
 
 interface Layer {
   id: string;
@@ -20,10 +21,11 @@ interface Layer {
   label: string;
   icon: string;
   source: mapboxgl.GeoJSONSourceSpecification | null;
-  type: "point" | "line" | "heatmap";
+  type: "point" | "line" | "heatmap" | "fill";
 }
 import { useFTTHPreorderLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorder";
 import { useFTTHPreorderHMLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorderHeatMap";
+import { useFTTHSuggestedFATLayer } from "@/components/Maps/PreOrders/Layers/FTTHSuggestedFAT";
 
 const FTTHModemsMap: React.FC = () => {
   const preOrdersLayer = useFTTHPreorderLayer();
@@ -34,17 +36,38 @@ const FTTHModemsMap: React.FC = () => {
   const metroLineLayer = useMetroLineLayer();
   const odcLineLayer = useODCLineLayer();
   const dropCableLineLayer = useDropCableLineLayer();
-
+  const suggestedFATLayer = useFTTHSuggestedFATLayer();
   const [isMFATLayerVisible, setIsMFATLayerVisible] = useState(true);
   const [isSFATLayerVisible, setIsSFATLayerVisible] = useState(true);
   const [isFATLayerVisible, setIsFATLayerVisible] = useState(true);
   const [isMetroLayerVisible, setIsMetroLayerVisible] = useState(true);
   const [isODCLineLayerVisible, setIsODCLineLayerVisible] = useState(true);
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
-  const [isPreOrdersVisable, setIsPreOrdersVisable] = useState(false);
-  const [isPreOrdersHMVisable, setIsPreOrdersHMVisable] = useState(true);
+  const [isPreOrdersVisable, setIsPreOrdersVisable] = useState(true);
+  const [isPreOrdersHMVisable, setIsPreOrdersHMVisable] = useState(false);
+  const [isSuggestedFATVisable, setIsSuggestedFATVisable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/dark-v10");
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditingPosition, setIsEditingPosition] = useState(false);
+  const [currentCoordinates, setCurrentCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [isPathPanelOpen, setIsPathPanelOpen] = useState(false);
+  const [selectedPath, setSelectedPath] = useState<any>(null);
+
+  const handleCoordinatesChange = (
+    coordinates: { lat: number; lng: number } | null
+  ) => {
+    setCurrentCoordinates(coordinates);
+  };
+
+  const handlePathPanelChange = (isOpen: boolean, path: any) => {
+    setIsPathPanelOpen(isOpen);
+    setSelectedPath(path);
+  };
 
   const [zoomLocation, setZoomLocation] = useState<{
     lat: number;
@@ -99,6 +122,14 @@ const FTTHModemsMap: React.FC = () => {
       label: "SFAT",
       icon: "/images/map/SFAT.png",
       type: "point",
+    },
+    {
+      ...suggestedFATLayer,
+      visible: isSuggestedFATVisable,
+      toggle: setIsSuggestedFATVisable,
+      label: "Suggested FATs",
+      icon: "",
+      type: "fill",
     },
   ];
 
@@ -156,6 +187,77 @@ const FTTHModemsMap: React.FC = () => {
     }
   }, [areVisibleLayersLoaded]);
 
+  const [editData, setEditData] = useState<any>(null);
+  const handleEdit = (data: any) => {
+    setIsEditMode(true);
+    setEditData(data);
+  };
+
+  const ftthMapRef = useRef<{
+    handleEditPoint: (data: any) => void;
+    handleSubmitPointEdit: () => void;
+    handleCancelPointEdit: () => void;
+    handleSuggestFATLine: (data: any) => void;
+    handleSaveSuggestedPath: () => void;
+    handleCancelSuggestedPath: () => void;
+    handleCancelEditPath: () => void;
+  } | null>(null);
+
+  const handleEditPosition = () => {
+    if (ftthMapRef.current) {
+      setIsEditingPosition(true);
+      ftthMapRef.current.handleCancelEditPath();
+      ftthMapRef.current.handleEditPoint(editData);
+    }
+  };
+
+  const handleCustomFATLine = () => {
+    alert("Custom FAT Line functionality will be implemented.");
+  };
+
+  const handleSuggestFATSubmit = () => {
+    if (ftthMapRef.current) {
+      setIsEditingPosition(false);
+      ftthMapRef.current.handleSaveSuggestedPath();
+    }
+  };
+
+  const handleCancelSuggestFAT = () => {
+    if (ftthMapRef.current) {
+      setIsEditingPosition(false);
+      ftthMapRef.current.handleCancelSuggestedPath();
+    }
+  };
+
+  const handleSuggestFATLine = () => {
+    if (ftthMapRef.current) {
+      ftthMapRef.current.handleCancelEditPath();
+      ftthMapRef.current.handleSuggestFATLine(editData);
+    }
+  };
+  const handleExitEditMode = () => {
+    if (ftthMapRef.current) {
+      setIsEditMode(false);
+      setIsEditingPosition(false);
+      ftthMapRef.current.handleCancelEditPath();
+    }
+  };
+
+  const handleSubmitEdit = () => {
+    if (ftthMapRef.current) {
+      setIsEditingPosition(false);
+      ftthMapRef.current.handleSubmitPointEdit();
+    }
+  };
+
+  const handleCancelEdit = () => {
+    if (ftthMapRef.current) {
+      setIsEditingPosition(false);
+      ftthMapRef.current.handleCancelEditPath();
+      ftthMapRef.current.handleCancelPointEdit();
+    }
+  };
+
   return (
     <DefaultLayout>
       {loading ? (
@@ -165,29 +267,56 @@ const FTTHModemsMap: React.FC = () => {
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
           <CityPanel onCityClick={handleCityClick} />
-          <LayerPanel
-            title=""
-            layers={pointLayers}
-            isMinimized={isPointPanelMinimized}
-            toggleMinimized={() => setIsPointPanelMinimized((prev) => !prev)}
-            customPosition="top-left"
-          />
-          <LayerPanel
-            title=""
-            layers={lineLayers}
-            isMinimized={isLinePanelMinimized}
-            toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
-            customPosition="bottom-left"
-          />
-          <StylePanel
-            onStyleChange={handleStyleChange}
-            selectedStyle={mapStyle}
-          />
+          {!isEditMode && (
+            <>
+              <LayerPanel
+                title=""
+                layers={pointLayers}
+                isMinimized={isPointPanelMinimized}
+                toggleMinimized={() =>
+                  setIsPointPanelMinimized((prev) => !prev)
+                }
+                customPosition="top-left"
+              />
+              <LayerPanel
+                title=""
+                layers={lineLayers}
+                isMinimized={isLinePanelMinimized}
+                toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
+                customPosition="bottom-left"
+              />
+              <StylePanel
+                onStyleChange={handleStyleChange}
+                selectedStyle={mapStyle}
+              />
+            </>
+          )}
+          {isEditMode && (
+            <EditPanel
+              onEditPosition={handleEditPosition}
+              onSuggestFATLine={handleSuggestFATLine}
+              onCustomFATLine={handleCustomFATLine}
+              onExitEditMode={handleExitEditMode}
+              currentCoordinates={currentCoordinates}
+              handleSubmitEdit={handleSubmitEdit}
+              handleCancelEdit={handleCancelEdit}
+              isEditingPosition={isEditingPosition}
+              isPathPanelOpen={isPathPanelOpen}
+              handleSavePath={handleSuggestFATSubmit}
+              handleCancelPath={handleCancelSuggestFAT}
+              selectedPath={selectedPath}
+            />
+          )}
           <div className="z-20">
             <FTTHMap
+              ref={ftthMapRef}
               layers={pointLayers.concat(lineLayers)}
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
+              onEdit={handleEdit}
+              isEditMode={isEditMode}
+              onCoordinatesChange={handleCoordinatesChange}
+              onPathPanelChange={handlePathPanelChange}
             />
           </div>
         </div>

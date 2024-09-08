@@ -25,7 +25,6 @@ export const useFTTHPreorderHMLayer = () => {
               Province: preorder.Province,
               City: preorder.City,
               Created_Date: preorder.Created_Date,
-       
             },
           })
         ),
@@ -79,7 +78,15 @@ export const useFTTHPreorderHMLayer = () => {
         1,
         "rgb(178,24,43)",
       ],
-      "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 12, 15, 15, 20],
+      "heatmap-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10,  // Lower zoom levels
+        10,  // Larger radius at lower zoom
+        20,  // Higher zoom levels
+        50,  // Much larger radius at higher zoom
+      ],
       "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 0.7, 20, 0],
     },
   };

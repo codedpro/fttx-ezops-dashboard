@@ -377,31 +377,32 @@ export function PlaceholdersAndVanishInput({
               </span>
 
               {suggestion.startsWith("8411") &&
-                (!currentPath.match(/^\/modem\/\d+/) ? (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      router.push(`/modem/${suggestion}`);
-                    }}
-                    className="ml-4 px-3 py-1 bg-primary text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
-                  >
-                    View Details
-                  </button>
-                ) : (
+                !currentPath.match(/^\/modem\/\d+/) &&
+                !currentPath.startsWith("/map") && (
                   <>
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        router.push(`/map?search=${suggestion}`);
+                        router.push(`/modem/${suggestion}`);
                       }}
                       className="ml-4 px-3 py-1 bg-primary text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
                     >
-                      Show Map
+                      View Details
                     </button>
+
+                    {/*    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/map?search=${suggestion}`);
+                      }}
+                      className="ml-4 px-3 py-1 bg-red-500 text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
+                    >
+                      Map
+                    </button> */}
                   </>
-                ))}
+                )}
             </li>
           ))}
         </ul>

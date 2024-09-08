@@ -35,8 +35,8 @@ export const useEditFeature = (
     lng: number;
   } | null>(null);
 
-  const handleEdit = (clickedFeature: CustomFeature | null) => {
-    if (clickedFeature) {
+  const handleEditPoint = (clickedFeature: CustomFeature | null) => {
+    if (clickedFeature && clickedFeature.LayerID === "preorders") {
       const long = clickedFeature.Long;
       const lat = clickedFeature.Lat;
 
@@ -183,7 +183,7 @@ export const useEditFeature = (
   return {
     isEditMode,
     currentCoordinates,
-    handleEdit,
+    handleEditPoint,
     handleSubmitEdit,
     handleCancelEdit,
   };

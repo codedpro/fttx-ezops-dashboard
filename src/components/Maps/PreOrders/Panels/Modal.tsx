@@ -124,7 +124,7 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
         </button>
         <h2 className="text-2xl font-bold dark:text-white mb-4">Details</h2>
 
-        <div className="custom-scrollbar max-h-[50vh]  overflow-auto pr-3">
+        <div className="custom-scrollbar max-h-[50vh] overflow-auto pr-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {Object.keys(data)
               .filter(
@@ -167,12 +167,19 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
               ))}
           </div>
         </div>
-        <button
-          onClick={() => onEdit(data)}
-          className="mt-6 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600"
-        >
-          Edit
-        </button>
+
+        {/* Conditionally render the Edit button and make it bigger for "preorders" */}
+        {data.LayerID === "preorders" && (
+          <button
+            onClick={() => {
+              onEdit(data);
+              onClose();
+            }}
+            className="mt-6 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all transform scale-110"
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );

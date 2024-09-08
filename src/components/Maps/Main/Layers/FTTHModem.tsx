@@ -29,6 +29,7 @@ export const useFTTHModemLayer = () => {
               iconSize: 0.8,
               Long: modem.Long,
               Lat: modem.Lat,
+              LayerID: "modems",
             },
           })
         ),

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { gsap, Power3, Power2, Back } from "gsap";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 interface ModalProps {
   data: Record<string, any>;
@@ -12,6 +13,7 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
+  const router = useRouter(); // Initialize the router
 
   useEffect(() => {
     if (modalRef.current) {
@@ -104,6 +106,12 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
     setTimeout(() => setCopied(null), 1500);
   };
 
+  const handleShowDetails = () => {
+    if (data.Modem_ID) {
+      router.push(`/modem/${data.Modem_ID}`);
+    }
+  };
+
   return (
     <div
       id="modal-overlay"
@@ -121,9 +129,9 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
         >
           <FaTimes size={24} />
         </button>
-        <h2 className="text-2xl font-bold dark:text-white mb-4">Details</h2>
+        <h2 className="text-2xl font-bold dark:text-white mb-4">Quote</h2>
 
-        <div className="custom-scrollbar max-h-[50vh]  overflow-auto pr-3">
+        <div className="custom-scrollbar max-h-[50vh] overflow-auto pr-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {Object.keys(data)
               .filter(
@@ -164,8 +172,19 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
                   </p>
                 </div>
               ))}
+
           </div>
-        </div>
+        
+        </div>    {data.LayerID === "modems" && (
+              <div className="col-span-1 sm:col-span-2 mt-4">
+                <button
+                  onClick={handleShowDetails}
+                  className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 rounded-lg"
+                >
+                  Show Details
+                </button>
+              </div>
+            )}
       </div>
     </div>
   );
