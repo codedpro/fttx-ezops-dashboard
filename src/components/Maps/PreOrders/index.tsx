@@ -189,9 +189,13 @@ const PreOrdersMap: React.FC<FTTHMapProps> = ({
     if (mapRef.current && zoomLocation) {
       mapRef.current.flyTo({
         center: [zoomLocation.lng, zoomLocation.lat],
-        zoom: 16,
+        zoom: 20,
         essential: true,
       });
+  
+      const url = new URL(window.location.href);
+      url.search = '';
+      window.history.replaceState({}, '', url.toString());
     }
   }, [zoomLocation]);
 

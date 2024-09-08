@@ -12,7 +12,7 @@ export default function DefaultLayout({
   return (
     <>
       {/* <!-- ===== Page Wrapper Star ===== --> */}
-      <div className="flex h-screen overflow-hidden z-10    bg-grid-black/[0.01] dark:bg-grid-white/[0.01]">
+      <div className="flex h-screen overflow-hidden  bg-grid-black/[0.01] dark:bg-grid-white/[0.01]">
         {/* <!-- ===== Sidebar Star ===== --> */}
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         {/* <!-- ===== Sidebar End ===== --> */}

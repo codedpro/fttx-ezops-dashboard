@@ -26,7 +26,7 @@ export const useFTTHPreorderLayer = () => {
               City: preorder.City,
               Created_Date: preorder.Created_Date,
               icon: "ftthPreorderIcon",
-              iconSize: 1,
+              iconSize: 0.5,
               Long: preorder.Long,
               Lat: preorder.Lat,
               LayerID: "preorders",

@@ -29,6 +29,8 @@ export const useODCLayer = () => {
               Is_Plan: component.Is_Plan,
               icon: "ODCIcon",
               iconSize: 0.2,
+              Long: component.Long,
+              Lat: component.Lat,
             },
           })
         ),

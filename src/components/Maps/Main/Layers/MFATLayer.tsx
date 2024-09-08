@@ -32,6 +32,8 @@ export const useMFATLayer = () => {
               Type: fat.Type,
               icon: "MFATIcon",
               iconSize: 0.5,
+              Long: fat.Long,
+              Lat: fat.Lat,
             },
           })
         ),

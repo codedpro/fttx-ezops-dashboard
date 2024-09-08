@@ -25,6 +25,7 @@ export const useFTTHModemLayer = () => {
               FAT: modem.FAT,
               Symbol: modem.Symbol,
               Error: modem.Error,
+              coordinates: [modem.Long, modem.Lat],
             },
           })
         ),

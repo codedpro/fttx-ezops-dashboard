@@ -32,6 +32,8 @@ export const useSFATLayer = () => {
               Type: fat.Type,
               icon: "SFAT",
               iconSize: 0.5,
+              Long: fat.Long,
+              Lat: fat.Lat,
             },
           })
         ),

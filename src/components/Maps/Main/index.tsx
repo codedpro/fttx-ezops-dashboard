@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { Modal } from "./Panels/Modal-Info";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 
@@ -28,6 +29,8 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+
+  const [modalData, setModalData] = useState<any>(null);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -64,9 +67,13 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
     if (mapRef.current && zoomLocation) {
       mapRef.current.flyTo({
         center: [zoomLocation.lng, zoomLocation.lat],
-        zoom: 16,
+        zoom: 20,
         essential: true,
       });
+  
+      const url = new URL(window.location.href);
+      url.search = '';
+      window.history.replaceState({}, '', url.toString());
     }
   }, [zoomLocation]);
 
@@ -117,6 +124,12 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
                 "visibility",
                 visible ? "visible" : "none"
               );
+              mapRef.current?.on("click", id, (e) => {
+                const clickedFeatures = e.features;
+                if (clickedFeatures && clickedFeatures.length > 0) {
+                  setModalData(clickedFeatures[0].properties); // Set modal data based on clicked feature
+                }
+              });
             })
             .catch((error) => {
               console.error("Error loading icons:", error);
@@ -161,7 +174,14 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
     }
   }, [layers]);
 
-  return <div ref={mapContainerRef} className="w-full h-screen" />;
+  return (
+    <>
+      <div ref={mapContainerRef} className="w-full h-screen" />
+      {modalData && (
+        <Modal data={modalData} onClose={() => setModalData(null)} />
+      )}
+    </>
+  );
 };
 
 export default FTTHMap;

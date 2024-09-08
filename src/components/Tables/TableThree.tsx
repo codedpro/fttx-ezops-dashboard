@@ -6,7 +6,7 @@ interface TableThreeProps {
   }
   
   const TableThree: React.FC<TableThreeProps> = ({ data, columns, header, emoji }) => {
-    const filteredColumns = columns.filter((col) => col.key !== "ID");
+    const filteredColumns = columns.filter((col) => col.key !== "ID" && col.key !== "FTTH_ID" && col.key !== "User_ID");
   
     return (
       <div className="rounded-[10px] border border-stroke bg-white  p-4 shadow-1 dark:border-[#1F2B37] dark:bg-[#122031] dark:shadow-card sm:p-7.5  hover:shadow-lg">

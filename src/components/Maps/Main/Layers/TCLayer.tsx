@@ -8,7 +8,7 @@ export const useTCLayer = () => {
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    const tcData = others.filter(component => component.Type === "TC");
+    const tcData = others.filter((component) => component.Type === "TC");
 
     if (tcData.length > 0) {
       const geoJsonData: FeatureCollection<Geometry> = {
@@ -29,6 +29,8 @@ export const useTCLayer = () => {
               Is_Plan: component.Is_Plan,
               icon: "TCIcon",
               iconSize: 0.5,
+              Long: component.Long,
+              Lat: component.Lat,
             },
           })
         ),
@@ -45,7 +47,7 @@ export const useTCLayer = () => {
     id: "tc-layer",
     source,
     visible: true,
-    type: "point" as const, 
+    type: "point" as const,
     icons: { TCIcon: "/images/map/TC.png" },
   };
 };

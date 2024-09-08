@@ -29,6 +29,8 @@ export const useHHLayer = () => {
               Is_Plan: component.Is_Plan,
               icon: "handHoldIcon",
               iconSize: 0.5,
+              Long: component.Long,
+              Lat: component.Lat,
             },
           })
         ),

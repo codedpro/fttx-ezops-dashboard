@@ -29,6 +29,8 @@ export const useOLTLayer = () => {
               Is_Plan: component.Is_Plan,
               icon: "OLTIcon",
               iconSize: 0.05,
+              Long: component.Long,
+              Lat: component.Lat,
             },
           })
         ),

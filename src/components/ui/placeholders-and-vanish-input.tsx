@@ -57,6 +57,7 @@ export function PlaceholdersAndVanishInput({
     };
   }, [placeholders]);
   const oltPattern = /^[A-Z]\d{1}$/;
+  const oltPattern2 = /^[A-Z]\d{4}$/;
   const draw = useCallback(() => {
     if (!inputRef.current) return;
     const canvas = canvasRef.current;
@@ -179,46 +180,96 @@ export function PlaceholdersAndVanishInput({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    vanishAndSubmit();
 
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("search", value);
 
-    setTimeout(() => {
-      setValue("");
-      router.replace(`?${searchParams.toString()}`);
-    }, 500);
-    onSubmit && onSubmit(e);
-  };
+    // Conditional handling for search patterns
+    const isLatLng = value.match(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/);
+    const isMapOrPreorders =
+      currentPath.startsWith("/map") || currentPath.startsWith("/preorders");
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setValue(suggestion);
-    vanishAndSubmit();
-  
-    const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("search", suggestion);
-  
-    const currentPath = window.location.pathname;
-  
-    if (suggestion.startsWith("8411")) {
+    if (value.startsWith("8411")) {
       if (currentPath.startsWith("/map")) {
-        // If on /map, update search param
         setTimeout(() => {
           setValue("");
           router.replace(`/map?${searchParams.toString()}`);
         }, 500);
       } else if (currentPath.match(/^\/modem\/\d+/)) {
-        // If on /modem/[id], navigate to the new modem page with the suggestion as the ID
+        setTimeout(() => {
+          setValue("");
+          router.push(`/modem/${value}`);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          setValue("");
+          router.push(`/map?search=${value}`);
+        }, 500);
+      }
+    } else if (value.match(oltPattern2)) {
+      if (currentPath.startsWith("/map")) {
+        setTimeout(() => {
+          setValue("");
+          router.replace(`${currentPath}?search=${value}`);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          setValue("");
+          router.push(`/map?search=${value}`);
+        }, 500);
+      }
+    } else if (isLatLng) {
+      if (isMapOrPreorders) {
+        setTimeout(() => {
+          setValue("");
+          router.replace(`${currentPath}?search=${value}`);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          setValue("");
+          router.push(`/map?search=${value}`);
+        }, 500);
+      }
+    } else {
+      setTimeout(() => {
+        setValue("");
+        router.replace(`?${searchParams.toString()}`);
+      }, 500);
+    }
+    setValue("");
+    onSubmit && onSubmit(e);
+  };
+
+  const currentPath = window.location.pathname;
+  const handleSuggestionClick = (suggestion: string) => {
+    setValue(suggestion);
+    vanishAndSubmit();
+
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("search", suggestion);
+    const isLatLng = suggestion.match(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/);
+    const isMapOrPreorders =
+      currentPath.startsWith("/map") || currentPath.startsWith("/preorders");
+
+    if (suggestion.startsWith("8411")) {
+      if (currentPath.startsWith("/map")) {
+        setTimeout(() => {
+          setValue("");
+          router.replace(`/map?${searchParams.toString()}`);
+        }, 500);
+      } else if (currentPath.match(/^\/modem\/\d+/)) {
         setTimeout(() => {
           setValue("");
           router.push(`/modem/${suggestion}`);
         }, 500);
+      } else {
+        setTimeout(() => {
+          setValue("");
+          router.push(`/map?search=${suggestion}`);
+        }, 500);
       }
-    } else if (suggestion.match(oltPattern)) {
-      if (
-        currentPath.startsWith("/preorders") ||
-        currentPath.startsWith("/map")
-      ) {
+    } else if (suggestion.match(oltPattern2)) {
+      if (currentPath.startsWith("/map")) {
         setTimeout(() => {
           setValue("");
           router.replace(`${currentPath}?search=${suggestion}`);
@@ -229,6 +280,19 @@ export function PlaceholdersAndVanishInput({
           router.push(`/map?search=${suggestion}`);
         }, 500);
       }
+    } else if (isLatLng) {
+      if (isMapOrPreorders) {
+        setTimeout(() => {
+          setValue("");
+          router.replace(`${currentPath}?latlng=${suggestion}`);
+        }, 500);
+      } else {
+        // Navigate to /map and add search params
+        setTimeout(() => {
+          setValue("");
+          router.push(`/map?latlng=${suggestion}`);
+        }, 500);
+      }
     } else {
       setTimeout(() => {
         setValue("");
@@ -236,7 +300,7 @@ export function PlaceholdersAndVanishInput({
       }, 500);
     }
   };
-  
+
   useEffect(() => {
     let newSuggestions: string[] = [];
 
@@ -305,27 +369,39 @@ export function PlaceholdersAndVanishInput({
           {suggestions.map((suggestion, index) => (
             <li
               key={index}
+              onClick={() => handleSuggestionClick(suggestion)}
               className="flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300"
             >
-              <span
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="text-black dark:text-gray-200 font-medium cursor-pointer"
-              >
+              <span className="text-black dark:text-gray-200 font-medium cursor-pointer">
                 {suggestion}
               </span>
 
-              {suggestion.startsWith("8411") && (
-                <button
-                  onClick={(e) => {
-                    e.preventDefault(); // Prevent form submission
-                    e.stopPropagation(); // Prevent propagation of the click event
-                    router.push(`/modem/${suggestion}`); // Navigate directly to the modem page
-                  }}
-                  className="ml-4 px-3 py-1 bg-primary text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
-                >
-                  View Details
-                </button>
-              )}
+              {suggestion.startsWith("8411") &&
+                (!currentPath.match(/^\/modem\/\d+/) ? (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/modem/${suggestion}`);
+                    }}
+                    className="ml-4 px-3 py-1 bg-primary text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
+                  >
+                    View Details
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/map?search=${suggestion}`);
+                      }}
+                      className="ml-4 px-3 py-1 bg-primary text-white font-semibold text-sm rounded-full hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary-dark transition-all duration-300"
+                    >
+                      Show Map
+                    </button>
+                  </>
+                ))}
             </li>
           ))}
         </ul>

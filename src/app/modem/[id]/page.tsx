@@ -29,6 +29,13 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     return "text-gray-500  bg-gray-500";
   };
 
+  const getIconColor2 = (status: string) => {
+    if (status === "Online" || status === "Not Expired") return "bg-green-500";
+    if (status === "Offline" || !status) return " bg-red-500";
+    if (status === "Expired") return " bg-yellow-500";
+    return "  bg-gray-500";
+  };
+
   const onlineStatus = modemDetails?.IBSNG_Main[0].Online_Status || "Offline";
   const lastUpdate = modemDetails?.IBSNG_Main[0].DB_Last_Update || "Unknown";
 
@@ -99,9 +106,9 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
                 >
                   <p className="text-sm dark:text-gray-400 mb-1">{label}</p>
                   <p
-                    className={`font-semibold text-lg dark:text-[#E2E8F0] ${
+                    className={`font-semibold text-lg dark:text-[#E2E8F0]  ${
                       status
-                        ? `inline-block px-2 py-1 rounded text-sm ${getIconColor(value)}`
+                        ? `inline-block px-2 py-1 rounded text-sm ${getIconColor2(value)} text-black`
                         : ""
                     }`}
                   >
