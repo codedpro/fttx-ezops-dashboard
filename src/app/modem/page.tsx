@@ -14,7 +14,6 @@ export default function Modem() {
   const modemListRef = useRef(null);
   const router = useRouter();
 
-  // GSAP animation for modem cards
   useEffect(() => {
     gsap.fromTo(
       modemListRef.current,
@@ -23,7 +22,6 @@ export default function Modem() {
     );
   }, [visibleModems]);
 
-  // Filter modems based on search input
   const filteredModems = modems.filter(
     (modem) =>
       modem.Modem_ID.toString().includes(searchTerm) ||
@@ -31,12 +29,10 @@ export default function Modem() {
       modem.Error.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Load more modems
   const loadMoreModems = () => {
     setVisibleModems((prev) => prev + 30);
   };
 
-  // Navigate to modem details
   const handleModemClick = (modemID: number) => {
     router.push(`/modem/${modemID}`);
   };
@@ -44,7 +40,6 @@ export default function Modem() {
   return (
     <DefaultLayout>
       <div className="container mx-auto p-4 space-y-8">
-        {/* Search Bar */}
         <div className="mb-4">
           <Input
             type="text"
@@ -55,7 +50,6 @@ export default function Modem() {
           />
         </div>
 
-        {/* Modem List */}
         <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           ref={modemListRef}
@@ -79,7 +73,6 @@ export default function Modem() {
           ))}
         </div>
 
-        {/* Load More Button */}
         {visibleModems < filteredModems.length && (
           <div className="flex justify-center mt-4">
             <button
