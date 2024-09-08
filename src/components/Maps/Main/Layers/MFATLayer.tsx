@@ -31,7 +31,7 @@ export const useMFATLayer = () => {
               Chain_ID: fat.Chain_ID,
               Type: fat.Type,
               icon: "MFATIcon",
-              iconSize: 1,
+              iconSize: 0.5,
             },
           })
         ),

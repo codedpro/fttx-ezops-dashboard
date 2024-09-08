@@ -28,7 +28,7 @@ export const useTCLayer = () => {
               Type: component.Type,
               Is_Plan: component.Is_Plan,
               icon: "TCIcon",
-              iconSize: 1,
+              iconSize: 0.5,
             },
           })
         ),
