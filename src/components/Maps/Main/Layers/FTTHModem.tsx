@@ -26,7 +26,7 @@ export const useFTTHModemLayer = () => {
               Symbol: modem.Symbol,
               Error: modem.Error,
               icon: "ftthModemIcon",
-              iconSize: 0.5,
+              iconSize: 0.8,
               Long: modem.Long,
               Lat: modem.Lat,
             },

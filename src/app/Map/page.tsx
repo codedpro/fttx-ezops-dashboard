@@ -64,10 +64,11 @@ const FTTHModemsMap: React.FC = () => {
   const [zoomLocation, setZoomLocation] = useState<{
     lat: number;
     lng: number;
+    zoom: number;
   } | null>(null);
   const searchParams = useSearchParams();
 
-  const handleCityClick = (city: { lat: number; lng: number }) => {
+  const handleCityClick = (city: { lat: number; lng: number; zoom: number}) => {
     setZoomLocation(city);
   };
 
@@ -178,7 +179,7 @@ const FTTHModemsMap: React.FC = () => {
     if (search.includes(",")) {
       const [lat, lng] = search.split(",").map(Number);
       if (!isNaN(lat) && !isNaN(lng)) {
-        setZoomLocation({ lat, lng });
+        setZoomLocation({ lat, lng, zoom:20 });
       }
     }
 
@@ -187,7 +188,7 @@ const FTTHModemsMap: React.FC = () => {
         (modem) => modem.Modem_ID.toString() === search
       );
       if (modem) {
-        setZoomLocation({ lat: modem.Lat, lng: modem.Long });
+        setZoomLocation({ lat: modem.Lat, lng: modem.Long , zoom:20  });
       }
     }
 
@@ -198,7 +199,7 @@ const FTTHModemsMap: React.FC = () => {
       );
       if (oltData.length > 0) {
         const olt = oltData[0];
-        setZoomLocation({ lat: olt.Lat, lng: olt.Long });
+        setZoomLocation({ lat: olt.Lat, lng: olt.Long , zoom:20 });
       }
     }
   }, [searchParams]);

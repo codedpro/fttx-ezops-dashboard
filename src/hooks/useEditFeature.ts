@@ -154,7 +154,6 @@ export const useEditFeature = (
     mapRef.current?.removeLayer("editable-point");
     mapRef.current?.removeSource("editable-point");
 
-    // Remove draggable marker
     const markers = document.querySelectorAll(".mapboxgl-marker");
     markers.forEach((marker) => marker.remove());
 
@@ -166,7 +165,6 @@ export const useEditFeature = (
     mapRef.current?.removeLayer("editable-point");
     mapRef.current?.removeSource("editable-point");
 
-    // Show the original layer after canceling the edit
     if (editPointData) {
       const originalLayerId = String(editPointData.properties?.ID);
       mapRef.current?.setLayoutProperty(
@@ -176,7 +174,6 @@ export const useEditFeature = (
       );
     }
 
-    // Remove draggable marker
     const markers = document.querySelectorAll(".mapboxgl-marker");
     markers.forEach((marker) => marker.remove());
 

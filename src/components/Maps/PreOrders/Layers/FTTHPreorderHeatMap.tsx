@@ -59,7 +59,7 @@ export const useFTTHPreorderHMLayer = () => {
         ["zoom"],
         10,
         0.5,
-        15,
+        20,
         2,
       ],
       "heatmap-color": [

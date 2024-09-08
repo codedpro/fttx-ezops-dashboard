@@ -24,7 +24,7 @@ interface FTTHMapProps {
     };
   }>;
   mapStyle: string;
-  zoomLocation: { lat: number; lng: number } | null;
+  zoomLocation: { lat: number; lng: number; zoom: number } | null;
 }
 
 const PreOrdersMap: React.FC<FTTHMapProps> = ({
@@ -145,6 +145,7 @@ const PreOrdersMap: React.FC<FTTHMapProps> = ({
           style: mapStyle,
           center: [52.6771, 36.538],
           zoom: 13.5,
+          maxZoom: 20,
         });
 
         mapRef.current.on("load", () => {
@@ -189,13 +190,13 @@ const PreOrdersMap: React.FC<FTTHMapProps> = ({
     if (mapRef.current && zoomLocation) {
       mapRef.current.flyTo({
         center: [zoomLocation.lng, zoomLocation.lat],
-        zoom: 20,
+        zoom: zoomLocation.zoom,
         essential: true,
       });
-  
+
       const url = new URL(window.location.href);
-      url.search = '';
-      window.history.replaceState({}, '', url.toString());
+      url.search = "";
+      window.history.replaceState({}, "", url.toString());
     }
   }, [zoomLocation]);
 
@@ -235,7 +236,7 @@ const PreOrdersMap: React.FC<FTTHMapProps> = ({
         <Modal data={modalData} onClose={closeModal} onEdit={handleEdit} />
       )}
       {isEditMode && currentCoordinates && (
-        <div className="fixed top-50 right-50 bg-white p-4 rounded shadow-lg">
+        <div className="absolute top-1/2 right-1/2 bg-white p-4 rounded shadow-lg">
           <p>Editing Point...</p>
           <p>Latitude: {currentCoordinates.lat.toFixed(6)}</p>
           <p>Longitude: {currentCoordinates.lng.toFixed(6)}</p>

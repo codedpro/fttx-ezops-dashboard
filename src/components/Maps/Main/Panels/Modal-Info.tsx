@@ -128,7 +128,12 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
             {Object.keys(data)
               .filter(
                 (key) =>
-                  key !== "icon" && key !== "LayerID" && key !== "iconSize"
+                  key !== "icon" &&
+                  key !== "LayerID" &&
+                  key !== "iconSize" &&
+                  key !== "Component_ID" &&
+                  key !== "Chain_ID" &&
+                  key !== "FAT_ID"
               )
               .map((key, idx) => (
                 <div
@@ -139,7 +144,7 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
                   className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
                 >
                   <p className="text-md text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                {key}
+                    {key}
                   </p>
                   <p
                     className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${

@@ -2,16 +2,21 @@ import React, { useState } from "react";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 
 interface CityPanelProps {
-  onCityClick: (city: { lat: number; lng: number }) => void;
+  onCityClick: (city: { lat: number; lng: number; zoom: number }) => void;
 }
 
 const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
   const [isMinimized, setIsMinimized] = useState(false);
 
   const cities = [
-    { name: "Shiraz", lat: 29.5918, lng: 52.5836 },
-    { name: "Babol", lat: 36.538, lng: 52.6771 },
-    { name: "Tehran", lat: 35.6892, lng: 51.389 },
+    { name: "Sadra", lat: 29.7998890028609, lng: 52.5047688858196, zoom: 14 },
+    { name: "Babol", lat: 36.538, lng: 52.6771, zoom: 13 },
+    {
+      name: "Tehran",
+      lat: 35.7579336107014,
+      lng: 51.4701567993049,
+      zoom: 16.5,
+    },
   ];
 
   const toggleMinimized = () => {
@@ -24,7 +29,9 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
         isMinimized ? "w-10 h-10 p-0 flex items-center justify-center" : "w-24"
       }`}
     >
-      <div className={`flex justify-between items-center ${isMinimized ? "hidden" : ""}`}>
+      <div
+        className={`flex justify-between items-center ${isMinimized ? "hidden" : ""}`}
+      >
         <h3 className="font-bold mb-2">Cities</h3>
         <button
           onClick={toggleMinimized}
@@ -43,7 +50,9 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
           {cities.map((city) => (
             <li
               key={city.name}
-              onClick={() => onCityClick({ lat: city.lat, lng: city.lng })}
+              onClick={() =>
+                onCityClick({ lat: city.lat, lng: city.lng, zoom: city.zoom })
+              }
               className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition duration-300"
             >
               <span className="text-xs font-medium">{city.name}</span>
@@ -53,7 +62,10 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
       )}
 
       {isMinimized && (
-        <button onClick={toggleMinimized} className="flex items-center justify-center">
+        <button
+          onClick={toggleMinimized}
+          className="flex items-center justify-center"
+        >
           <IoMdArrowDropdown size={20} />
         </button>
       )}
