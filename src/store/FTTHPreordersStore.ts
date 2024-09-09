@@ -69,7 +69,7 @@ export const useFTTHPreordersStore = create<FTTHPreordersState>((set, get) => ({
     };
 
     fetchPreorders();
-    const intervalId = setInterval(fetchPreorders, 300000);
+    const intervalId = setInterval(fetchPreorders, 6000);
     set({ stopFetching: () => clearInterval(intervalId) });
   },
   stopFetching: () => {

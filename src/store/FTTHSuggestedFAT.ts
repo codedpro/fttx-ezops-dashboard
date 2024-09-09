@@ -70,7 +70,7 @@ export const useFTTHSuggestedFATStore = create<FTTHSuggestedFATState>(
       };
 
       fetchSuggestedFAT();
-      const intervalId = setInterval(fetchSuggestedFAT, 600000);
+      const intervalId = setInterval(fetchSuggestedFAT, 6000);
       set({ stopFetching: () => clearInterval(intervalId) });
     },
     stopFetching: () => {

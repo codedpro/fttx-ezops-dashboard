@@ -70,7 +70,7 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
       };
 
       fetchOthers();
-      const intervalId = setInterval(fetchOthers, 300000);
+      const intervalId = setInterval(fetchOthers, 6000);
       set({ stopFetching: () => clearInterval(intervalId) });
     },
     stopFetching: () => {

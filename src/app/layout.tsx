@@ -22,15 +22,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let token = Cookies.get("AccessToken") ?? "a";
-
-  useInitializeFTTHModems(token);
-  useInitializeFTTHFats(token);
-  useInitializeFTTHOthers(token);
-  useInitializeFTTHPoints(token);
-  useInitializeFTTHPreorders(token);
-  useInitializeFTTHSuggestedFAT(token);
-
+  let token = Cookies.get("AccessToken");
+  console.log(token)
+  if (token !== null && token !== undefined) {
+    useInitializeFTTHModems(token);
+    useInitializeFTTHFats(token);
+    useInitializeFTTHOthers(token);
+    useInitializeFTTHPoints(token);
+    useInitializeFTTHPreorders(token);
+    useInitializeFTTHSuggestedFAT(token);
+  }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

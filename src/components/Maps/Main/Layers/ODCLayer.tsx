@@ -15,7 +15,7 @@ export const useODCLayer = () => {
         type: "FeatureCollection",
         features: odcData.map(
           (component): Feature => ({
-            type: "Feature",
+            type: "Feature", 
             geometry: {
               type: "Point",
               coordinates: [component.Long, component.Lat],

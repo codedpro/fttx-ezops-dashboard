@@ -67,7 +67,7 @@ export const useFTTHPointsStore = create<FTTHPointsState>((set, get) => ({
     };
 
     fetchPoints();
-    const intervalId = setInterval(fetchPoints, 30000);
+    const intervalId = setInterval(fetchPoints, 6000);
     set({ stopFetching: () => clearInterval(intervalId) });
   },
   stopFetching: () => {

@@ -67,24 +67,38 @@ const PreOrdersMap = forwardRef<
       if (!mapRef.current) return;
 
       layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
-        if (source && mapRef.current && !mapRef.current.getSource(id)) {
+        const layerExists = mapRef.current?.getLayer(id);
+
+        // If layer exists, ensure it's updated and visible accordingly
+        if (layerExists) {
+          mapRef.current?.setLayoutProperty(
+            id,
+            "visibility",
+            visible ? "visible" : "none"
+          );
+          return;
+        }
+
+        if (source && !layerExists) {
           const geoJsonSource = {
             ...source,
             type: "geojson" as const,
           };
 
-          mapRef.current.addSource(id, geoJsonSource);
+          if (mapRef.current && !mapRef.current.getSource(id)) {
+            mapRef.current.addSource(id, geoJsonSource);
+          }
 
-          if (type === "fill") {
+          if (type === "fill" && mapRef.current) {
             mapRef.current.addLayer({
-              id: id,
+              id,
               type: "fill",
               source: id,
               paint: paint,
             });
-          } else if (type === "heatmap") {
+          } else if (type === "heatmap" && mapRef.current) {
             mapRef.current.addLayer({
-              id: id,
+              id,
               type: "heatmap",
               source: id,
               paint: paint,
@@ -124,9 +138,9 @@ const PreOrdersMap = forwardRef<
               .catch((error) => {
                 console.error("Error loading icons:", error);
               });
-          } else if (type === "line") {
+          } else if (type === "line" && mapRef.current) {
             mapRef.current.addLayer({
-              id: id,
+              id,
               type: "line",
               source: id,
               paint: {
@@ -137,7 +151,8 @@ const PreOrdersMap = forwardRef<
             });
           }
 
-          mapRef.current.setLayoutProperty(
+          // Set visibility after adding the layer
+          mapRef.current?.setLayoutProperty(
             id,
             "visibility",
             visible ? "visible" : "none"
@@ -206,6 +221,10 @@ const PreOrdersMap = forwardRef<
           zoom: zoomLocation.zoom,
           essential: true,
         });
+
+        const url = new URL(window.location.href);
+        url.search = "";
+        window.history.replaceState({}, "", url.toString());
       }
     }, [zoomLocation]);
 
@@ -220,14 +239,14 @@ const PreOrdersMap = forwardRef<
               source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
             );
           }
-          if (layerExists) {
+          if (!layerExists) {
+            addLayersToMap();
+          } else {
             mapRef.current?.setLayoutProperty(
               id,
               "visibility",
               visible ? "visible" : "none"
             );
-          } else {
-            addLayersToMap();
           }
         });
       }
@@ -259,7 +278,6 @@ const PreOrdersMap = forwardRef<
         onCoordinatesChange(currentCoordinates);
       }
     }, [currentCoordinates, onCoordinatesChange]);
-
     useEffect(() => {
       if (onPathPanelChange) {
         onPathPanelChange(isPathPanelOpen, selectedPath);
@@ -293,7 +311,6 @@ const PreOrdersMap = forwardRef<
         removeSuggestedPaths();
       },
     }));
-
     return (
       <div className="w-full h-screen relative">
         <div ref={mapContainerRef} className="w-full h-screen" />

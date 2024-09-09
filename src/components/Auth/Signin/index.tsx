@@ -120,7 +120,8 @@ export default function Signin() {
         Cookies.set("Email", data.Email, { expires: 1 });
         Cookies.set("Role", JSON.stringify(data.Role), { expires: 1 });
         Cookies.set("UserName", data.Username, { expires: 1 });
-        router.push("/");
+        window.location.href = "/";
+        
       } else {
         console.error("Failed to login:", data.message);
       }
