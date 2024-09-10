@@ -34,34 +34,38 @@ const EditPanel: React.FC<EditPanelProps> = ({
     console.log(selectedPath);
   }, [selectedPath]);
   return (
-    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-wrap justify-center items-center space-x-2 sm:space-x-4">
+    <div className="absolute text-xs bottom-4 w-full left-1/2 transform -translate-x-1/2 z-50 flex flex-wrap justify-center items-center space-x-2 sm:space-x-4">
       <button
         onClick={onEditPosition}
-        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105"
+        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
       >
-        <FaEdit size={24} className="text-primary" />
+        <FaEdit size={16} className="text-primary" />
+        <span className="text-primary">Edit Position</span>
       </button>
       <button
         onClick={onSuggestFATLine}
-        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105"
+        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
       >
-        <FaRoad size={24} className="text-primary" />
+        <FaRoad size={16} className="text-primary" />
+        <span className="text-primary">Suggest FAT Line</span>
       </button>
       <button
         onClick={onCustomFATLine}
-        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105"
+        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
       >
-        <FaDrawPolygon size={24} className="text-primary" />
+        <FaDrawPolygon size={16} className="text-primary" />
+        <span className="text-primary">Custom FAT Line</span>
       </button>
       <button
         onClick={onExitEditMode}
-        className="bg-red-500 p-4 rounded-full shadow-lg text-white transition-transform hover:scale-105"
+        className="bg-red-500 p-4 rounded-full shadow-lg text-white transition-transform hover:scale-105 flex items-center space-x-2"
       >
-        <FaTimes size={24} />
+        <FaTimes size={16} />
+        <span>Exit</span>
       </button>
 
       {isEditingPosition && currentCoordinates && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all w-full max-w-sm sm:max-w-md lg:max-w-lg">
+        <div className="absolute bottom-4 right-4 transform translate-x-0 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all max-w-sm sm:max-w-md lg:max-w-lg">
           <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
             Editing Point
           </h3>
@@ -89,7 +93,7 @@ const EditPanel: React.FC<EditPanelProps> = ({
       )}
 
       {isPathPanelOpen && selectedPath && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all w-full max-w-sm sm:max-w-md lg:max-w-lg">
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all max-w-sm sm:max-w-md lg:max-w-lg">
           <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
             Selected Path
           </h3>

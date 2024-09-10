@@ -217,7 +217,7 @@ const FTTHModemsMap: React.FC = () => {
     if (ftthMapRef.current) {
       setIsEditingPosition(true);
       ftthMapRef.current.handleCancelEditPath();
-      setZoomLocation({lat: editData.Lat, lng: editData.Long, zoom: 20});
+      setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleEditPoint(editData);
     }
   };
@@ -243,7 +243,7 @@ const FTTHModemsMap: React.FC = () => {
   const handleSuggestFATLine = () => {
     if (ftthMapRef.current) {
       ftthMapRef.current.handleCancelEditPath();
-      setZoomLocation({lat: editData.Lat, lng: editData.Long, zoom: 20});
+      setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleSuggestFATLine(editData);
     }
   };
@@ -301,9 +301,7 @@ const FTTHModemsMap: React.FC = () => {
                 onStyleChange={handleStyleChange}
                 selectedStyle={mapStyle}
               />
-              {!isSuggestedFATVisable ? null : (
-                <LegendPanel /> // Only show the legend when the Suggested FAT Areas are visible
-              )}
+              {!isSuggestedFATVisable ? null : <LegendPanel />}
             </>
           )}
           {isEditMode && (

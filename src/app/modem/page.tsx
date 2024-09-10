@@ -26,7 +26,7 @@ export default function Modem() {
     (modem) =>
       modem.Modem_ID.toString().includes(searchTerm) ||
       modem.OLT.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      modem.Error.toLowerCase().includes(searchTerm.toLowerCase())
+      modem.Online_Status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const loadMoreModems = () => {
@@ -66,8 +66,13 @@ export default function Modem() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 OLT: {modem.OLT}
               </p>
-              <p className="text-sm text-red-500 dark:text-red-400">
-                Error: {modem.Error || "None"}
+              <p className={`text-sm text-gray-700 dark:text-gray-300 `}>
+                Status:
+                <span 
+                  className={`ml-1 ${modem.Online_Status == "Online" ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}
+                >
+                  {modem.Online_Status || "Offline"}
+                </span>
               </p>
             </div>
           ))}

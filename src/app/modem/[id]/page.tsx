@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import TableThree from "@/components/Tables/TableThree";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { FaWifi } from "react-icons/fa";
+import { FaMap, FaMapMarkerAlt, FaWifi } from "react-icons/fa";
 import { fetchModemDetails } from "@/lib/actions";
 import {
   ballancesColumns,
@@ -9,6 +9,7 @@ import {
   internetOnlinesColumns,
 } from "@/data/modemColumns";
 import RefreshButton from "@/components/Buttons/RefreshButton";
+import Link from "next/link";
 
 const ModemPage = async ({ params }: { params: { id: string } }) => {
   const cookieStore = cookies();
@@ -21,14 +22,23 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
   const modemId = params.id;
   const modemDetails = await fetchModemDetails(modemId, token);
 
-  if (!modemDetails || !modemDetails.IBSNG_Main || modemDetails.IBSNG_Main.length === 0) {
+  if (
+    !modemDetails ||
+    !modemDetails.IBSNG_Main ||
+    modemDetails.IBSNG_Main.length === 0
+  ) {
     return (
       <DefaultLayout>
         <div className="container mx-auto p-4 space-y-8">
           <div className="text-center p-6 bg-red-100 text-red-700 rounded-lg shadow-lg">
             <h1 className="text-3xl font-bold mb-4">Modem Not Found</h1>
-            <p className="text-lg">Sorry, we couldn't find any data for the modem with ID: <span className="font-semibold">{modemId}</span>.</p>
-            <p className="mt-4">Please check the modem ID or try again later.</p>
+            <p className="text-lg">
+              Sorry, we couldn't find any data for the modem with ID:{" "}
+              <span className="font-semibold">{modemId}</span>.
+            </p>
+            <p className="mt-4">
+              Please check the modem ID or try again later.
+            </p>
           </div>
         </div>
       </DefaultLayout>
@@ -64,6 +74,9 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
               <span className="font-semibold">{onlineStatus}</span>
             </p>
+            <Link href={`/map?search=${modemId}`}>
+              <FaMap className="text-2xl text-gray-700 dark:text-gray-300 cursor-pointer" />
+            </Link>
           </div>
           <div className="flex items-center space-x-4">
             <p className="text-sm text-gray-500 dark:text-gray-300">
