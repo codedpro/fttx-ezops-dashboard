@@ -21,6 +21,20 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
   const modemId = params.id;
   const modemDetails = await fetchModemDetails(modemId, token);
 
+  if (!modemDetails || !modemDetails.IBSNG_Main || modemDetails.IBSNG_Main.length === 0) {
+    return (
+      <DefaultLayout>
+        <div className="container mx-auto p-4 space-y-8">
+          <div className="text-center p-6 bg-red-100 text-red-700 rounded-lg shadow-lg">
+            <h1 className="text-3xl font-bold mb-4">Modem Not Found</h1>
+            <p className="text-lg">Sorry, we couldn't find any data for the modem with ID: <span className="font-semibold">{modemId}</span>.</p>
+            <p className="mt-4">Please check the modem ID or try again later.</p>
+          </div>
+        </div>
+      </DefaultLayout>
+    );
+  }
+
   const getIconColor = (status: string) => {
     if (status === "Online" || status === "Not Expired")
       return "text-green-500 bg-green-500";

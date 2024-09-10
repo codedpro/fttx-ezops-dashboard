@@ -230,27 +230,34 @@ const PreOrdersMap = forwardRef<
             }, 50);
           });
 
-          mapRef.current.on("mouseenter", "suggestedFATS", (e) => {
+          mapRef.current.on("mouseenter", "suggestedFATSGrayFill", (e) => {
             mapRef.current!.getCanvas().style.cursor = "pointer";
+
             if (e.features && e.features.length > 0) {
               const feature = e.features[0];
               const coordinates = e.lngLat;
-    
-              // Show popup with the count on hover
-              new mapboxgl.Popup()
+
+              new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+              })
                 .setLngLat(coordinates)
-                .setHTML(`<strong>Count: </strong> ${feature.properties?.Count}`)
+                .setHTML(
+                  `<strong>Count: </strong> ${feature.properties?.Count}`
+                )
                 .addTo(mapRef.current!);
             }
           });
-    
-          mapRef.current.on("mouseleave", "suggestedFATS", () => {
+
+          mapRef.current.on("mouseleave", "suggestedFATSGrayFill", () => {
             mapRef.current!.getCanvas().style.cursor = "";
+
             const popups = document.getElementsByClassName("mapboxgl-popup");
             if (popups.length > 0) {
-              popups[0].remove();
+              Array.from(popups).forEach((popup) => popup.remove());
             }
           });
+
           mapRef.current.on("click", (e) => {
             if (!isEditModeRef.current) {
               const features = mapRef.current?.queryRenderedFeatures(e.point);
@@ -331,13 +338,13 @@ const PreOrdersMap = forwardRef<
         if (mapRef.current?.getLayer(id)) {
           mapRef.current.on("mouseenter", id, () => {
             if (mapRef.current) {
-              mapRef.current.getCanvas().style.cursor = "pointer"; 
+              mapRef.current.getCanvas().style.cursor = "pointer";
             }
           });
 
           mapRef.current.on("mouseleave", id, () => {
             if (mapRef.current) {
-              mapRef.current.getCanvas().style.cursor = ""; 
+              mapRef.current.getCanvas().style.cursor = "";
             }
           });
         }

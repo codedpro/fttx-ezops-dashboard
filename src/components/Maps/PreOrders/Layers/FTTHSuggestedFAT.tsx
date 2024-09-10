@@ -14,12 +14,11 @@ export const useFTTHSuggestedFATLayer = () => {
   const suggestedFATS = useFTTHSuggestedFATStore((state) => state.suggestedFAT);
   const [fillSource, setFillSource] =
     useState<GeoJSONSourceSpecification | null>(null);
-  const [pointSource, setPointSource] =
-    useState<GeoJSONSourceSpecification | null>(null); // Point source for the center points
+  const [smallFillSource, setSmallFillSource] =
+    useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
     if (suggestedFATS.length > 0) {
-      // Fill layer geojson data
       const fillGeoJsonData: FeatureCollection<Geometry> = {
         type: "FeatureCollection",
         features: suggestedFATS.map(
@@ -58,22 +57,31 @@ export const useFTTHSuggestedFATLayer = () => {
         ),
       };
 
-      // Point layer geojson data (for center points)
-      const pointGeoJsonData: FeatureCollection<Geometry> = {
+      const smallFillGeoJsonData: FeatureCollection<Geometry> = {
         type: "FeatureCollection",
-        features: suggestedFATS.map((suggestedFAT): Feature<Geometry> => {
+        features: suggestedFATS.map((suggestedFAT): Feature<Polygon> => {
+          const point = turf.point([suggestedFAT.Long, suggestedFAT.Lat]);
+          const smallBuffer = turf.buffer(point, 0.01, { units: "kilometers" }); // 10 meters buffer
+
+          if (smallBuffer && smallBuffer.geometry.type === "Polygon") {
+            return {
+              type: "Feature",
+              geometry: smallBuffer.geometry,
+              properties: {
+                SuggestedFAT_ID: suggestedFAT.ID,
+                Count: suggestedFAT.Count,
+                LayerID: "smallSuggestedFATS",
+              },
+            };
+          }
+
           return {
             type: "Feature",
             geometry: {
-              type: "Point",
-              coordinates: [suggestedFAT.Long, suggestedFAT.Lat], // Center point coordinates
+              type: "Polygon",
+              coordinates: [],
             },
-            properties: {
-              SuggestedFAT_ID: suggestedFAT.ID,
-              Count: suggestedFAT.Count,
-              icon: "marker-15",
-              iconSize: 1.5,
-            },
+            properties: {},
           };
         }),
       };
@@ -83,9 +91,9 @@ export const useFTTHSuggestedFATLayer = () => {
         data: fillGeoJsonData,
       });
 
-      setPointSource({
+      setSmallFillSource({
         type: "geojson",
-        data: pointGeoJsonData,
+        data: smallFillGeoJsonData,
       });
     }
   }, [suggestedFATS]);
@@ -112,15 +120,15 @@ export const useFTTHSuggestedFATLayer = () => {
         "fill-outline-color": "black",
       },
     },
-    pointLayer: {
-      id: "suggestedFATSPoints",
-      source: pointSource,
+    smallFillLayer: {
+      id: "suggestedFATSGrayFill",
+      source: smallFillSource,
       visible: true,
-      type: "symbol",
-      layout: {
-        "icon-image": ["get", "icon"], // Use the marker icon from Mapbox
-        "icon-size": ["get", "iconSize"],
-        "icon-allow-overlap": true,
+      type: "fill",
+      paint: {
+        "fill-color": "black",
+        "fill-opacity": 1,
+        "fill-outline-color": "black",
       },
     },
   };

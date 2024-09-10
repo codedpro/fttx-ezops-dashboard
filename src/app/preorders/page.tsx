@@ -132,12 +132,12 @@ const FTTHModemsMap: React.FC = () => {
       type: "fill",
     },
     {
-      ...suggestedFATLayer.pointLayer,
+      ...suggestedFATLayer.smallFillLayer,
       visible: isSuggestedFATVisable,
       toggle: setIsSuggestedFATVisable,
       label: "",
       icon: "",
-      type: "point",
+      type: "fill",
     },
   ];
 
