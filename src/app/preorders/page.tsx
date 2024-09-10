@@ -242,6 +242,7 @@ const FTTHModemsMap: React.FC = () => {
   const handleSuggestFATLine = () => {
     if (ftthMapRef.current) {
       ftthMapRef.current.handleCancelEditPath();
+      setZoomLocation({lat: editData.Lat, lng: editData.Long, zoom: 20});
       ftthMapRef.current.handleSuggestFATLine(editData);
     }
   };
