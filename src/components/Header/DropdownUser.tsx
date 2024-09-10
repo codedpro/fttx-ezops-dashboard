@@ -3,32 +3,14 @@ import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { useRouter } from "next/navigation";
+import { UserService } from "@/services/userService";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  /**  const [user, setUser] = useState<User>({
-    name: null,
-    family_name: null,
-    email: null,
-    phone_number: null,
-    student_number: null,
-    profile: null,
-  });
-  
-   const userService = new UserService();*/
+  const userservice = new UserService();
   const router = useRouter();
-  /** useEffect(() => {
-    setUser({
-      name: userService.getName() ?? "",
-      family_name: userService.getFamilyName() ?? "",
-      email: userService.getEmail() ?? "",
-      phone_number: userService.getPhoneNumber() ?? "",
-      student_number: userService.getStudentNumber() ?? "",
-      profile: userService.getProfile() ?? "",
-    });
-  }, []); */
+
   const handleLogout = () => {
-    //  userService.logout();
     router.push("/login");
   };
   return (
@@ -43,8 +25,7 @@ const DropdownUser = () => {
             <Image
               width={112}
               height={112}
-              //   src={user?.profile ? user.profile : "/images/user/user-02.png"}
-              src={"/images/user/user-03.png"}
+              src={userservice.getProfile() ?? "/images/user/user-03.png"}
               style={{
                 width: "auto",
                 height: "auto",
@@ -56,7 +37,9 @@ const DropdownUser = () => {
         }
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-gray-300">
-          <span className="hidden lg:block">Amir Hossein Nouri</span>
+          <span className="hidden lg:block">
+            {userservice.getName() ?? userservice.getUserName()}
+          </span>
 
           <svg
             className={`fill-current duration-200 ease-in ${dropdownOpen && "rotate-180"}`}
@@ -102,10 +85,10 @@ const DropdownUser = () => {
             }
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">
-                Amir Hossein Nouri
+                {userservice.getName() ?? userservice.getUserName()}
               </span>
               <span className="block font-medium text-dark-5 dark:text-gray-200">
-                dev.codedpro@gmail.com
+                {userservice.getEmail()}
               </span>
             </span>
           </div>
@@ -142,7 +125,7 @@ const DropdownUser = () => {
 
             <li>
               <Link
-                href="/profile/settings"
+                href="/"
                 className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-white lg:text-base"
               >
                 <svg

@@ -2,22 +2,26 @@ import { NearybyFATs } from "@/types/NearbyFATs";
 import { useState, useCallback } from "react";
 import { LineString } from "geojson";
 
-// Helper to calculate the distance between two lat/lng points using Haversine formula
-const calculateDistance = (coord1: [number, number], coord2: [number, number]) => {
-  const R = 6371e3; // Radius of the Earth in meters
-  const lat1 = coord1[1] * (Math.PI / 180); // Convert degrees to radians
+const calculateDistance = (
+  coord1: [number, number],
+  coord2: [number, number]
+) => {
+  const R = 6371e3;
+  const lat1 = coord1[1] * (Math.PI / 180);
   const lat2 = coord2[1] * (Math.PI / 180);
   const deltaLat = (coord2[1] - coord1[1]) * (Math.PI / 180);
   const deltaLong = (coord2[0] - coord1[0]) * (Math.PI / 180);
 
   const a =
     Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) *
-    Math.sin(deltaLong / 2) * Math.sin(deltaLong / 2);
-  
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(deltaLong / 2) *
+      Math.sin(deltaLong / 2);
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  const distance = R * c; // Distance in meters
+  const distance = R * c;
   return distance;
 };
 
@@ -96,26 +100,23 @@ export const useSuggestFATLine = (
         const color = generateUniqueColor();
         const pathId = generateUniqueId();
 
-        // Get the last point from the Mapbox route
-        const lastPoint = path.geometry.coordinates[path.geometry.coordinates.length - 1] as [number, number]; // Type assertion
+        const lastPoint = path.geometry.coordinates[
+          path.geometry.coordinates.length - 1
+        ] as [number, number];
 
-        // FAT position
-        const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat]; // Explicitly typing as [number, number]
+        const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat];
 
-        // Calculate the distance from the last point to the FAT manually
         const manualDistance = calculateDistance(lastPoint, fatPosition);
 
-        // Add the manual segment from the last point to the FAT's exact location
         const extendedPath: LineString = {
-          type: "LineString", // Ensuring the type is explicitly set to 'LineString'
+          type: "LineString",
           coordinates: [
-            [featureProperties.Long, featureProperties.Lat], // Add starting point manually
+            [featureProperties.Long, featureProperties.Lat],
             ...path.geometry.coordinates,
-            fatPosition, // Add FAT position manually at the end
+            fatPosition,
           ],
         };
 
-        // Calculate the real distance (Mapbox distance + manual distance)
         const realDistance = path.distance + manualDistance;
 
         paths.push({
@@ -124,10 +125,10 @@ export const useSuggestFATLine = (
           path: extendedPath,
           FAT_ID: fat.FAT_ID,
           FAT_Name: fat.Name,
-          originalDistance: path.distance, // Original Mapbox distance
-          manualDistance, // Distance from last point to FAT
-          realDistance, // Combined distance
-          duration: path.duration, // Original Mapbox duration
+          originalDistance: path.distance,
+          manualDistance,
+          realDistance,
+          duration: path.duration,
         });
 
         if (mapRef.current) {
@@ -135,7 +136,7 @@ export const useSuggestFATLine = (
             type: "geojson",
             data: {
               type: "Feature",
-              geometry: extendedPath, // Use the modified path with the manual extension
+              geometry: extendedPath,
               properties: {},
             },
           });
@@ -150,14 +151,13 @@ export const useSuggestFATLine = (
             },
           });
 
-          // Pass the path information (with FAT details) to the selectedPath
           mapRef.current.on("click", pathId, () => {
             setSelectedPath({
               id: pathId,
               color: color,
               FAT_ID: fat.FAT_ID,
               FAT_Name: fat.Name,
-              path: extendedPath, // Include the path in the selected data
+              path: extendedPath,
               originalDistance: path.distance,
               manualDistance,
               realDistance,

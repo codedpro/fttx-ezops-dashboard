@@ -43,8 +43,8 @@ const FTTHModemsMap: React.FC = () => {
   const [isMetroLayerVisible, setIsMetroLayerVisible] = useState(true);
   const [isODCLineLayerVisible, setIsODCLineLayerVisible] = useState(true);
   const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
-  const [isPreOrdersVisable, setIsPreOrdersVisable] = useState(true);
-  const [isPreOrdersHMVisable, setIsPreOrdersHMVisable] = useState(false);
+  const [isPreOrdersVisable, setIsPreOrdersVisable] = useState(false);
+  const [isPreOrdersHMVisable, setIsPreOrdersHMVisable] = useState(true);
   const [isSuggestedFATVisable, setIsSuggestedFATVisable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/dark-v10");

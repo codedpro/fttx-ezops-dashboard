@@ -11,9 +11,16 @@ export async function middleware(request: NextRequest) {
 
   const tokenCookie = request.cookies.get("AccessToken");
   const token = tokenCookie?.value;
-
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const response = NextResponse.redirect(new URL("/login", request.url));
+
+    response.cookies.delete("AccessToken");
+    response.cookies.delete("Email");
+    response.cookies.delete("Name");
+    response.cookies.delete("Role");
+    response.cookies.delete("UserName");
+
+    return response;
   }
 
   if (pathname !== "/api/VerifyToken") {
@@ -31,10 +38,24 @@ export async function middleware(request: NextRequest) {
       if (verifyResponse.status === 200) {
         return NextResponse.next();
       } else {
-        return NextResponse.redirect(new URL("/login", request.url));
+        const response = NextResponse.redirect(new URL("/login", request.url));
+        response.cookies.delete("AccessToken");
+        response.cookies.delete("Email");
+        response.cookies.delete("Name");
+        response.cookies.delete("Role");
+        response.cookies.delete("UserName");
+
+        return response;
       }
     } catch (error) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.delete("AccessToken");
+      response.cookies.delete("Email");
+      response.cookies.delete("Name");
+      response.cookies.delete("Role");
+      response.cookies.delete("UserName");
+
+      return response;
     }
   }
 
