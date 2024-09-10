@@ -230,6 +230,27 @@ const PreOrdersMap = forwardRef<
             }, 50);
           });
 
+          mapRef.current.on("mouseenter", "suggestedFATS", (e) => {
+            mapRef.current!.getCanvas().style.cursor = "pointer";
+            if (e.features && e.features.length > 0) {
+              const feature = e.features[0];
+              const coordinates = e.lngLat;
+    
+              // Show popup with the count on hover
+              new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(`<strong>Count: </strong> ${feature.properties?.Count}`)
+                .addTo(mapRef.current!);
+            }
+          });
+    
+          mapRef.current.on("mouseleave", "suggestedFATS", () => {
+            mapRef.current!.getCanvas().style.cursor = "";
+            const popups = document.getElementsByClassName("mapboxgl-popup");
+            if (popups.length > 0) {
+              popups[0].remove();
+            }
+          });
           mapRef.current.on("click", (e) => {
             if (!isEditModeRef.current) {
               const features = mapRef.current?.queryRenderedFeatures(e.point);

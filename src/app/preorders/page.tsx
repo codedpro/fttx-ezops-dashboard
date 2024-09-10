@@ -13,7 +13,7 @@ import CityPanel from "@/components/Maps/Main/Panels/CityPanel";
 import LayerPanel from "@/components/Maps/Main/Panels/LayerPanel";
 import { useSearchParams } from "next/navigation";
 import EditPanel from "@/components/Maps/PreOrders/Panels/EditPanel";
-
+import LegendPanel from "@/components/Maps/PreOrders/Panels/LegendPanel";
 interface Layer {
   id: string;
   visible: boolean;
@@ -124,12 +124,20 @@ const FTTHModemsMap: React.FC = () => {
       type: "point",
     },
     {
-      ...suggestedFATLayer,
+      ...suggestedFATLayer.fillLayer,
       visible: isSuggestedFATVisable,
       toggle: setIsSuggestedFATVisable,
-      label: "Suggested FATs",
+      label: "Suggested FAT Areas",
       icon: "",
       type: "fill",
+    },
+    {
+      ...suggestedFATLayer.pointLayer,
+      visible: isSuggestedFATVisable,
+      toggle: setIsSuggestedFATVisable,
+      label: "",
+      icon: "",
+      type: "point",
     },
   ];
 
@@ -291,6 +299,9 @@ const FTTHModemsMap: React.FC = () => {
                 onStyleChange={handleStyleChange}
                 selectedStyle={mapStyle}
               />
+              {!isSuggestedFATVisable ? null : (
+                <LegendPanel /> // Only show the legend when the Suggested FAT Areas are visible
+              )}
             </>
           )}
           {isEditMode && (

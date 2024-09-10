@@ -25,11 +25,15 @@ export const useFTTHModemLayer = () => {
               FAT: modem.FAT,
               Symbol: modem.Symbol,
               Error: modem.Error,
-              icon: "ftthModemIcon",
+              icon:
+                modem.Online_Status == "Online"
+                  ? "ftthOnlineModemIcon"
+                  : "ftthOfflineModemIcon",
               iconSize: 0.8,
               Long: modem.Long,
               Lat: modem.Lat,
               LayerID: "modems",
+              Status: modem.Online_Status,
             },
           })
         ),
@@ -47,6 +51,9 @@ export const useFTTHModemLayer = () => {
     source,
     visible: true,
     type: "point" as const,
-    icons: { ftthModemIcon: "/images/map/FTTHModem.png" },
+    icons: {
+      ftthOnlineModemIcon: "/images/map/FTTHModemOnline.png",
+      ftthOfflineModemIcon: "/images/map/FTTHModemOffline.png",
+    },
   };
 };

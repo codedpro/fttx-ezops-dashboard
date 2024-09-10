@@ -9,5 +9,6 @@ export interface FTTHModem {
     MAC: string;
     IP: string;
     Error: string;
+    Online_Status: string;
   }
   

@@ -43,6 +43,9 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
     );
   };
 
+  // Filter out layers that don't have an icon
+  const visibleLayers = layers.filter((layer) => layer.label !== "");
+
   return (
     <div
       className={`absolute z-30 m-2 p-2 bg-white bg-opacity-50 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all duration-200 ease-in-out transform ${
@@ -63,7 +66,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
 
       {!isMinimized && (
         <div className="space-y-3 transition-all duration-100 ease-in-out transform">
-          {layers.map((layer) => (
+          {visibleLayers.map((layer) => (
             <div className="flex items-center space-x-2" key={layer.id}>
               {layer.type === "point" ? (
                 <Image

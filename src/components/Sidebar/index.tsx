@@ -67,6 +67,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               alt="Logo"
               priority
               className="hidden dark:block w-45"
+              draggable={false}
             />
             <Image
               width={3000}
@@ -75,6 +76,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               alt="Logo"
               priority
               className="block dark:hidden w-45"
+              draggable={false}
             />
           </Link>
 
