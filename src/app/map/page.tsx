@@ -83,7 +83,7 @@ const FTTHModemsMap: React.FC = () => {
       visible: isModemLayerVisible,
       toggle: setIsModemLayerVisible,
       label: "Modem",
-      icon: "/images/map/FTTHModemOnline.png",
+      icon: "/images/map/FTTHModem.png",
       type: "point",
     },
     {
