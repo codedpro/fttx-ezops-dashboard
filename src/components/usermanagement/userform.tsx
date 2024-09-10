@@ -106,7 +106,6 @@ export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
       formData.password === formData.confirmPassword
     );
   };
-  console.log(formData);
   return (
     <div>
       <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card">

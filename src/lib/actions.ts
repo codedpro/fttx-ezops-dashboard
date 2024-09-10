@@ -42,8 +42,7 @@ export const performHardRefresh = async (modemId: string) => {
     throw new Error("Failed to refresh modem data");
   }
  */
-  await new Promise((resolve) => setTimeout(resolve, 3000))
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  console.log("Refreshed");
   return true;
 };

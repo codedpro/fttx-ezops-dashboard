@@ -48,7 +48,6 @@ export const useSuggestFATLine = (
       }
 
       const data: NearybyFATs[] = await response.json();
-      console.log(data);
       return data;
     } catch (error) {
       console.error("Failed to fetch nearby FATs:", error);
@@ -69,7 +68,6 @@ export const useSuggestFATLine = (
 
     for (const fat of nearbyFATs) {
       const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${featureProperties.Long},${featureProperties.Lat};${fat.FAT_Long},${fat.FAT_Lat}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`;
-      console.log(url);
       const response = await fetch(url);
       const data = await response.json();
 
@@ -144,13 +142,12 @@ export const useSuggestFATLine = (
     setSelectedPath(null);
   };
   const removeSuggestedPaths = () => {
-    
     const map = mapRef.current;
-    console.log("asdasd")
+
     if (!map) {
       return;
     }
-    console.log("ass")
+
     suggestedPaths.forEach((path) => {
       if (map.getLayer(path.id)) {
         map.removeLayer(path.id);

@@ -23,7 +23,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   let token = Cookies.get("AccessToken");
-  console.log(token)
   if (token !== null && token !== undefined) {
     useInitializeFTTHModems(token);
     useInitializeFTTHFats(token);
