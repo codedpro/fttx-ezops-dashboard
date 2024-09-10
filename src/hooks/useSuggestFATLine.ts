@@ -1,5 +1,25 @@
 import { NearybyFATs } from "@/types/NearbyFATs";
 import { useState, useCallback } from "react";
+import { LineString } from "geojson";
+
+// Helper to calculate the distance between two lat/lng points using Haversine formula
+const calculateDistance = (coord1: [number, number], coord2: [number, number]) => {
+  const R = 6371e3; // Radius of the Earth in meters
+  const lat1 = coord1[1] * (Math.PI / 180); // Convert degrees to radians
+  const lat2 = coord2[1] * (Math.PI / 180);
+  const deltaLat = (coord2[1] - coord1[1]) * (Math.PI / 180);
+  const deltaLong = (coord2[0] - coord1[0]) * (Math.PI / 180);
+
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) *
+    Math.sin(deltaLong / 2) * Math.sin(deltaLong / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const distance = R * c; // Distance in meters
+  return distance;
+};
 
 export interface FeatureProperties {
   ID: number;
@@ -74,23 +94,48 @@ export const useSuggestFATLine = (
       if (data.routes && data.routes.length > 0) {
         const path = data.routes[0];
         const color = generateUniqueColor();
-        const pathId = generateUniqueId(); // Use the custom unique ID generator
+        const pathId = generateUniqueId();
+
+        // Get the last point from the Mapbox route
+        const lastPoint = path.geometry.coordinates[path.geometry.coordinates.length - 1] as [number, number]; // Type assertion
+
+        // FAT position
+        const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat]; // Explicitly typing as [number, number]
+
+        // Calculate the distance from the last point to the FAT manually
+        const manualDistance = calculateDistance(lastPoint, fatPosition);
+
+        // Add the manual segment from the last point to the FAT's exact location
+        const extendedPath: LineString = {
+          type: "LineString", // Ensuring the type is explicitly set to 'LineString'
+          coordinates: [
+            [featureProperties.Long, featureProperties.Lat], // Add starting point manually
+            ...path.geometry.coordinates,
+            fatPosition, // Add FAT position manually at the end
+          ],
+        };
+
+        // Calculate the real distance (Mapbox distance + manual distance)
+        const realDistance = path.distance + manualDistance;
 
         paths.push({
           id: pathId,
           color: color,
-          path: path.geometry,
+          path: extendedPath,
           FAT_ID: fat.FAT_ID,
           FAT_Name: fat.Name,
+          originalDistance: path.distance, // Original Mapbox distance
+          manualDistance, // Distance from last point to FAT
+          realDistance, // Combined distance
+          duration: path.duration, // Original Mapbox duration
         });
 
-        // Add the path to the map
         if (mapRef.current) {
           mapRef.current.addSource(pathId, {
             type: "geojson",
             data: {
               type: "Feature",
-              geometry: path.geometry,
+              geometry: extendedPath, // Use the modified path with the manual extension
               properties: {},
             },
           });
@@ -105,9 +150,19 @@ export const useSuggestFATLine = (
             },
           });
 
-          // Handle path click event
+          // Pass the path information (with FAT details) to the selectedPath
           mapRef.current.on("click", pathId, () => {
-            setSelectedPath(path);
+            setSelectedPath({
+              id: pathId,
+              color: color,
+              FAT_ID: fat.FAT_ID,
+              FAT_Name: fat.Name,
+              path: extendedPath, // Include the path in the selected data
+              originalDistance: path.distance,
+              manualDistance,
+              realDistance,
+              duration: path.duration,
+            });
             setIsPathPanelOpen(true);
           });
         }
@@ -129,10 +184,7 @@ export const useSuggestFATLine = (
 
   const handleSavePath = useCallback(() => {
     if (selectedPath) {
-      // Log the selected path (in future, we will post it to an API)
       console.log("Saving path:", selectedPath);
-
-      // For now, simply close the panel
       setIsPathPanelOpen(false);
     }
   }, [selectedPath]);
@@ -141,6 +193,7 @@ export const useSuggestFATLine = (
     setIsPathPanelOpen(false);
     setSelectedPath(null);
   };
+
   const removeSuggestedPaths = () => {
     const map = mapRef.current;
 

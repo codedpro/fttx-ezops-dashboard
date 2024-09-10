@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaEdit, FaRoad, FaDrawPolygon, FaTimes } from "react-icons/fa";
 
 interface EditPanelProps {
@@ -30,6 +30,9 @@ const EditPanel: React.FC<EditPanelProps> = ({
   handleCancelPath,
   selectedPath,
 }) => {
+  useEffect(() => {
+    console.log(selectedPath);
+  }, [selectedPath]);
   return (
     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-wrap justify-center items-center space-x-2 sm:space-x-4">
       <button
@@ -92,6 +95,12 @@ const EditPanel: React.FC<EditPanelProps> = ({
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             FAT Name: {selectedPath.FAT_Name}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            FAT ID: {selectedPath.FAT_ID}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Distance: {selectedPath.realDistance}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Do you want to save this path?

@@ -67,7 +67,7 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
     };
 
     fetchModems();
-    const intervalId = setInterval(fetchModems, 600);
+    const intervalId = setInterval(fetchModems, 6000);
     set({ stopFetching: () => clearInterval(intervalId) });
   },
   stopFetching: () => {

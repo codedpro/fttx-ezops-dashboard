@@ -63,194 +63,220 @@ const PreOrdersMap = forwardRef<
     const [modalData, setModalData] = useState<any>(null);
     const isEditModeRef = useRef(isEditMode);
 
-    const addLayersToMap = () => {
-      if (!mapRef.current) return;
-
-      layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
-        const layerExists = mapRef.current?.getLayer(id);
-
-        // If layer exists, ensure it's updated and visible accordingly
-        if (layerExists) {
-          mapRef.current?.setLayoutProperty(
-            id,
-            "visibility",
-            visible ? "visible" : "none"
-          );
-          return;
-        }
-
-        if (source && !layerExists) {
-          const geoJsonSource = {
-            ...source,
-            type: "geojson" as const,
-          };
-
-          if (mapRef.current && !mapRef.current.getSource(id)) {
-            mapRef.current.addSource(id, geoJsonSource);
-          }
-
-          if (type === "fill" && mapRef.current) {
-            mapRef.current.addLayer({
-              id,
-              type: "fill",
-              source: id,
-              paint: paint,
-            });
-          } else if (type === "heatmap" && mapRef.current) {
-            mapRef.current.addLayer({
-              id,
-              type: "heatmap",
-              source: id,
-              paint: paint,
-            });
-          } else if (type === "point") {
-            const iconPromises = Object.keys(icons).map((key) => {
-              return new Promise<void>((resolve, reject) => {
-                if (!mapRef.current?.hasImage(key)) {
-                  mapRef.current?.loadImage(icons[key], (error, image) => {
-                    if (error) {
-                      console.error(`Error loading icon ${key}:`, error);
-                      reject(error);
-                    } else if (image) {
-                      mapRef.current?.addImage(key, image);
-                      resolve();
-                    }
-                  });
-                } else {
-                  resolve();
+    // Function to add point layers
+    const addPointLayer = async (id: string, source: any, icons: any, visible: boolean) => {
+        // Check if the images for icons are already loaded
+        const iconPromises = Object.keys(icons).map((key) => {
+          return new Promise<void>((resolve) => {
+            if (!mapRef.current?.hasImage(key)) {
+              mapRef.current?.loadImage(icons[key], (error, image) => {
+                if (error) {
+                  console.error(`Error loading icon ${key}:`, error);
+                } else if (image) {
+                  mapRef.current?.addImage(key, image);
                 }
+                resolve();
               });
-            });
-
-            Promise.all(iconPromises)
-              .then(() => {
-                mapRef.current?.addLayer({
-                  id: id,
-                  type: "symbol",
-                  source: id,
-                  layout: {
-                    "icon-image": ["get", "icon"],
-                    "icon-size": ["get", "iconSize"],
-                    "icon-allow-overlap": true,
-                  },
-                });
-              })
-              .catch((error) => {
-                console.error("Error loading icons:", error);
-              });
-          } else if (type === "line" && mapRef.current) {
-            mapRef.current.addLayer({
-              id,
-              type: "line",
-              source: id,
-              paint: {
-                "line-color": paint?.["line-color"] || "#ff0000",
-                "line-width": paint?.["line-width"] || 5,
-                "line-opacity": paint?.["line-opacity"] || 0.8,
-              },
-            });
-          }
-
-          // Set visibility after adding the layer
-          mapRef.current?.setLayoutProperty(
-            id,
-            "visibility",
-            visible ? "visible" : "none"
-          );
-        }
-      });
-    };
-
-    const customLayerIds = layers.map((layer) => layer.id);
-
-    useEffect(() => {
-      if (!mapContainerRef.current) return;
-
-      const initializeMap = () => {
-        if (!mapRef.current && mapContainerRef.current) {
-          mapRef.current = new mapboxgl.Map({
-            container: mapContainerRef.current,
-            style: mapStyle,
-            center: [52.6771, 36.538],
-            zoom: 13.5,
-            maxZoom: 20,
-          });
-
-          mapRef.current.on("load", () => {
-            setMapIsLoaded(true);
-            addLayersToMap();
-          });
-
-          mapRef.current.on("click", (e) => {
-            if (!isEditModeRef.current) {
-              const features = mapRef.current?.queryRenderedFeatures(e.point);
-              if (features && features.length > 0) {
-                const clickedFeature = features.find(
-                  (feature) =>
-                    feature.layer && customLayerIds.includes(feature.layer.id)
-                );
-
-                if (clickedFeature) {
-                  setModalData(clickedFeature.properties);
-                  setIsModalOpen(true);
-                }
-              }
+            } else {
+              resolve();  // Image already exists
             }
           });
+        });
+  
+
+      await Promise.all(iconPromises);
+
+      if (!mapRef.current?.getLayer(id)) {
+        mapRef.current?.addLayer({
+          id,
+          type: "symbol",
+          source: id,
+          layout: {
+            "icon-image": ["get", "icon"],
+            "icon-size": ["get", "iconSize"],
+            "icon-allow-overlap": true,
+          },
+        });
+        mapRef.current?.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+      }
+    };
+
+
+    // Function to add line layers
+    const addLineLayer = (id: string, source: any, paint: any, visible: boolean) => {
+        if (!mapRef.current?.getLayer(id)) {
+          mapRef.current?.addLayer({
+            id,
+            type: "line",
+            source: id,
+            paint: {
+              "line-color": paint?.["line-color"] || "#ff0000",
+              "line-width": paint?.["line-width"] || 5,
+              "line-opacity": paint?.["line-opacity"] || 0.8,
+            },
+          });
+          mapRef.current?.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
         }
       };
 
-      initializeMap();
-    }, [customLayerIds]);
+    // Function to add heatmap layers
+    const addHeatmapLayer = (id: string, source: any, paint: any, visible: boolean) => {
+        if (!mapRef.current?.getLayer(id)) {
+          mapRef.current?.addLayer({
+            id,
+            type: "heatmap",
+            source: id,
+            paint: paint,
+          });
+          mapRef.current?.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+        }
+      };
 
-    useEffect(() => {
-      if (mapRef.current) {
-        mapRef.current.setStyle(mapStyle);
-        mapRef.current.once("styledata", () => {
-          if (mapIsLoaded) {
-            addLayersToMap();
-          }
-        });
-      }
-    }, [mapStyle, mapIsLoaded]);
+      const addFillLayer = (id: string, source: any, paint: any, visible: boolean) => {
+        if (!mapRef.current?.getLayer(id)) {
+          mapRef.current?.addLayer({
+            id,
+            type: "fill",
+            source: id,
+            paint: paint,
+          });
+          mapRef.current?.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+        }
+      };
+  
 
-    useEffect(() => {
-      if (mapRef.current && zoomLocation) {
-        mapRef.current.flyTo({
-          center: [zoomLocation.lng, zoomLocation.lat],
-          zoom: zoomLocation.zoom,
-          essential: true,
-        });
-
-        const url = new URL(window.location.href);
-        url.search = "";
-        window.history.replaceState({}, "", url.toString());
-      }
-    }, [zoomLocation]);
-
-    useEffect(() => {
-      if (mapRef.current && mapIsLoaded) {
-        layers.forEach(({ id, source, visible }) => {
+      const addLayersToMap = () => {
+        if (!mapRef.current) return;
+  
+        layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
           const layerExists = mapRef.current?.getLayer(id);
-          const existingSource = mapRef.current?.getSource(id);
-
-          if (existingSource && source) {
-            (existingSource as mapboxgl.GeoJSONSource).setData(
-              source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
-            );
+          const sourceExists = mapRef.current?.getSource(id);
+  
+          // Check if source exists, if not, add it
+          if (!sourceExists && source) {
+            mapRef.current?.addSource(id, {
+              ...source,
+            });
           }
-          if (!layerExists) {
-            addLayersToMap();
-          } else {
-            mapRef.current?.setLayoutProperty(
-              id,
-              "visibility",
-              visible ? "visible" : "none"
-            );
+  
+          // Check if layer exists, if not, add it
+          if (!layerExists && mapRef.current?.getSource(id)) {
+            switch (type) {
+              case "point":
+                addPointLayer(id, source, icons, visible);
+                break;
+              case "line":
+                addLineLayer(id, source, paint, visible);
+                break;
+              case "heatmap":
+                addHeatmapLayer(id, source, paint, visible);
+                break;
+              case "fill":
+                addFillLayer(id, source, paint, visible);
+                break;
+              default:
+                console.error("Unknown layer type", type);
+                break;
+            }
           }
         });
-      }
-    }, [layers, mapIsLoaded]);
+      };
+  
+      useEffect(() => {
+        if (!mapContainerRef.current) return;
+  
+        const initializeMap = () => {
+          if (!mapRef.current && mapContainerRef.current) {
+            mapRef.current = new mapboxgl.Map({
+              container: mapContainerRef.current,
+              style: mapStyle,
+              center: [52.6771, 36.538],
+              zoom: 13.5,
+              maxZoom: 20,
+            });
+  
+            mapRef.current.on("load", () => {
+              setMapIsLoaded(true);
+  
+              // Delay layer addition by 500ms after map is loaded
+              setTimeout(() => {
+                addLayersToMap();
+              }, 50);
+            });
+  
+            mapRef.current.on("click", (e) => {
+              if (!isEditModeRef.current) {
+                const features = mapRef.current?.queryRenderedFeatures(e.point);
+                if (features && features.length > 0) {
+                  const clickedFeature = features.find(
+                    (feature) => feature.layer && layers.map((layer) => layer.id).includes(feature.layer.id)
+                  );
+  
+                  if (clickedFeature) {
+                    setModalData(clickedFeature.properties);
+                    setIsModalOpen(true);
+                  }
+                }
+              }
+            });
+          }
+        };
+  
+        initializeMap();
+      }, []);
+
+      useEffect(() => {
+        if (mapRef.current) {
+          mapRef.current.setStyle(mapStyle);
+          mapRef.current.once("styledata", () => {
+            if (mapIsLoaded) {
+              // Delay layer re-addition by 500ms after style data is ready
+              setTimeout(() => {
+                addLayersToMap();
+              }, 50);
+            }
+          });
+        }
+      }, [mapStyle, mapIsLoaded]);
+  
+
+      useEffect(() => {
+        if (mapRef.current && zoomLocation) {
+          mapRef.current.flyTo({
+            center: [zoomLocation.lng, zoomLocation.lat],
+            zoom: zoomLocation.zoom,
+            essential: true,
+          });
+  
+          const url = new URL(window.location.href);
+          url.search = "";
+          window.history.replaceState({}, "", url.toString());
+        }
+      }, [zoomLocation]);
+
+      useEffect(() => {
+        if (mapRef.current && mapIsLoaded) {
+          layers.forEach(({ id, source, visible }) => {
+            const layerExists = mapRef.current?.getLayer(id);
+            const existingSource = mapRef.current?.getSource(id);
+  
+            if (existingSource && source) {
+              (existingSource as mapboxgl.GeoJSONSource).setData(
+                source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+              );
+            }
+            if (!layerExists) {
+              addLayersToMap();
+            } else {
+              mapRef.current?.setLayoutProperty(
+                id,
+                "visibility",
+                visible ? "visible" : "none"
+              );
+            }
+          });
+        }
+      }, [layers, mapIsLoaded]);
 
     const closeModal = () => {
       setIsModalOpen(false);
@@ -278,6 +304,7 @@ const PreOrdersMap = forwardRef<
         onCoordinatesChange(currentCoordinates);
       }
     }, [currentCoordinates, onCoordinatesChange]);
+
     useEffect(() => {
       if (onPathPanelChange) {
         onPathPanelChange(isPathPanelOpen, selectedPath);
@@ -311,6 +338,7 @@ const PreOrdersMap = forwardRef<
         removeSuggestedPaths();
       },
     }));
+
     return (
       <div className="w-full h-screen relative">
         <div ref={mapContainerRef} className="w-full h-screen" />

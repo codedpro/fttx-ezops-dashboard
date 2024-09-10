@@ -168,7 +168,9 @@ const FTTHModemsMap: React.FC = () => {
     },
   ];
 
-  const areVisibleLayersLoaded = lineLayers.every((layer) => layer.source);
+  const areVisibleLayersLoaded =
+    pointLayers.every((layer) => layer.source) &&
+    lineLayers.every((layer) => layer.source);
   useEffect(() => {
     const search = searchParams.get("search");
     if (!search) return;
