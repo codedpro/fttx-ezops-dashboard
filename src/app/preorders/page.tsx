@@ -26,6 +26,7 @@ interface Layer {
 import { useFTTHPreorderLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorder";
 import { useFTTHPreorderHMLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorderHeatMap";
 import { useFTTHSuggestedFATLayer } from "@/components/Maps/PreOrders/Layers/FTTHSuggestedFAT";
+import { useCustomFATLine } from "@/hooks/useCustomFATLine";
 
 const FTTHModemsMap: React.FC = () => {
   const preOrdersLayer = useFTTHPreorderLayer();
@@ -51,6 +52,7 @@ const FTTHModemsMap: React.FC = () => {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditingPosition, setIsEditingPosition] = useState(false);
+  const [isSuggestingLine, setIsSuggestingLine] = useState(false);
   const [currentCoordinates, setCurrentCoordinates] = useState<{
     lat: number;
     lng: number;
@@ -211,6 +213,7 @@ const FTTHModemsMap: React.FC = () => {
     handleSaveSuggestedPath: () => void;
     handleCancelSuggestedPath: () => void;
     handleCancelEditPath: () => void;
+    mapRef: React.MutableRefObject<mapboxgl.Map | null>;
   } | null>(null);
 
   const handleEditPosition = () => {
@@ -220,10 +223,6 @@ const FTTHModemsMap: React.FC = () => {
       setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleEditPoint(editData);
     }
-  };
-
-  const handleCustomFATLine = () => {
-    alert("Custom FAT Line functionality will be implemented.");
   };
 
   const handleSuggestFATSubmit = () => {
@@ -245,6 +244,7 @@ const FTTHModemsMap: React.FC = () => {
       ftthMapRef.current.handleCancelEditPath();
       setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleSuggestFATLine(editData);
+      setIsSuggestingLine(true);
     }
   };
   const handleExitEditMode = () => {
@@ -254,7 +254,14 @@ const FTTHModemsMap: React.FC = () => {
       ftthMapRef.current.handleCancelEditPath();
     }
   };
+  const handleCancelSuggesting = () => {
+    if (ftthMapRef.current) {
+      ftthMapRef.current.handleCancelSuggestedPath();
+      ftthMapRef.current.handleCancelEditPath();
 
+      setIsSuggestingLine(false);
+    }
+  };
   const handleSubmitEdit = () => {
     if (ftthMapRef.current) {
       setIsEditingPosition(false);
@@ -267,6 +274,25 @@ const FTTHModemsMap: React.FC = () => {
       setIsEditingPosition(false);
       ftthMapRef.current.handleCancelEditPath();
       ftthMapRef.current.handleCancelPointEdit();
+    }
+  };
+
+  const {
+    isDrawing,
+    lineColor,
+    handleStartDrawing,
+    handleDrawNextPoint,
+    handleUndoLastPoint,
+    handleSaveLine,
+    handleCancelLine,
+    handleColorChange,
+  } = useCustomFATLine(ftthMapRef.current?.mapRef ?? { current: null }, "sfat-layer");
+
+  const handleCustomFATLine = () => {
+    if (ftthMapRef.current && editData) {
+
+      handleStartDrawing(editData);
+
     }
   };
 
@@ -304,7 +330,7 @@ const FTTHModemsMap: React.FC = () => {
               {!isSuggestedFATVisable ? null : <LegendPanel />}
             </>
           )}
-          {isEditMode && (
+          {isEditMode && ftthMapRef.current && (
             <EditPanel
               onEditPosition={handleEditPosition}
               onSuggestFATLine={handleSuggestFATLine}
@@ -315,9 +341,17 @@ const FTTHModemsMap: React.FC = () => {
               handleCancelEdit={handleCancelEdit}
               isEditingPosition={isEditingPosition}
               isPathPanelOpen={isPathPanelOpen}
-              handleSavePath={handleSuggestFATSubmit}
-              handleCancelPath={handleCancelSuggestFAT}
+              handleSavePath={handleSaveLine}
+              handleCancelPath={ftthMapRef.current.handleCancelSuggestedPath}
               selectedPath={selectedPath}
+              handleUndoCustomLine={handleUndoLastPoint}
+              handleColorChange={handleColorChange}
+              isDrawingLine={isDrawing}
+              lineColor={lineColor}
+              handleSaveCustomLine={handleSaveLine}
+              isSuggestingFATLine={isSuggestingLine}
+              handleCancelCustomLine={handleCancelLine}
+              handleCancelSuggestingFATLine={handleCancelSuggesting}
             />
           )}
           <div className="z-20">

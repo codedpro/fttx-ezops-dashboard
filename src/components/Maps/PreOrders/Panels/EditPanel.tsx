@@ -1,5 +1,14 @@
-import React, { useEffect } from "react";
-import { FaEdit, FaRoad, FaDrawPolygon, FaTimes } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import {
+  FaEdit,
+  FaRoad,
+  FaDrawPolygon,
+  FaSave,
+  FaUndo,
+  FaTimes,
+  FaPalette,
+} from "react-icons/fa";
+import { TwitterPicker } from "react-color";
 
 interface EditPanelProps {
   onEditPosition: () => void;
@@ -14,6 +23,14 @@ interface EditPanelProps {
   handleSavePath: () => void;
   handleCancelPath: () => void;
   selectedPath: any;
+  handleUndoCustomLine: () => void;
+  handleColorChange: (color: string) => void;
+  isDrawingLine: boolean;
+  lineColor: string;
+  handleSaveCustomLine: () => void;
+  handleCancelCustomLine: () => void;
+  isSuggestingFATLine: boolean;
+  handleCancelSuggestingFATLine: () => void;
 }
 
 const EditPanel: React.FC<EditPanelProps> = ({
@@ -29,41 +46,113 @@ const EditPanel: React.FC<EditPanelProps> = ({
   handleSavePath,
   handleCancelPath,
   selectedPath,
+  handleSaveCustomLine,
+  handleUndoCustomLine,
+  handleCancelCustomLine,
+  handleColorChange,
+  isDrawingLine,
+  lineColor,
+  isSuggestingFATLine,
+  handleCancelSuggestingFATLine,
 }) => {
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+
   useEffect(() => {
     console.log(selectedPath);
   }, [selectedPath]);
+
   return (
     <div className="absolute text-xs bottom-4 w-full left-1/2 transform -translate-x-1/2 z-50 flex flex-wrap justify-center items-center space-x-2 sm:space-x-4">
-      <button
-        onClick={onEditPosition}
-        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-      >
-        <FaEdit size={16} className="text-primary" />
-        <span className="text-primary">Edit Position</span>
-      </button>
-      <button
-        onClick={onSuggestFATLine}
-        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-      >
-        <FaRoad size={16} className="text-primary" />
-        <span className="text-primary">Suggest FAT Line</span>
-      </button>
-      <button
-        onClick={onCustomFATLine}
-        className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-      >
-        <FaDrawPolygon size={16} className="text-primary" />
-        <span className="text-primary">Custom FAT Line</span>
-      </button>
-      <button
-        onClick={onExitEditMode}
-        className="bg-red-500 p-4 rounded-full shadow-lg text-white transition-transform hover:scale-105 flex items-center space-x-2"
-      >
-        <FaTimes size={16} />
-        <span>Exit</span>
-      </button>
+      {!isDrawingLine && !isEditingPosition && !isSuggestingFATLine && (
+        <>
+          {" "}
+          <button
+            onClick={onEditPosition}
+            className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+          >
+            <FaEdit size={16} className="text-primary" />
+            <span className="text-primary">Edit Position</span>
+          </button>
+          <button
+            onClick={onSuggestFATLine}
+            className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+          >
+            <FaRoad size={16} className="text-primary" />
+            <span className="text-primary">Suggest FAT Line</span>
+          </button>
+          <button
+            onClick={onCustomFATLine}
+            className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+          >
+            <FaDrawPolygon size={16} className="text-primary" />
+            <span className="text-primary">Custom FAT Line</span>
+          </button>
+        </>
+      )}
 
+      {isDrawingLine && (
+        <button
+          onClick={handleSaveCustomLine}
+          className="bg-green-600 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+        >
+          <FaSave size={16} />
+          <span>Save Line</span>
+        </button>
+      )}
+
+      {isDrawingLine && (
+        <button
+          onClick={handleUndoCustomLine}
+          className="bg-yellow-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+        >
+          <FaUndo size={16} />
+          <span>Undo</span>
+        </button>
+      )}
+
+      {isDrawingLine && (
+        <button
+          onClick={handleCancelCustomLine}
+          className="bg-red-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+        >
+          <FaTimes size={16} />
+          <span>Cancel</span>
+        </button>
+      )}
+
+      {/* Line Color Picker */}
+      {isDrawingLine && (
+        <>
+          <button
+            onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
+            className="bg-blue-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+          >
+            <FaPalette size={16} />
+            <span>Color</span>
+          </button>
+
+          {isColorPickerOpen && (
+            <div className="absolute bottom-20 z-50">
+              <TwitterPicker
+                color={lineColor}
+                onChangeComplete={(color) => handleColorChange(color.hex)}
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Exit Edit Mode Button */}
+      {!isDrawingLine && !isSuggestingFATLine && !isEditingPosition && (
+        <button
+          onClick={onExitEditMode}
+          className="bg-red-500 p-4 rounded-full shadow-lg text-white transition-transform hover:scale-105 flex items-center space-x-2"
+        >
+          <FaTimes size={16} />
+          <span>Exit</span>
+        </button>
+      )}
+      {/* Editing Position Panel */}
       {isEditingPosition && currentCoordinates && (
         <div className="absolute bottom-4 right-4 transform translate-x-0 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all max-w-sm sm:max-w-md lg:max-w-lg">
           <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
@@ -92,6 +181,17 @@ const EditPanel: React.FC<EditPanelProps> = ({
         </div>
       )}
 
+      {isSuggestingFATLine && (
+        <button
+          onClick={handleCancelSuggestingFATLine} // Adjust to your handleCancel method
+          className="bg-red-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
+        >
+          <FaTimes size={16} />
+          <span>Cancel FAT Line</span>
+        </button>
+      )}
+
+      {/* Path Panel */}
       {isPathPanelOpen && selectedPath && (
         <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all max-w-sm sm:max-w-md lg:max-w-lg">
           <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">

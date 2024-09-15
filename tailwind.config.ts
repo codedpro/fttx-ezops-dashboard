@@ -24,6 +24,9 @@ const config: Config = {
     },
     extend: {
       colors: {
+        purples: "#CBACF9",
+        darks: "#2b2b2b",
+        gold: "#bfa361",
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",
@@ -290,6 +293,7 @@ const config: Config = {
         12: "12px",
       },
       boxShadow: {
+        gold: "0 4px 6px rgba(255, 215, 0, 0.1)",
         default: "0px 4px 7px 0px rgba(0, 0, 0, 0.14)",
         input: `0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08)`,
         error: "0px 12px 34px 0px rgba(13, 10, 44, 0.05)",
@@ -315,6 +319,9 @@ const config: Config = {
         5: "0px 10px 30px 0px rgba(85, 106, 235, 0.12), 0px 4px 10px 0px rgba(85, 106, 235, 0.04), 0px -18px 38px 0px rgba(85, 106, 235, 0.04)",
         6: "0px 12px 34px 0px rgba(13, 10, 44, 0.08), 0px 34px 26px 0px rgba(13, 10, 44, 0.05)",
         7: "0px 18px 25px 0px rgba(113, 116, 152, 0.05)",
+      },
+      transitionTimingFunction: {
+        "in-out-expo": "cubic-bezier(0.77, 0, 0.175, 1)",
       },
       dropShadow: {
         card: "0px 8px 13px rgba(0, 0, 0, 0.07)",
@@ -387,6 +394,13 @@ const config: Config = {
         line2: "line-revert 8s infinite linear",
         line3: "line 7s infinite linear",
       },
+    },
+  },
+  variants: {
+    extend: {
+      ringColor: ["focus"], // Enable ring color on focus
+      ringOpacity: ["focus"], // Enable ring opacity on focus
+      scale: ["hover", "focus"], // Enable scaling on hover and focus
     },
   },
   plugins: [

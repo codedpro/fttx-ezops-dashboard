@@ -41,7 +41,10 @@ interface FTTHMapProps {
 }
 
 const PreOrdersMap = forwardRef<
-  { handleEditPoint: (data: any) => void },
+  {
+    handleEditPoint: (data: any) => void;
+    mapRef: React.MutableRefObject<mapboxgl.Map | null>;
+  },
   FTTHMapProps
 >(
   (
@@ -258,28 +261,46 @@ const PreOrdersMap = forwardRef<
             }
           });
 
-          mapRef.current.on("click", (e) => {
-            if (!isEditModeRef.current) {
-              const features = mapRef.current?.queryRenderedFeatures(e.point);
-              if (features && features.length > 0) {
-                const clickedFeature = features.find(
-                  (feature) =>
-                    feature.layer &&
-                    layers.map((layer) => layer.id).includes(feature.layer.id)
-                );
-
-                if (clickedFeature) {
-                  setModalData(clickedFeature.properties);
-                  setIsModalOpen(true);
-                }
-              }
-            }
-          });
+          if (isEditMode) {
+            return;
+          }
         }
       };
 
       initializeMap();
     }, []);
+
+    useEffect(() => {
+      if (!mapRef.current) return;
+
+      const handleClick = (e: mapboxgl.MapMouseEvent) => {
+        if (isEditMode) {
+          return;
+        }
+
+        const features = mapRef.current?.queryRenderedFeatures(e.point);
+        if (features && features.length > 0) {
+          const clickedFeature = features.find(
+            (feature) =>
+              feature.layer &&
+              layers.map((layer) => layer.id).includes(feature.layer.id)
+          );
+
+          if (clickedFeature) {
+            setModalData(clickedFeature.properties);
+            setIsModalOpen(true);
+          }
+        }
+      };
+
+      mapRef.current.on("click", handleClick);
+
+      return () => {
+        if (mapRef.current) {
+          mapRef.current.off("click", handleClick);
+        }
+      };
+    }, [isEditMode, layers]);
 
     useEffect(() => {
       if (mapRef.current) {
@@ -423,6 +444,7 @@ const PreOrdersMap = forwardRef<
       handleCancelEditPath: () => {
         removeSuggestedPaths();
       },
+      mapRef,
     }));
 
     return (
