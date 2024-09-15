@@ -1,16 +1,19 @@
 import { NearybyFATs } from "@/types/NearbyFATs";
 import { useState, useCallback } from "react";
 import { LineString } from "geojson";
+import mapboxgl from "mapbox-gl";
 
 const calculateDistance = (
   coord1: [number, number],
   coord2: [number, number]
 ) => {
   const R = 6371e3;
-  const lat1 = coord1[1] * (Math.PI / 180);
-  const lat2 = coord2[1] * (Math.PI / 180);
-  const deltaLat = (coord2[1] - coord1[1]) * (Math.PI / 180);
-  const deltaLong = (coord2[0] - coord1[0]) * (Math.PI / 180);
+  const toRad = (angle: number) => (angle * Math.PI) / 180;
+
+  const lat1 = toRad(coord1[1]);
+  const lat2 = toRad(coord2[1]);
+  const deltaLat = toRad(coord2[1] - coord1[1]);
+  const deltaLong = toRad(coord2[0] - coord1[0]);
 
   const a =
     Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
@@ -21,8 +24,7 @@ const calculateDistance = (
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  const distance = R * c;
-  return distance;
+  return R * c;
 };
 
 export interface FeatureProperties {
@@ -38,9 +40,11 @@ export interface FeatureProperties {
   Lat: number;
 }
 
-const generateUniqueId = () => {
-  return `id-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-};
+const generateUniqueId = () =>
+  `id-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+const generateUniqueColor = () =>
+  `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
 export const useSuggestFATLine = (
   mapRef: React.MutableRefObject<mapboxgl.Map | null>
@@ -74,14 +78,9 @@ export const useSuggestFATLine = (
       const data: NearybyFATs[] = await response.json();
       return data;
     } catch (error) {
-      console.error("Failed to fetch nearby FATs:", error);
+      console.error("Error fetching nearby FATs:", error);
       return [];
     }
-  };
-
-  const generateUniqueColor = () => {
-    const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-    return randomColor;
   };
 
   const generatePaths = async (
@@ -91,81 +90,94 @@ export const useSuggestFATLine = (
     const paths = [];
 
     for (const fat of nearbyFATs) {
-      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${featureProperties.Long},${featureProperties.Lat};${fat.FAT_Long},${fat.FAT_Lat}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      try {
+        const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${featureProperties.Long},${featureProperties.Lat};${fat.FAT_Long},${fat.FAT_Lat}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-      if (data.routes && data.routes.length > 0) {
-        const path = data.routes[0];
-        const color = generateUniqueColor();
-        const pathId = generateUniqueId();
+        if (data.routes && data.routes.length > 0) {
+          const path = data.routes[0];
+          const color = generateUniqueColor();
+          const pathId = generateUniqueId();
 
-        const lastPoint = path.geometry.coordinates[
-          path.geometry.coordinates.length - 1
-        ] as [number, number];
+          const lastPoint = path.geometry.coordinates[
+            path.geometry.coordinates.length - 1
+          ] as [number, number];
+          const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat];
+          const manualDistance = calculateDistance(lastPoint, fatPosition);
 
-        const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat];
+          const extendedPath: LineString = {
+            type: "LineString",
+            coordinates: [
+              [featureProperties.Long, featureProperties.Lat],
+              ...path.geometry.coordinates,
+              fatPosition,
+            ],
+          };
 
-        const manualDistance = calculateDistance(lastPoint, fatPosition);
+          const realDistance = path.distance + manualDistance;
 
-        const extendedPath: LineString = {
-          type: "LineString",
-          coordinates: [
-            [featureProperties.Long, featureProperties.Lat],
-            ...path.geometry.coordinates,
-            fatPosition,
-          ],
-        };
-
-        const realDistance = path.distance + manualDistance;
-
-        paths.push({
-          id: pathId,
-          color: color,
-          path: extendedPath,
-          FAT_ID: fat.FAT_ID,
-          FAT_Name: fat.Name,
-          originalDistance: path.distance,
-          manualDistance,
-          realDistance,
-          duration: path.duration,
-        });
-
-        if (mapRef.current) {
-          mapRef.current.addSource(pathId, {
-            type: "geojson",
-            data: {
-              type: "Feature",
-              geometry: extendedPath,
-              properties: {},
-            },
-          });
-
-          mapRef.current.addLayer({
+          paths.push({
             id: pathId,
-            type: "line",
-            source: pathId,
-            paint: {
-              "line-color": color,
-              "line-width": 3,
-            },
+            color,
+            path: extendedPath,
+            FAT_ID: fat.FAT_ID,
+            FAT_Name: fat.Name,
+            originalDistance: path.distance,
+            manualDistance,
+            realDistance,
+            duration: path.duration,
           });
 
-          mapRef.current.on("click", pathId, () => {
-            setSelectedPath({
-              id: pathId,
-              color: color,
-              FAT_ID: fat.FAT_ID,
-              FAT_Name: fat.Name,
-              path: extendedPath,
-              originalDistance: path.distance,
-              manualDistance,
-              realDistance,
-              duration: path.duration,
+          if (mapRef.current) {
+            mapRef.current.addSource(pathId, {
+              type: "geojson",
+              data: {
+                type: "Feature",
+                geometry: extendedPath,
+                properties: {},
+              },
             });
-            setIsPathPanelOpen(true);
-          });
+
+            mapRef.current.addLayer({
+              id: pathId,
+              type: "line",
+              source: pathId,
+              paint: {
+                "line-color": color,
+                "line-width": 6,
+              },
+            });
+            if (mapRef.current.getLayer(pathId)) {
+              mapRef.current.on("mouseenter", pathId, () => {
+                mapRef.current!.getCanvas().style.cursor = "pointer";
+              });
+
+              mapRef.current.on("mouseleave", pathId, () => {
+                mapRef.current!.getCanvas().style.cursor = "";
+              });
+            } else {
+              console.error(`Layer with ID ${pathId} not found`);
+            }
+
+            mapRef.current.on("click", pathId, () => {
+              setSelectedPath({
+                id: pathId,
+                color,
+                FAT_ID: fat.FAT_ID,
+                FAT_Name: fat.Name,
+                path: extendedPath,
+                originalDistance: path.distance,
+                manualDistance,
+                realDistance,
+                duration: path.duration,
+              });
+              setIsPathPanelOpen(true);
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error generating paths:", error);
       }
     }
 
@@ -175,8 +187,10 @@ export const useSuggestFATLine = (
   const handleSuggestFATLine = useCallback(
     async (featureProperties: FeatureProperties) => {
       const nearbyFATs = await fetchNearbyFATs(featureProperties);
-      if (nearbyFATs.length) {
+      if (nearbyFATs.length > 0) {
         generatePaths(featureProperties, nearbyFATs);
+      } else {
+        alert("No FAT nearby this Pre Order.");
       }
     },
     []
@@ -196,10 +210,7 @@ export const useSuggestFATLine = (
 
   const removeSuggestedPaths = () => {
     const map = mapRef.current;
-
-    if (!map) {
-      return;
-    }
+    if (!map) return;
 
     suggestedPaths.forEach((path) => {
       if (map.getLayer(path.id)) {

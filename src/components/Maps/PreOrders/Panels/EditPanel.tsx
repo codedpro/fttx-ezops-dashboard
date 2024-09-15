@@ -65,71 +65,53 @@ const EditPanel: React.FC<EditPanelProps> = ({
     <div className="absolute text-xs bottom-4 w-full left-1/2 transform -translate-x-1/2 z-50 flex flex-wrap justify-center items-center space-x-2 sm:space-x-4">
       {!isDrawingLine && !isEditingPosition && !isSuggestingFATLine && (
         <>
-          {" "}
-          <button
+          <ActionButton
             onClick={onEditPosition}
-            className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-          >
-            <FaEdit size={16} className="text-primary" />
-            <span className="text-primary">Edit Position</span>
-          </button>
-          <button
+            label="Edit Position"
+            icon={FaEdit}
+            bgColor="bg-green-500"
+          />
+          <ActionButton
             onClick={onSuggestFATLine}
-            className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-          >
-            <FaRoad size={16} className="text-primary" />
-            <span className="text-primary">Suggest FAT Line</span>
-          </button>
-          <button
+            label="Suggest FAT Line"
+            icon={FaRoad}
+            bgColor="bg-orange-600"
+          />
+          <ActionButton
             onClick={onCustomFATLine}
-            className="bg-gray-100 dark:bg-[#2a3b4d] p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-          >
-            <FaDrawPolygon size={16} className="text-primary" />
-            <span className="text-primary">Custom FAT Line</span>
-          </button>
+            label="Custom FAT Line"
+            icon={FaDrawPolygon}
+            bgColor="bg-blue-600"
+          />
         </>
       )}
 
       {isDrawingLine && (
-        <button
-          onClick={handleSaveCustomLine}
-          className="bg-green-600 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-        >
-          <FaSave size={16} />
-          <span>Save Line</span>
-        </button>
-      )}
-
-      {isDrawingLine && (
-        <button
-          onClick={handleUndoCustomLine}
-          className="bg-yellow-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-        >
-          <FaUndo size={16} />
-          <span>Undo</span>
-        </button>
-      )}
-
-      {isDrawingLine && (
-        <button
-          onClick={handleCancelCustomLine}
-          className="bg-red-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-        >
-          <FaTimes size={16} />
-          <span>Cancel</span>
-        </button>
-      )}
-
-      {/* Line Color Picker */}
-      {isDrawingLine && (
         <>
-          <button
+          <ActionButton
+            onClick={handleSaveCustomLine}
+            label="Save Line"
+            icon={FaSave}
+            bgColor="bg-green-500"
+          />
+          <ActionButton
+            onClick={handleUndoCustomLine}
+            label="Undo"
+            icon={FaUndo}
+            bgColor="bg-yellow-500"
+          />
+          <ActionButton
+            onClick={handleCancelCustomLine}
+            label="Cancel"
+            icon={FaTimes}
+            bgColor="bg-red-500"
+          />
+          <ActionButton
             onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
-            className="bg-blue-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-          >
-            <FaPalette size={16} />
-            <span>Color</span>
-          </button>
+            label="Color"
+            icon={FaPalette}
+            bgColor="bg-blue-600"
+          />
 
           {isColorPickerOpen && (
             <div className="absolute bottom-20 z-50">
@@ -142,91 +124,107 @@ const EditPanel: React.FC<EditPanelProps> = ({
         </>
       )}
 
-      {/* Exit Edit Mode Button */}
       {!isDrawingLine && !isSuggestingFATLine && !isEditingPosition && (
-        <button
+        <ActionButton
           onClick={onExitEditMode}
-          className="bg-red-500 p-4 rounded-full shadow-lg text-white transition-transform hover:scale-105 flex items-center space-x-2"
-        >
-          <FaTimes size={16} />
-          <span>Exit</span>
-        </button>
+          label="Exit"
+          icon={FaTimes}
+          bgColor="bg-red-500"
+        />
       )}
-      {/* Editing Position Panel */}
+
       {isEditingPosition && currentCoordinates && (
-        <div className="absolute bottom-4 right-4 transform translate-x-0 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all max-w-sm sm:max-w-md lg:max-w-lg">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
-            Editing Point
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Latitude: {currentCoordinates.lat.toFixed(6)}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Longitude: {currentCoordinates.lng.toFixed(6)}
-          </p>
-          <div className="flex space-x-4">
-            <button
-              onClick={handleSubmitEdit}
-              className="px-4 py-2 bg-green-600 text-white rounded transition-all hover:bg-green-700"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleCancelEdit}
-              className="px-4 py-2 bg-red-600 text-white rounded transition-all hover:bg-red-700"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <>
+          <CoordinateButton
+            label="Latitude"
+            value={currentCoordinates.lat.toFixed(6)}
+            bgColor="bg-orange-500"
+          />
+          <CoordinateButton
+            label="Longitude"
+            value={currentCoordinates.lng.toFixed(6)}
+            bgColor="bg-orange-500"
+          />
+          <ActionButton
+            onClick={handleSubmitEdit}
+            label="Save Position"
+            icon={FaSave}
+            bgColor="bg-green-500"
+          />
+          <ActionButton
+            onClick={handleCancelEdit}
+            label="Cancel"
+            icon={FaTimes}
+            bgColor="bg-red-500"
+          />
+        </>
       )}
 
-      {isSuggestingFATLine && (
-        <button
-          onClick={handleCancelSuggestingFATLine} // Adjust to your handleCancel method
-          className="bg-red-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2"
-        >
-          <FaTimes size={16} />
-          <span>Cancel FAT Line</span>
-        </button>
+      {isSuggestingFATLine && !isPathPanelOpen && !selectedPath && (
+        <ActionButton
+          onClick={handleCancelSuggestingFATLine}
+          label="Cancel FAT Line"
+          icon={FaTimes}
+          bgColor="bg-red-500"
+        />
       )}
 
-      {/* Path Panel */}
       {isPathPanelOpen && selectedPath && (
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white dark:bg-[#1f2937] p-4 rounded-lg shadow-lg transition-all max-w-sm sm:max-w-md lg:max-w-lg">
-          <h3 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
-            Selected Path
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            FAT Name: {selectedPath.FAT_Name}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            FAT ID: {selectedPath.FAT_ID}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Distance: {selectedPath.realDistance}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Do you want to save this path?
-          </p>
-          <div className="flex space-x-4">
-            <button
-              onClick={handleSavePath}
-              className="px-4 py-2 bg-green-600 text-white rounded transition-all hover:bg-green-700"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleCancelPath}
-              className="px-4 py-2 bg-red-600 text-white rounded transition-all hover:bg-red-700"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <>
+          <CoordinateButton
+            label="FAT ID"
+            value={selectedPath.FAT_ID}
+            bgColor="bg-yellow-500"
+          />
+          <CoordinateButton
+            label="Distance"
+            value={selectedPath.realDistance.toFixed(2)}
+            bgColor="bg-orange-500"
+          />
+          <ActionButton
+            onClick={handleSavePath}
+            label="Save Path"
+            icon={FaSave}
+            bgColor="bg-green-500"
+          />
+          <ActionButton
+            onClick={handleCancelPath}
+            label="Cancel"
+            icon={FaTimes}
+            bgColor="bg-red-500"
+          />
+        </>
       )}
     </div>
   );
 };
+
+const ActionButton: React.FC<{
+  onClick: () => void;
+  label: string;
+  icon: React.ComponentType<any>;
+  bgColor?: string;
+}> = ({ onClick, label, icon: Icon, bgColor = "bg-gray-100" }) => (
+  <button
+    onClick={onClick}
+    className={`${bgColor} p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2`}
+  >
+    <Icon size={16} className="text-white" />
+    <span className="text-white">{label}</span>
+  </button>
+);
+
+const CoordinateButton: React.FC<{
+  label: string;
+  value: string | number;
+  bgColor?: string;
+}> = ({ label, value, bgColor = "bg-gray-100" }) => (
+  <button
+    className={`${bgColor} p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center space-x-2`}
+  >
+    <span className="text-xs font-semibold text-white">{label}:</span>
+    <span className="text-sm text-white">{value}</span>
+  </button>
+);
 
 export default EditPanel;

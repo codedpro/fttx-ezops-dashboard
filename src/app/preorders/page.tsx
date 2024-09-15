@@ -229,6 +229,7 @@ const FTTHModemsMap: React.FC = () => {
     if (ftthMapRef.current) {
       setIsEditingPosition(false);
       ftthMapRef.current.handleSaveSuggestedPath();
+      handleCancelSuggestFAT()
     }
   };
 
@@ -341,8 +342,8 @@ const FTTHModemsMap: React.FC = () => {
               handleCancelEdit={handleCancelEdit}
               isEditingPosition={isEditingPosition}
               isPathPanelOpen={isPathPanelOpen}
-              handleSavePath={handleSaveLine}
-              handleCancelPath={ftthMapRef.current.handleCancelSuggestedPath}
+              handleSavePath={handleSuggestFATSubmit}
+              handleCancelPath={handleCancelSuggestFAT}
               selectedPath={selectedPath}
               handleUndoCustomLine={handleUndoLastPoint}
               handleColorChange={handleColorChange}
