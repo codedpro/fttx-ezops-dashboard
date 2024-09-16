@@ -395,6 +395,7 @@ const PreOrdersMap = forwardRef<
       handleEditPoint,
       handleSubmitEdit,
       handleCancelEdit,
+      handleMovePoint,
     } = useEditFeature(mapRef, addLayersToMap, setIsModalOpen);
 
     const {
@@ -443,6 +444,9 @@ const PreOrdersMap = forwardRef<
       },
       handleCancelEditPath: () => {
         removeSuggestedPaths();
+      },
+      handlemoveEditPoint: (newCoordinates: { lat: number; lng: number }) => {
+        handleMovePoint(newCoordinates);
       },
       mapRef,
     }));

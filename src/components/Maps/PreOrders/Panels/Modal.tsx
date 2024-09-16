@@ -105,6 +105,10 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
     setTimeout(() => setCopied(null), 1500);
   };
 
+  const formatLatLong = (lat: number, long: number) => {
+    return `${lat}, ${long}`;
+  };
+
   return (
     <div
       id="modal-overlay"
@@ -134,41 +138,51 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
                   key !== "iconSize" &&
                   key !== "Component_ID" &&
                   key !== "Chain_ID" &&
-                  key !== "FAT_ID"
+                  key !== "FAT_ID" &&
+                  key !== "Long"
               )
-              .map((key, idx) => (
-                <div
-                  key={idx}
-                  ref={(el) => {
-                    if (el) cardRefs.current[idx] = el;
-                  }}
-                  className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
-                >
-                  <p className="text-md text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                    {key}
-                  </p>
-                  <p
-                    className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${
-                      copied === key ? "text-green-500" : ""
-                    }`}
-                    onClick={() => copyToClipboard(data[key], key)}
+              .map((key, idx) => {
+                const displayValue =
+                  key === "Lat" && data.Long
+                    ? formatLatLong(data.Lat, data.Long)
+                    : data[key];
+
+                const displayKey =
+                  key === "Lat" && data.Long ? "Lat/Long" : key;
+
+                return (
+                  <div
+                    key={idx}
+                    ref={(el) => {
+                      if (el) cardRefs.current[idx] = el;
+                    }}
+                    className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
                   >
-                    {data[key] || "N/A"}
-                    {copied === key && (
-                      <span
-                        id={`copied-${key}`}
-                        className="ml-2 text-xs text-green-500"
-                      >
-                        Copied!
-                      </span>
-                    )}
-                  </p>
-                </div>
-              ))}
+                    <p className="text-md text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                      {displayKey}
+                    </p>
+                    <p
+                      className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${
+                        copied === displayKey ? "text-green-500" : ""
+                      }`}
+                      onClick={() => copyToClipboard(displayValue, displayKey)}
+                    >
+                      {displayValue || "N/A"}
+                      {copied === displayKey && (
+                        <span
+                          id={`copied-${displayKey}`}
+                          className="ml-2 text-xs text-green-500"
+                        >
+                          Copied!
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                );
+              })}
           </div>
         </div>
 
-        {/* Conditionally render the Edit button and make it bigger for "preorders" */}
         {data.LayerID === "preorders" && (
           <button
             onClick={() => {

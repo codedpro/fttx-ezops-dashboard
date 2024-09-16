@@ -4,7 +4,7 @@ import mapboxgl from "mapbox-gl";
 
 export const useCustomFATLine = (
   mapRef: React.MutableRefObject<mapboxgl.Map | null>,
-  fatLayerId: string
+  fatLayerIds: [string, string]
 ) => {
   const [drawnLine, setDrawnLine] = useState<LineString | null>(null);
   const [lineCoordinates, setLineCoordinates] = useState<
@@ -193,7 +193,7 @@ export const useCustomFATLine = (
 
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
       const fatFeatures = mapRef.current?.queryRenderedFeatures(e.point, {
-        layers: [fatLayerId],
+        layers: fatLayerIds,
       });
 
       if (fatFeatures && fatFeatures.length > 0) {
@@ -212,7 +212,7 @@ export const useCustomFATLine = (
         mapRef.current.off("click", handleMapClick);
       }
     };
-  }, [isDrawing, fatLayerId, handleDrawNextPoint, handleConnectToFAT, mapRef]);
+  }, [isDrawing, fatLayerIds, handleDrawNextPoint, handleConnectToFAT, mapRef]);
 
   const handleSaveLine = useCallback(() => {
     if (lineCoordinates.length > 1 && isConnectedToFAT && fatCoordinate) {

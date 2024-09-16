@@ -83,52 +83,86 @@ export const useSuggestFATLine = (
     }
   };
 
-  const generatePaths = async (
-    featureProperties: FeatureProperties,
-    nearbyFATs: NearybyFATs[]
+  const animateLine = (
+    pathId: string,
+    path: LineString,
+    color: string,
+    duration: number
   ) => {
-    const paths = [];
+    let startTime: number | null = null;
 
-    for (const fat of nearbyFATs) {
-      try {
-        const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${featureProperties.Long},${featureProperties.Lat};${fat.FAT_Long},${fat.FAT_Lat}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`;
-        const response = await fetch(url);
-        const data = await response.json();
+    const totalSteps = 1000;
 
-        if (data.routes && data.routes.length > 0) {
-          const path = data.routes[0];
-          const color = generateUniqueColor();
-          const pathId = generateUniqueId();
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
 
-          const lastPoint = path.geometry.coordinates[
-            path.geometry.coordinates.length - 1
-          ] as [number, number];
-          const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat];
-          const manualDistance = calculateDistance(lastPoint, fatPosition);
+      const step = Math.floor(progress * totalSteps);
 
-          const extendedPath: LineString = {
-            type: "LineString",
-            coordinates: [
-              [featureProperties.Long, featureProperties.Lat],
-              ...path.geometry.coordinates,
-              fatPosition,
-            ],
-          };
+      const numCoordinates = Math.floor(
+        step * (path.coordinates.length / totalSteps)
+      );
 
-          const realDistance = path.distance + manualDistance;
+      const coordinates = path.coordinates.slice(0, numCoordinates);
 
-          paths.push({
-            id: pathId,
-            color,
-            path: extendedPath,
-            FAT_ID: fat.FAT_ID,
-            FAT_Name: fat.Name,
-            originalDistance: path.distance,
-            manualDistance,
-            realDistance,
-            duration: path.duration,
+      if (mapRef.current) {
+        const source = mapRef.current.getSource(
+          pathId
+        ) as mapboxgl.GeoJSONSource;
+        if (source) {
+          source.setData({
+            type: "Feature",
+            geometry: {
+              type: "LineString",
+              coordinates,
+            },
+            properties: {},
           });
+        }
+      }
 
+      if (progress < 1) {
+        requestAnimationFrame(animate); // Keep animating until complete
+      }
+    };
+
+    requestAnimationFrame(animate);
+  };
+
+  const generateAndAnimatePath = async (
+    featureProperties: FeatureProperties,
+    fat: NearybyFATs,
+    delay: number
+  ) => {
+    try {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${featureProperties.Long},${featureProperties.Lat};${fat.FAT_Long},${fat.FAT_Lat}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.routes && data.routes.length > 0) {
+        const path = data.routes[0];
+        const color = generateUniqueColor();
+        const pathId = generateUniqueId();
+
+        const lastPoint = path.geometry.coordinates[
+          path.geometry.coordinates.length - 1
+        ] as [number, number];
+        const fatPosition: [number, number] = [fat.FAT_Long, fat.FAT_Lat];
+        const manualDistance = calculateDistance(lastPoint, fatPosition);
+
+        const extendedPath: LineString = {
+          type: "LineString",
+          coordinates: [
+            [featureProperties.Long, featureProperties.Lat],
+            ...path.geometry.coordinates,
+            fatPosition,
+          ],
+        };
+
+        const realDistance = path.distance + manualDistance;
+
+        setTimeout(() => {
           if (mapRef.current) {
             mapRef.current.addSource(pathId, {
               type: "geojson",
@@ -148,6 +182,14 @@ export const useSuggestFATLine = (
                 "line-width": 6,
               },
             });
+
+            setSuggestedPaths((prevPaths) => [
+              ...prevPaths,
+              { id: pathId, color, path: extendedPath },
+            ]);
+
+            animateLine(pathId, extendedPath, color, 3000);
+
             if (mapRef.current.getLayer(pathId)) {
               mapRef.current.on("mouseenter", pathId, () => {
                 mapRef.current!.getCanvas().style.cursor = "pointer";
@@ -156,32 +198,37 @@ export const useSuggestFATLine = (
               mapRef.current.on("mouseleave", pathId, () => {
                 mapRef.current!.getCanvas().style.cursor = "";
               });
-            } else {
-              console.error(`Layer with ID ${pathId} not found`);
-            }
 
-            mapRef.current.on("click", pathId, () => {
-              setSelectedPath({
-                id: pathId,
-                color,
-                FAT_ID: fat.FAT_ID,
-                FAT_Name: fat.Name,
-                path: extendedPath,
-                originalDistance: path.distance,
-                manualDistance,
-                realDistance,
-                duration: path.duration,
+              mapRef.current.on("click", pathId, () => {
+                setSelectedPath({
+                  id: pathId,
+                  color,
+                  FAT_ID: fat.FAT_ID,
+                  FAT_Name: fat.Name,
+                  path: extendedPath,
+                  originalDistance: path.distance,
+                  manualDistance,
+                  realDistance,
+                  duration: path.duration,
+                });
+                setIsPathPanelOpen(true);
               });
-              setIsPathPanelOpen(true);
-            });
+            }
           }
-        }
-      } catch (error) {
-        console.error("Error generating paths:", error);
+        }, delay); // Introduce delay between drawing each line
       }
+    } catch (error) {
+      console.error("Error generating paths:", error);
     }
+  };
 
-    setSuggestedPaths(paths);
+  const generatePaths = async (
+    featureProperties: FeatureProperties,
+    nearbyFATs: NearybyFATs[]
+  ) => {
+    nearbyFATs.forEach((fat, index) => {
+      generateAndAnimatePath(featureProperties, fat, index * 1500);
+    });
   };
 
   const handleSuggestFATLine = useCallback(
@@ -221,7 +268,7 @@ export const useSuggestFATLine = (
       }
     });
 
-    setSuggestedPaths([]);
+    setSuggestedPaths([]); // Clear the tracked paths after removal
   };
 
   return {

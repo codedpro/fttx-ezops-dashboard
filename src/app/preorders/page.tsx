@@ -213,6 +213,7 @@ const FTTHModemsMap: React.FC = () => {
     handleSaveSuggestedPath: () => void;
     handleCancelSuggestedPath: () => void;
     handleCancelEditPath: () => void;
+    handlemoveEditPoint: (newCoordinates: { lat: number; lng: number }) => void;
     mapRef: React.MutableRefObject<mapboxgl.Map | null>;
   } | null>(null);
 
@@ -224,12 +225,25 @@ const FTTHModemsMap: React.FC = () => {
       ftthMapRef.current.handleEditPoint(editData);
     }
   };
+  const handleSaveEditPointCoordinates = (newCoordinates: {
+    lat: number;
+    lng: number;
+  }) => {
+    if (ftthMapRef.current) {
+      setZoomLocation({
+        lat: newCoordinates.lat,
+        lng: newCoordinates.lng,
+        zoom: 20,
+      });
+      ftthMapRef.current.handlemoveEditPoint(newCoordinates);
+    }
+  };
 
   const handleSuggestFATSubmit = () => {
     if (ftthMapRef.current) {
       setIsEditingPosition(false);
       ftthMapRef.current.handleSaveSuggestedPath();
-      handleCancelSuggestFAT()
+      handleCancelSuggestFAT();
     }
   };
 
@@ -243,6 +257,11 @@ const FTTHModemsMap: React.FC = () => {
   const handleSuggestFATLine = () => {
     if (ftthMapRef.current) {
       ftthMapRef.current.handleCancelEditPath();
+
+      setIsFATLayerVisible(false);
+      setIsMetroLayerVisible(false);
+      setIsODCLineLayerVisible(false);
+      setIsDropCableLayerVisible(false);
       setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleSuggestFATLine(editData);
       setIsSuggestingLine(true);
@@ -257,6 +276,10 @@ const FTTHModemsMap: React.FC = () => {
   };
   const handleCancelSuggesting = () => {
     if (ftthMapRef.current) {
+      setIsFATLayerVisible(true);
+      setIsMetroLayerVisible(true);
+      setIsODCLineLayerVisible(true);
+      setIsDropCableLayerVisible(true);
       ftthMapRef.current.handleCancelSuggestedPath();
       ftthMapRef.current.handleCancelEditPath();
 
@@ -287,13 +310,14 @@ const FTTHModemsMap: React.FC = () => {
     handleSaveLine,
     handleCancelLine,
     handleColorChange,
-  } = useCustomFATLine(ftthMapRef.current?.mapRef ?? { current: null }, "sfat-layer");
+  } = useCustomFATLine(ftthMapRef.current?.mapRef ?? { current: null }, [
+    "sfat-layer",
+    "mfat-layer",
+  ]);
 
   const handleCustomFATLine = () => {
     if (ftthMapRef.current && editData) {
-
       handleStartDrawing(editData);
-
     }
   };
 
@@ -353,6 +377,7 @@ const FTTHModemsMap: React.FC = () => {
               isSuggestingFATLine={isSuggestingLine}
               handleCancelCustomLine={handleCancelLine}
               handleCancelSuggestingFATLine={handleCancelSuggesting}
+              handleSaveEditCoordinates={handleSaveEditPointCoordinates}
             />
           )}
           <div className="z-20">
