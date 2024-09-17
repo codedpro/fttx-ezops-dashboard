@@ -3,39 +3,45 @@ import Link from "next/link";
 import SidebarDropdown from "@/components/Sidebar/SidebarDropdown";
 import { usePathname } from "next/navigation";
 
-const SidebarItem = ({ item }: any) => {
+interface SidebarItemProps {
+  item: any;
+  collapsed: boolean;
+}
+
+const SidebarItem = ({ item, collapsed }: SidebarItemProps) => {
   const pathname = usePathname();
 
-  // Determine if the current item is active based on the pathname
   const isActive = pathname === item.route;
 
   return (
     <>
-      <li>
+      <li className={`relative group`}>
         <Link
           href={item.route}
           className={`${
             isActive
-              ? "bg-primary/[.07] text-primary dark:bg-white/10 dark:text-white"
+              ? "bg-primary text-black dark:bg-primary dark:text-white"
               : "text-dark-4 hover:bg-gray-2 hover:text-dark dark:text-gray-5 dark:hover:bg-white/10 dark:hover:text-white"
-          } group relative flex items-center gap-3 rounded-[7px] px-3.5 py-3 font-medium duration-300 ease-in-out`}
+          } relative flex items-center gap-3 px-3.5 py-3 font-medium duration-300 ease-in-out ${
+            collapsed ? "justify-center" : ""
+          }`}
         >
           {item.icon}
-          {item.label}
-          {item.message && (
+          {!collapsed && <span>{item.label}</span>}
+          {item.message && !collapsed && (
             <span className="absolute right-11.5 top-1/2 -translate-y-1/2 rounded-full bg-red-light-6 px-1.5 py-px text-[10px] font-medium leading-[17px] text-red">
               {item.message}
             </span>
           )}
-          {item.pro && (
+          {item.pro && !collapsed && (
             <span className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md bg-primary px-1.5 py-px text-[10px] font-medium leading-[17px] text-white">
               New
             </span>
           )}
           {item.children && (
             <svg
-              className={`absolute right-3.5 top-1/2 -translate-y-1/2 fill-current ${
-                !isActive && "rotate-180"
+              className={`absolute right-3.5 top-1/2 -translate-y-1/2 fill-current transition-transform duration-300 ${
+                !isActive && !collapsed ? "rotate-180" : ""
               }`}
               width="22"
               height="22"
@@ -59,7 +65,7 @@ const SidebarItem = ({ item }: any) => {
               !isActive && "hidden"
             }`}
           >
-            <SidebarDropdown item={item.children} />
+            {!collapsed && <SidebarDropdown item={item.children} />}
           </div>
         )}
       </li>

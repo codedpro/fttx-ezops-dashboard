@@ -27,15 +27,15 @@ const Header = (props: {
 
   return (
     <header className="sticky top-0 z-50 flex w-full border-b border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark">
-      <div className="flex flex-grow items-center justify-between px-4 py-5 shadow-2 md:px-5 2xl:px-10">
-        <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
+      <div className="flex flex-grow items-center justify-between py-5 shadow-2 md:px-5 2xl px-10">
+        <div className="flex items-center gap-2 sm:gap-4 ">
           <button
             aria-controls="sidebar"
             onClick={(e) => {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="z-50 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-dark-3 dark:bg-dark-2 lg:hidden"
+            className="z-50 block rounded-sm  bg-white p-1.5  dark:bg-[#122031] "
           >
             <span className="relative block h-5.5 w-5.5 cursor-pointer">
               <span className="du-block absolute right-0 h-full w-full">

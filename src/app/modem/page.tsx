@@ -26,8 +26,9 @@ export default function Modem() {
     (modem) =>
       modem.Modem_ID.toString().includes(searchTerm) ||
       modem.OLT.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      modem.Online_Status.toLowerCase().includes(searchTerm.toLowerCase())
+      (modem.Online_Status && modem.Online_Status.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+  
 
   const loadMoreModems = () => {
     setVisibleModems((prev) => prev + 30);

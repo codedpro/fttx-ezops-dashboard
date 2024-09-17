@@ -175,6 +175,35 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
     }
   }, [layers]);
 
+  function debounce(func: (...args: any[]) => void, delay: number) {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  }
+
+  const resizeMap = debounce(() => {
+    if (mapRef.current) {
+      mapRef.current.resize();
+    }
+  }, 100);
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      resizeMap();
+    });
+
+    if (mapContainerRef.current) {
+      observer.observe(mapContainerRef.current);
+    }
+
+    return () => {
+      if (mapContainerRef.current) {
+        observer.unobserve(mapContainerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <>
       <div ref={mapContainerRef} className="w-full h-screen" />

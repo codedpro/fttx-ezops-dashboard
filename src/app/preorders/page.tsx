@@ -328,7 +328,7 @@ const FTTHModemsMap: React.FC = () => {
           <div className="text-2xl font-bold">Loading Map...</div>
         </div>
       ) : (
-        <div className="w-full h-[80vh] relative overflow-hidden">
+        <div className="w-full h-[80vh] relative overflow-hidden flex">
           <CityPanel onCityClick={handleCityClick} />
           {!isEditMode && (
             <>
@@ -380,7 +380,7 @@ const FTTHModemsMap: React.FC = () => {
               handleSaveEditCoordinates={handleSaveEditPointCoordinates}
             />
           )}
-          <div className="z-20">
+        <div className="w-full">
             <FTTHMap
               ref={ftthMapRef}
               layers={pointLayers.concat(lineLayers)}

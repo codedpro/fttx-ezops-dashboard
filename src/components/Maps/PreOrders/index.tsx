@@ -10,35 +10,15 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Modal } from "./Panels/Modal";
 import { useEditFeature } from "@/hooks/useEditFeature";
 import { useSuggestFATLine } from "@/hooks/useSuggestFATLine";
+import {
+  addPointLayer,
+  addLineLayer,
+  addHeatmapLayer,
+  addFillLayer,
+} from "@/utils/mapLayers";
 
+import { FTTHMapProps } from "@/types/FTTHMapProps";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
-
-interface FTTHMapProps {
-  layers: Array<{
-    id: string;
-    source: GeoJSONSourceSpecification | null;
-    visible: boolean;
-    type: "point" | "line" | "heatmap" | "fill";
-    icons?: { [key: string]: string };
-    paint?: {
-      "line-color"?: string;
-      "line-width"?: number;
-      "line-opacity"?: number;
-      "heatmap-intensity"?: number;
-      "heatmap-radius"?: number;
-      "heatmap-opacity"?: number;
-      "heatmap-color"?: [string, ...any[]];
-    };
-  }>;
-  mapStyle: string;
-  zoomLocation: { lat: number; lng: number; zoom: number } | null;
-  onEdit: (point: any) => void;
-  isEditMode: boolean;
-  onCoordinatesChange: (
-    coordinates: { lat: number; lng: number } | null
-  ) => void;
-  onPathPanelChange: (isOpen: boolean, path: any) => void;
-}
 
 const PreOrdersMap = forwardRef<
   {
@@ -66,117 +46,6 @@ const PreOrdersMap = forwardRef<
     const [modalData, setModalData] = useState<any>(null);
     const isEditModeRef = useRef(isEditMode);
 
-    const addPointLayer = async (
-      id: string,
-      source: any,
-      icons: any,
-      visible: boolean
-    ) => {
-      const iconPromises = Object.keys(icons).map((key) => {
-        return new Promise<void>((resolve) => {
-          if (!mapRef.current?.hasImage(key)) {
-            mapRef.current?.loadImage(icons[key], (error, image) => {
-              if (error) {
-                console.error(`Error loading icon ${key}:`, error);
-              } else if (image) {
-                mapRef.current?.addImage(key, image);
-              }
-              resolve();
-            });
-          } else {
-            resolve();
-          }
-        });
-      });
-
-      await Promise.all(iconPromises);
-
-      if (!mapRef.current?.getLayer(id)) {
-        mapRef.current?.addLayer({
-          id,
-          type: "symbol",
-          source: id,
-          layout: {
-            "icon-image": ["get", "icon"],
-            "icon-size": ["get", "iconSize"],
-            "icon-allow-overlap": true,
-          },
-        });
-        mapRef.current?.setLayoutProperty(
-          id,
-          "visibility",
-          visible ? "visible" : "none"
-        );
-      }
-    };
-
-    const addLineLayer = (
-      id: string,
-      source: any,
-      paint: any,
-      visible: boolean
-    ) => {
-      if (!mapRef.current?.getLayer(id)) {
-        mapRef.current?.addLayer({
-          id,
-          type: "line",
-          source: id,
-          paint: {
-            "line-color": paint?.["line-color"] || "#ff0000",
-            "line-width": paint?.["line-width"] || 5,
-            "line-opacity": paint?.["line-opacity"] || 0.8,
-          },
-        });
-        mapRef.current?.setLayoutProperty(
-          id,
-          "visibility",
-          visible ? "visible" : "none"
-        );
-      }
-    };
-
-    const addHeatmapLayer = (
-      id: string,
-      source: any,
-      paint: any,
-      visible: boolean
-    ) => {
-      if (!mapRef.current?.getLayer(id)) {
-        mapRef.current?.addLayer({
-          id,
-          type: "heatmap",
-          source: id,
-          paint: paint,
-        });
-        mapRef.current?.setLayoutProperty(
-          id,
-          "visibility",
-          visible ? "visible" : "none"
-        );
-      }
-    };
-
-    const addFillLayer = (
-      id: string,
-      source: any,
-      paint: any,
-      visible: boolean
-    ) => {
-      if (!mapRef.current?.getLayer(id)) {
-        mapRef.current?.addLayer({
-          id,
-          type: "fill",
-          source: id,
-          paint: paint,
-        });
-        mapRef.current?.setLayoutProperty(
-          id,
-          "visibility",
-          visible ? "visible" : "none"
-        );
-      }
-    };
-
     const addLayersToMap = () => {
       if (!mapRef.current) return;
 
@@ -193,16 +62,16 @@ const PreOrdersMap = forwardRef<
         if (!layerExists && mapRef.current?.getSource(id)) {
           switch (type) {
             case "point":
-              addPointLayer(id, source, icons, visible);
+              addPointLayer(mapRef, id, source, icons, visible);
               break;
             case "line":
-              addLineLayer(id, source, paint, visible);
+              addLineLayer(mapRef, id, source, paint, visible);
               break;
             case "heatmap":
-              addHeatmapLayer(id, source, paint, visible);
+              addHeatmapLayer(mapRef, id, source, paint, visible);
               break;
             case "fill":
-              addFillLayer(id, source, paint, visible);
+              addFillLayer(mapRef, id, source, paint, visible);
               break;
             default:
               console.error("Unknown layer type", type);
@@ -385,6 +254,37 @@ const PreOrdersMap = forwardRef<
       };
     }, [layers, mapIsLoaded]);
 
+
+    function debounce(func: (...args: any[]) => void, delay: number) {
+        let timeoutId: NodeJS.Timeout;
+        return (...args: any[]) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => func(...args), delay);
+        };
+      }
+    const resizeMap = debounce(() => {
+        if (mapRef.current) {
+          mapRef.current.resize();
+        }
+      }, 100);
+      useEffect(() => {
+        const observer = new ResizeObserver(() => {
+          resizeMap();
+        });
+    
+        if (mapContainerRef.current) {
+          observer.observe(mapContainerRef.current);
+        }
+    
+        return () => {
+          if (mapContainerRef.current) {
+            observer.unobserve(mapContainerRef.current);
+          }
+        };
+      }, []);
+
+
+
     const closeModal = () => {
       setIsModalOpen(false);
       setModalData(null);
@@ -452,7 +352,7 @@ const PreOrdersMap = forwardRef<
     }));
 
     return (
-      <div className="w-full h-screen relative">
+      <div className="w-full h-screen relative ">
         <div ref={mapContainerRef} className="w-full h-screen" />
         {isModalOpen && modalData && (
           <Modal data={modalData} onClose={closeModal} onEdit={onEdit} />

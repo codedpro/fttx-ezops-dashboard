@@ -1,129 +1,166 @@
-"use client";
-
-import React from "react";
-import { usePathname } from "next/navigation";
+import React, { useState, useEffect, useRef } from "react";
+import { Sidebar } from "react-pro-sidebar";
+import {
+  FaTachometerAlt,
+  FaMapMarkerAlt,
+  FaCogs,
+  FaWifi,
+  FaChevronLeft,
+} from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
-import ClickOutside from "@/components/ClickOutside";
-import {
-  FaMapMarkerAlt,
-  FaTachometerAlt,
-  FaCogs,
-  FaWifi,
-} from "react-icons/fa";
 
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
 }
 
-const menuGroups = [
-  {
-    name: "MAIN MENU",
-    menuItems: [
-      {
-        icon: <FaTachometerAlt className="text-current" size={24} />,
-        label: "Dashboard",
-        route: "/",
-      },
-      {
-        icon: <FaMapMarkerAlt className="text-current" size={24} />,
-        label: "Map",
-        route: "/map",
-      },
-      {
-        icon: <FaCogs className="text-current" size={24} />,
-        label: "Preorders",
-        route: "/preorders",
-      },
-      {
-        icon: <FaWifi className="text-current" size={24} />,
-        label: "Modems",
-        route: "/modem",
-      },
-    ],
-  },
-];
+const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [isArrowClicked, setIsArrowClicked] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(
+    document.documentElement.classList.contains("dark")
+  );
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const pathname = usePathname(); // Get the current pathname
+  useEffect(() => {
+    const detectDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    };
+
+    const observer = new MutationObserver(detectDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    setCollapsed(!sidebarOpen);
+  }, [sidebarOpen]);
+
+  const handleMouseEnter = () => {
+    if (collapsed && !isArrowClicked) {
+      setCollapsed(false);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!collapsed && !isArrowClicked) {
+      setCollapsed(true);
+    }
+  };
+
+  const toggleArrowBehavior = () => {
+    setIsArrowClicked(!isArrowClicked);
+    setCollapsed(false);
+  };
+
+  const darkModeStyles = {
+    backgroundColor: "#1f2937",
+    color: "#ffffff",
+    borderColor: "#2d3748",
+  };
+
+  const lightModeStyles = {
+    backgroundColor: "#ffffff",
+    color: "#1f2937",
+    borderColor: "#e2e8f0",
+  };
+
+  const rootStyles = isDarkMode ? darkModeStyles : lightModeStyles;
+
+  const sidebarItems = [
+    {
+      label: "Dashboard",
+      icon: <FaTachometerAlt />,
+      route: "/",
+    },
+    {
+      label: "Map",
+      icon: <FaMapMarkerAlt />,
+      route: "/map",
+    },
+    {
+      label: "Preorders",
+      icon: <FaCogs />,
+      route: "/preorders",
+    },
+    {
+      label: "Modems",
+      icon: <FaWifi />,
+      route: "/modem",
+    },
+  ];
+
+  if (!sidebarOpen) {
+    return null;
+  }
 
   return (
-    <ClickOutside onClick={() => setSidebarOpen(false)}>
-      <aside
-        className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden border-r border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark lg:static lg:translate-x-0 ${
-          sidebarOpen
-            ? "translate-x-0 duration-300 ease-linear"
-            : "-translate-x-full"
-        }`}
+    <div className="flex transition-width duration-300 ease-in-out">
+      <Sidebar
+        collapsed={collapsed}
+        toggled={sidebarOpen}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onBackdropClick={() =>
+          window.innerWidth < 768 ? setSidebarOpen(false) : null
+        }
+        breakPoint="md"
+        transitionDuration={90}
+        backgroundColor={isDarkMode ? "#122031" : "#ffffff"}
+        rootStyles={rootStyles}
       >
-        <div className="flex items-center justify-center gap-2 px-6">
+        <div className="sidebar-header flex items-center justify-center py-4">
           <Link href="/">
             <Image
-              width={3000}
-              height={3000}
-              src={"/images/logo/logo-dark.png"}
+              width={500}
+              height={500}
+              src="/images/logo/logo-dark.png"
               alt="Logo"
               priority
-              className="hidden dark:block w-45"
-              draggable={false}
-            />
-            <Image
-              width={3000}
-              height={3000}
-              src={"/images/logo/logo-white.png"}
-              alt="Logo"
-              priority
-              className="block dark:hidden w-45"
+              className="dark:block w-36 hidden"
               draggable={false}
             />
           </Link>
-
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="block lg:hidden"
-          >
-            <svg
-              className="fill-current"
-              width="20"
-              height="18"
-              viewBox="0 0 20 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M19 8.175H2.98748L9.36248 1.6875C9.69998 1.35 9.69998 0.825 9.36248 0.4875C9.02498 0.15 8.49998 0.15 8.16248 0.4875L0.399976 8.3625C0.0624756 8.7 0.0624756 9.225 0.399976 9.5625L8.16248 17.4375C8.31248 17.5875 8.53748 17.7 8.76248 17.7C8.98748 17.7 9.17498 17.625 9.36248 17.475C9.69998 17.1375 9.69998 16.6125 9.36248 16.275L3.02498 9.8625H19C19.45 9.8625 19.825 9.4875 19.825 9.0375C19.825 8.55 19.45 8.175 19 8.175Z"
-                fill=""
-              />
-            </svg>
-          </button>
+          <Link href="/">
+            <Image
+              width={500}
+              height={500}
+              src="/images/logo/logo-light.png"
+              alt="Logo"
+              priority
+              className="dark:hidden w-36"
+              draggable={false}
+            />
+          </Link>
         </div>
 
-        <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-          <nav className="mt-1 px-4 lg:px-6">
-            {menuGroups.map((group, groupIndex) => (
-              <div key={groupIndex}>
-                <h3 className="mb-5 text-sm font-medium text-dark-4 dark:text-gray-300">
-                  {group.name}
-                </h3>
+        <ul>
+          {sidebarItems.map((item, index) => (
+            <SidebarItem key={index} item={item} collapsed={collapsed} />
+          ))}
+        </ul>
 
-                <ul className="mb-6 flex flex-col gap-2">
-                  {group.menuItems.map((menuItem, menuIndex) => (
-                    <SidebarItem
-                      key={menuIndex}
-                      item={menuItem}
-                      isActive={pathname === menuItem.route} // Check if the current path matches the menu item's route
-                    />
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
+        <div
+          onClick={toggleArrowBehavior}
+          className="sidebar-footer absolute bottom-0 right-0 flex items-center justify-end py-2 pr-2 w-full bg-[#f3f4f6] dark:bg-[#122031] hover:opacity/80"
+        >
+          <FaChevronLeft
+            size={20}
+            className={`transition-transform text-dark dark:text-white ${
+              isArrowClicked ? "" : "rotate-180"
+            }`}
+          />
         </div>
-      </aside>
-    </ClickOutside>
+      </Sidebar>
+    </div>
   );
 };
 
-export default Sidebar;
+export default SidebarComponent;

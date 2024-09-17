@@ -68,7 +68,11 @@ const FTTHModemsMap: React.FC = () => {
   } | null>(null);
   const searchParams = useSearchParams();
 
-  const handleCityClick = (city: { lat: number; lng: number; zoom: number}) => {
+  const handleCityClick = (city: {
+    lat: number;
+    lng: number;
+    zoom: number;
+  }) => {
     setZoomLocation(city);
   };
 
@@ -179,7 +183,7 @@ const FTTHModemsMap: React.FC = () => {
     if (search.includes(",")) {
       const [lat, lng] = search.split(",").map(Number);
       if (!isNaN(lat) && !isNaN(lng)) {
-        setZoomLocation({ lat, lng, zoom:20 });
+        setZoomLocation({ lat, lng, zoom: 20 });
       }
     }
 
@@ -188,7 +192,7 @@ const FTTHModemsMap: React.FC = () => {
         (modem) => modem.Modem_ID.toString() === search
       );
       if (modem) {
-        setZoomLocation({ lat: modem.Lat, lng: modem.Long , zoom:20  });
+        setZoomLocation({ lat: modem.Lat, lng: modem.Long, zoom: 20 });
       }
     }
 
@@ -199,7 +203,7 @@ const FTTHModemsMap: React.FC = () => {
       );
       if (oltData.length > 0) {
         const olt = oltData[0];
-        setZoomLocation({ lat: olt.Lat, lng: olt.Long , zoom:20 });
+        setZoomLocation({ lat: olt.Lat, lng: olt.Long, zoom: 20 });
       }
     }
   }, [searchParams]);
@@ -209,6 +213,8 @@ const FTTHModemsMap: React.FC = () => {
       setLoading(false);
     }
   }, [areVisibleLayersLoaded]);
+
+
 
   return (
     <DefaultLayout>
@@ -237,7 +243,7 @@ const FTTHModemsMap: React.FC = () => {
             onStyleChange={handleStyleChange}
             selectedStyle={mapStyle}
           />
-          <div className="z-20">
+          <div className="z-20 w-full">
             <FTTHMap
               layers={pointLayers.concat(lineLayers)}
               mapStyle={mapStyle}
