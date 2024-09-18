@@ -3,7 +3,7 @@ import { Feature, FeatureCollection, Geometry } from "geojson";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import { useEffect, useState } from "react";
 
-export const useFTTHModemLayer = () => {
+export const useFTTHComplainLayer = () => {
   const modems = useFTTHModemsStore((state) => state.modems);
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
 
@@ -39,9 +39,9 @@ export const useFTTHModemLayer = () => {
   }, [modems]);
 
   return {
-    id: "modems",
+    id: "FTTHComplain",
     source,
     visible: true,
-    type: "point" as const, 
+    type: "point" as const,
   };
 };

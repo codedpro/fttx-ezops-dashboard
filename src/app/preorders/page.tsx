@@ -1,12 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import FTTHMap from "@/components/Maps/PreOrders";
-import { useMFATLayer } from "@/components/Maps/Main/Layers/MFATLayer";
-import { useSFATLayer } from "@/components/Maps/Main/Layers/SFATLayer";
-import { useFATLineLayer } from "@/components/Maps/Main/Layers/FATLineLayer";
-import { useMetroLineLayer } from "@/components/Maps/Main/Layers/MetroLineLayer";
-import { useODCLineLayer } from "@/components/Maps/Main/Layers/ODCLineLayer";
-import { useDropCableLineLayer } from "@/components/Maps/Main/Layers/DropCableLineLayer";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import StylePanel from "@/components/Maps/Main/Panels/StylePanel";
 import CityPanel from "@/components/Maps/Main/Panels/CityPanel";
@@ -14,42 +8,13 @@ import LayerPanel from "@/components/Maps/Main/Panels/LayerPanel";
 import { useSearchParams } from "next/navigation";
 import EditPanel from "@/components/Maps/PreOrders/Panels/EditPanel";
 import LegendPanel from "@/components/Maps/PreOrders/Panels/LegendPanel";
-interface Layer {
-  id: string;
-  visible: boolean;
-  toggle: React.Dispatch<React.SetStateAction<boolean>>;
-  label: string;
-  icon: string;
-  source: mapboxgl.GeoJSONSourceSpecification | null;
-  type: "point" | "line" | "heatmap" | "fill";
-}
-import { useFTTHPreorderLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorder";
-import { useFTTHPreorderHMLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorderHeatMap";
-import { useFTTHSuggestedFATLayer } from "@/components/Maps/PreOrders/Layers/FTTHSuggestedFAT";
 import { useCustomFATLine } from "@/hooks/useCustomFATLine";
+import { LayerKeys } from "@/types/Layers";
+import { useLayerManager } from "@/utils/layerManager";
 
 const FTTHModemsMap: React.FC = () => {
-  const preOrdersLayer = useFTTHPreorderLayer();
-  const preOrdersHMLayer = useFTTHPreorderHMLayer();
-  const mFatLayer = useMFATLayer();
-  const sFatLayer = useSFATLayer();
-  const fatLineLayer = useFATLineLayer();
-  const metroLineLayer = useMetroLineLayer();
-  const odcLineLayer = useODCLineLayer();
-  const dropCableLineLayer = useDropCableLineLayer();
-  const suggestedFATLayer = useFTTHSuggestedFATLayer();
-  const [isMFATLayerVisible, setIsMFATLayerVisible] = useState(true);
-  const [isSFATLayerVisible, setIsSFATLayerVisible] = useState(true);
-  const [isFATLayerVisible, setIsFATLayerVisible] = useState(true);
-  const [isMetroLayerVisible, setIsMetroLayerVisible] = useState(true);
-  const [isODCLineLayerVisible, setIsODCLineLayerVisible] = useState(true);
-  const [isDropCableLayerVisible, setIsDropCableLayerVisible] = useState(true);
-  const [isPreOrdersVisable, setIsPreOrdersVisable] = useState(false);
-  const [isPreOrdersHMVisable, setIsPreOrdersHMVisable] = useState(true);
-  const [isSuggestedFATVisable, setIsSuggestedFATVisable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/dark-v10");
-
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditingPosition, setIsEditingPosition] = useState(false);
   const [isSuggestingLine, setIsSuggestingLine] = useState(false);
@@ -59,7 +24,62 @@ const FTTHModemsMap: React.FC = () => {
   } | null>(null);
   const [isPathPanelOpen, setIsPathPanelOpen] = useState(false);
   const [selectedPath, setSelectedPath] = useState<any>(null);
+  const [zoomLocation, setZoomLocation] = useState<{
+    lat: number;
+    lng: number;
+    zoom: number;
+  } | null>(null);
+  const searchParams = useSearchParams();
+  const handleCityClick = (city: {
+    lat: number;
+    lng: number;
+    zoom: number;
+  }) => {
+    setZoomLocation(city);
+  };
+  const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
+  const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
 
+  const selectedLayers = [
+    //Points
+    "FTTHPreorderLayer",
+    "MFATLayer",
+    "SFATLayer",
+    "FTTHPreorderHMLayer",
+    "FTTHSuggestedFATLayer",
+    "FTTHSuggestedFATSmallFillLayer",
+    //Lines
+    "ODCLineLayer",
+    "FATLineLayer",
+    "MetroLineLayer",
+    "DropCableLineLayer",
+  ] as LayerKeys[];
+
+  const defaultVisibility = {
+    FTTHPreorderLayer: false,
+    MFATLayer: true,
+    SFATLayer: true,
+    FTTHPreorderHMLayer: true,
+    FTTHSuggestedFATLayer: false,
+    FTTHSuggestedFATSmallFillLayer: false,
+    ODCLineLayer: true,
+    FATLineLayer: true,
+    MetroLineLayer: true,
+    DropCableLineLayer: true,
+  };
+
+  const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
+  const pointLayers = activeLayers.filter(
+    (layer) =>
+      layer.type === "point" ||
+      layer.type === "heatmap" ||
+      (layer.type === "fill" && layer.id !== "suggestedFATSGrayFill")
+  );
+  const lineLayers = activeLayers.filter((layer) => layer.type === "line");
+
+  const handleStyleChange = (newStyle: string) => {
+    setMapStyle(newStyle);
+  };
   const handleCoordinatesChange = (
     coordinates: { lat: number; lng: number } | null
   ) => {
@@ -71,116 +91,6 @@ const FTTHModemsMap: React.FC = () => {
     setSelectedPath(path);
   };
 
-  const [zoomLocation, setZoomLocation] = useState<{
-    lat: number;
-    lng: number;
-    zoom: number;
-  } | null>(null);
-  const searchParams = useSearchParams();
-
-  const handleCityClick = (city: {
-    lat: number;
-    lng: number;
-    zoom: number;
-  }) => {
-    setZoomLocation(city);
-  };
-
-  const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
-  const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
-  const handleStyleChange = (newStyle: string) => {
-    setMapStyle(newStyle);
-  };
-  const pointLayers: Layer[] = [
-    {
-      ...preOrdersHMLayer,
-      visible: isPreOrdersHMVisable,
-      toggle: setIsPreOrdersHMVisable,
-      label: "Pre Orders heatmap",
-      icon: "",
-      type: "heatmap",
-    },
-    {
-      ...preOrdersLayer,
-      visible: isPreOrdersVisable,
-      toggle: setIsPreOrdersVisable,
-      label: "Pre Orders",
-      icon: "/images/map/FTTHPreorder.png",
-      type: "point",
-    },
-
-    {
-      ...mFatLayer,
-      visible: isMFATLayerVisible,
-      toggle: setIsMFATLayerVisible,
-      label: "MFAT",
-      icon: "/images/map/MFAT.png",
-      type: "point",
-    },
-    {
-      ...sFatLayer,
-      visible: isSFATLayerVisible,
-      toggle: setIsSFATLayerVisible,
-      label: "SFAT",
-      icon: "/images/map/SFAT.png",
-      type: "point",
-    },
-    {
-      ...suggestedFATLayer.fillLayer,
-      visible: isSuggestedFATVisable,
-      toggle: setIsSuggestedFATVisable,
-      label: "Suggested FAT Areas",
-      icon: "",
-      type: "fill",
-    },
-    {
-      ...suggestedFATLayer.smallFillLayer,
-      visible: isSuggestedFATVisable,
-      toggle: setIsSuggestedFATVisable,
-      label: "",
-      icon: "",
-      type: "fill",
-    },
-  ];
-
-  const lineLayers: Layer[] = [
-    {
-      ...fatLineLayer,
-      visible: isFATLayerVisible,
-      toggle: setIsFATLayerVisible,
-      label: "FAT",
-      icon: "#0360f5",
-      type: "line",
-    },
-    {
-      ...metroLineLayer,
-      visible: isMetroLayerVisible,
-      toggle: setIsMetroLayerVisible,
-      label: "Metro",
-      icon: "#ddddff",
-      type: "line",
-    },
-    {
-      ...odcLineLayer,
-      visible: isODCLineLayerVisible,
-      toggle: setIsODCLineLayerVisible,
-      label: "ODC",
-      icon: "#ff0000",
-      type: "line",
-    },
-    {
-      ...dropCableLineLayer,
-      visible: isDropCableLayerVisible,
-      toggle: setIsDropCableLayerVisible,
-      label: "Drop Cable",
-      icon: "#000000",
-      type: "line",
-    },
-  ];
-
-  const areVisibleLayersLoaded =
-    pointLayers.every((layer) => layer.source) &&
-    lineLayers.every((layer) => layer.source);
   useEffect(() => {
     const search = searchParams.get("search");
     if (!search) return;
@@ -192,12 +102,6 @@ const FTTHModemsMap: React.FC = () => {
       }
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    if (areVisibleLayersLoaded) {
-      setLoading(false);
-    }
-  }, [areVisibleLayersLoaded]);
 
   const [editData, setEditData] = useState<any>(null);
   const handleEdit = (data: any) => {
@@ -258,15 +162,26 @@ const FTTHModemsMap: React.FC = () => {
     if (ftthMapRef.current) {
       ftthMapRef.current.handleCancelEditPath();
 
-      setIsFATLayerVisible(false);
-      setIsMetroLayerVisible(false);
-      setIsODCLineLayerVisible(false);
-      setIsDropCableLayerVisible(false);
+      activeLayers.forEach((layer) => {
+        if (
+          [
+            "FATLineLayer",
+            "MetroLineLayer",
+            "ODCLineLayer",
+            "DropCableLineLayer",
+          ].includes(layer.id) &&
+          layer.visible
+        ) {
+          layer.toggle();
+        }
+      });
+
       setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleSuggestFATLine(editData);
       setIsSuggestingLine(true);
     }
   };
+
   const handleExitEditMode = () => {
     if (ftthMapRef.current) {
       setIsEditMode(false);
@@ -276,10 +191,19 @@ const FTTHModemsMap: React.FC = () => {
   };
   const handleCancelSuggesting = () => {
     if (ftthMapRef.current) {
-      setIsFATLayerVisible(true);
-      setIsMetroLayerVisible(true);
-      setIsODCLineLayerVisible(true);
-      setIsDropCableLayerVisible(true);
+      activeLayers.forEach((layer) => {
+        if (
+          [
+            "FATLineLayer",
+            "MetroLineLayer",
+            "ODCLineLayer",
+            "DropCableLineLayer",
+          ].includes(layer.id) &&
+          !layer.visible
+        ) {
+          layer.toggle();
+        }
+      });
       ftthMapRef.current.handleCancelSuggestedPath();
       ftthMapRef.current.handleCancelEditPath();
 
@@ -321,6 +245,16 @@ const FTTHModemsMap: React.FC = () => {
     }
   };
 
+  const FTTHSuggestedFATLayer = activeLayers.find(
+    (layer) => layer.id === "FTTHSuggestedFATLayer"
+  );
+
+  useEffect(() => {
+    const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
+    if (areVisibleLayersLoaded) {
+      setLoading(false);
+    }
+  }, [activeLayers]);
   return (
     <DefaultLayout>
       {loading ? (
@@ -352,7 +286,7 @@ const FTTHModemsMap: React.FC = () => {
                 onStyleChange={handleStyleChange}
                 selectedStyle={mapStyle}
               />
-              {!isSuggestedFATVisable ? null : <LegendPanel />}
+              {FTTHSuggestedFATLayer?.visible ? <LegendPanel /> : null}
             </>
           )}
           {isEditMode && ftthMapRef.current && (
@@ -380,10 +314,10 @@ const FTTHModemsMap: React.FC = () => {
               handleSaveEditCoordinates={handleSaveEditPointCoordinates}
             />
           )}
-        <div className="w-full">
+          <div className="w-full">
             <FTTHMap
               ref={ftthMapRef}
-              layers={pointLayers.concat(lineLayers)}
+              layers={activeLayers}
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
               onEdit={handleEdit}

@@ -7,7 +7,7 @@ interface Layer {
   visible: boolean;
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
   label: string;
-  icon: string; // For "line" type layers, this will be a color code
+  icon: string;
   type: "point" | "line" | "heatmap" | "fill";
 }
 
@@ -43,7 +43,6 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
     );
   };
 
-  // Filter out layers that don't have an icon
   const visibleLayers = layers.filter((layer) => layer.label !== "");
 
   return (
@@ -68,7 +67,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
         <div className="space-y-3 transition-all duration-100 ease-in-out transform">
           {visibleLayers.map((layer) => (
             <div className="flex items-center space-x-2" key={layer.id}>
-              {layer.type === "point" ? (
+              {layer.type === "point" || layer.type === "heatmap" ? (
                 <Image
                   src={layer.icon}
                   alt={layer.label}

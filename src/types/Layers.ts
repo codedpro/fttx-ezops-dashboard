@@ -1,0 +1,17 @@
+export type LayerKeys =
+  | "MFATLayer"
+  | "SFATLayer"
+  | "FATLineLayer"
+  | "MetroLineLayer"
+  | "ODCLineLayer"
+  | "DropCableLineLayer"
+  | "FTTHPreorderLayer"
+  | "FTTHPreorderHMLayer"
+  | "FTTHSuggestedFATLayer"
+  | "FTTHSuggestedFATSmallFillLayer"
+  | "ModemLayer"
+  | "OLTLayer"
+  | "HHLayer"
+  | "FTTHComplain"
+  | "ODCLayer"
+  | "TCLayer";

@@ -10,7 +10,7 @@ interface FTTHMapProps {
     id: string;
     source: GeoJSONSourceSpecification | null;
     visible: boolean;
-    type: "point" | "line";
+    type: "point" | "line" | "heatmap" | "fill";
     icons?: { [key: string]: string };
     paint?: {
       "line-color"?: string;

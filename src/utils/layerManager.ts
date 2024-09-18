@@ -9,53 +9,39 @@ import { useFTTHPreorderLayer } from "@/components/Maps/PreOrders/Layers/FTTHPre
 import { useFTTHPreorderHMLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorderHeatMap";
 import { useFTTHSuggestedFATLayer } from "@/components/Maps/PreOrders/Layers/FTTHSuggestedFAT";
 import { useFTTHModemLayer } from "@/components/Maps/Main/Layers/FTTHModem";
+
 import { useOLTLayer } from "@/components/Maps/Main/Layers/OLTLayer";
 import { useHHLayer } from "@/components/Maps/Main/Layers/HHLayer";
+import { LayerKeys } from "@/types/Layers";
+import { useFTTHComplainLayer } from "@/components/Maps/Main/Layers/FTTHComplain";
+import { useTCLayer } from "@/components/Maps/Main/Layers/TCLayer";
+import { useODCLayer } from "@/components/Maps/Main/Layers/ODCLayer";
 
-// Define valid layer keys
-type LayerKeys = 
-  | "MFATLayer"
-  | "SFATLayer"
-  | "FATLineLayer"
-  | "MetroLineLayer"
-  | "ODCLineLayer"
-  | "DropCableLineLayer"
-  | "FTTHPreorderLayer"
-  | "FTTHPreorderHMLayer"
-  | "FTTHSuggestedFATLayer"
-  | "ModemLayer"
-  | "OLTLayer"
-  | "HHLayer";
-
-// Define default visibility as an optional argument
-interface LayerManagerConfig {
-  defaultVisibility?: Partial<Record<LayerKeys, boolean>>;
+interface LayerConfig {
+  id: string;
+  label: string;
+  icon: string;
+  type: "point" | "line" | "heatmap" | "fill";
+  visible: boolean;
+  source: mapboxgl.GeoJSONSourceSpecification | null;
+  toggle: () => void;
 }
 
-export const useLayerManager = (selectedLayers: LayerKeys[], config?: LayerManagerConfig) => {
-  const layers = {
-    MFATLayer: useMFATLayer(),
-    SFATLayer: useSFATLayer(),
-    FATLineLayer: useFATLineLayer(),
-    MetroLineLayer: useMetroLineLayer(),
-    ODCLineLayer: useODCLineLayer(),
-    DropCableLineLayer: useDropCableLineLayer(),
-    FTTHPreorderLayer: useFTTHPreorderLayer(),
-    FTTHPreorderHMLayer: useFTTHPreorderHMLayer(),
-    FTTHSuggestedFATLayer: useFTTHSuggestedFATLayer(),
-    ModemLayer: useFTTHModemLayer(),
-    OLTLayer: useOLTLayer(),
-    HHLayer: useHHLayer(),
-  };
-
-  // Initialize the layer visibility state using the provided default visibility
-  const [layerVisibility, setLayerVisibility] = useState<Record<LayerKeys, boolean>>(
-    () =>
-      Object.keys(layers).reduce((acc, key) => {
+export const useLayerManager = (
+  selectedLayers: LayerKeys[],
+  defaultVisibility: Partial<Record<LayerKeys, boolean>>
+) => {
+  const [layerVisibility, setLayerVisibility] = useState<
+    Record<LayerKeys, boolean>
+  >(() =>
+    Object.keys(defaultVisibility).reduce(
+      (acc, key) => {
         const layerKey = key as LayerKeys;
-        acc[layerKey] = config?.defaultVisibility?.[layerKey] ?? true; // Use default visibility if provided
+        acc[layerKey] = defaultVisibility[layerKey] ?? false;
         return acc;
-      }, {} as Record<LayerKeys, boolean>)
+      },
+      {} as Record<LayerKeys, boolean>
+    )
   );
 
   const toggleLayerVisibility = (layerName: LayerKeys) => {
@@ -65,12 +51,144 @@ export const useLayerManager = (selectedLayers: LayerKeys[], config?: LayerManag
     }));
   };
 
-  // Only return the selected layers
-  const activeLayers = selectedLayers.map((layerName) => ({
+  const layers: Record<LayerKeys, LayerConfig> = {
+    MFATLayer: {
+      ...useMFATLayer(),
+      label: "MFAT",
+      icon: "/images/map/MFAT.png",
+      type: "point",
+      visible: layerVisibility.MFATLayer,
+      toggle: () => toggleLayerVisibility("MFATLayer"),
+    },
+    SFATLayer: {
+      ...useSFATLayer(),
+      label: "SFAT",
+      icon: "/images/map/SFAT.png",
+      type: "point",
+      visible: layerVisibility.SFATLayer,
+      toggle: () => toggleLayerVisibility("SFATLayer"),
+    },
+    FATLineLayer: {
+      ...useFATLineLayer(),
+      label: "FAT",
+      icon: "#0360f5",
+      type: "line",
+      visible: layerVisibility.FATLineLayer,
+      toggle: () => toggleLayerVisibility("FATLineLayer"),
+    },
+    MetroLineLayer: {
+      ...useMetroLineLayer(),
+      label: "Metro",
+      icon: "#ddddff",
+      type: "line",
+      visible: layerVisibility.MetroLineLayer,
+      toggle: () => toggleLayerVisibility("MetroLineLayer"),
+    },
+    ODCLineLayer: {
+      ...useODCLineLayer(),
+      label: "ODC",
+      icon: "#ff0000",
+      type: "line",
+      visible: layerVisibility.ODCLineLayer,
+      toggle: () => toggleLayerVisibility("ODCLineLayer"),
+    },
+    DropCableLineLayer: {
+      ...useDropCableLineLayer(),
+      label: "Drop Cable",
+      icon: "#000000",
+      type: "line",
+      visible: layerVisibility.DropCableLineLayer,
+      toggle: () => toggleLayerVisibility("DropCableLineLayer"),
+    },
+    FTTHPreorderLayer: {
+      ...useFTTHPreorderLayer(),
+      label: "FTTH Preorder",
+      icon: "/images/map/FTTHPreorder.png",
+      type: "point",
+      visible: layerVisibility.FTTHPreorderLayer,
+      toggle: () => toggleLayerVisibility("FTTHPreorderLayer"),
+    },
+    FTTHPreorderHMLayer: {
+      ...useFTTHPreorderHMLayer(),
+      label: "FTTH Preorder Heatmap",
+      icon: "/images/map/heatmap.png",
+      type: "heatmap",
+      visible: layerVisibility.FTTHPreorderHMLayer,
+      toggle: () => toggleLayerVisibility("FTTHPreorderHMLayer"),
+    },
+    FTTHSuggestedFATLayer: {
+      ...useFTTHSuggestedFATLayer().fillLayer,
+      label: "Suggested FAT Areas",
+      icon: "",
+      type: "fill",
+      visible: layerVisibility.FTTHSuggestedFATLayer,
+      toggle: () => {
+        toggleLayerVisibility("FTTHSuggestedFATLayer");
+        toggleLayerVisibility("FTTHSuggestedFATSmallFillLayer");
+      },
+    },
+
+    FTTHSuggestedFATSmallFillLayer: {
+      ...useFTTHSuggestedFATLayer().smallFillLayer,
+      label: "Small Suggested FAT Areas",
+      icon: "",
+      type: "fill",
+      visible: layerVisibility.FTTHSuggestedFATSmallFillLayer,
+      toggle: () => toggleLayerVisibility("FTTHSuggestedFATSmallFillLayer"),
+    },
+    ModemLayer: {
+      ...useFTTHModemLayer(),
+      label: "Modem",
+      icon: "/images/map/FTTHModem.png",
+      type: "point",
+      visible: layerVisibility.ModemLayer,
+      toggle: () => toggleLayerVisibility("ModemLayer"),
+    },
+    OLTLayer: {
+      ...useOLTLayer(),
+      label: "OLT",
+      icon: "/images/map/OLT.png",
+      type: "point",
+      visible: layerVisibility.OLTLayer,
+      toggle: () => toggleLayerVisibility("OLTLayer"),
+    },
+    HHLayer: {
+      ...useHHLayer(),
+      label: "Hand Hole",
+      icon: "/images/map/HandHole.png",
+      type: "point",
+      visible: layerVisibility.HHLayer,
+      toggle: () => toggleLayerVisibility("HHLayer"),
+    },
+    ODCLayer: {
+      ...useODCLayer(),
+      label: "ODC",
+      icon: "/images/map/ODC.png",
+      type: "point",
+      visible: layerVisibility.ODCLayer,
+      toggle: () => toggleLayerVisibility("ODCLayer"),
+    },
+    TCLayer: {
+      ...useTCLayer(),
+      label: "TC",
+      icon: "/images/map/TC.png",
+      type: "point",
+      visible: layerVisibility.TCLayer,
+      toggle: () => toggleLayerVisibility("TCLayer"),
+    },
+    FTTHComplain: {
+      ...useFTTHComplainLayer(),
+      label: "Complain",
+      icon: "/images/map/Complains.png",
+      type: "point",
+      visible: layerVisibility.FTTHComplain,
+      toggle: () => toggleLayerVisibility("FTTHComplain"),
+    },
+  };
+
+  const activeLayers: LayerConfig[] = selectedLayers.map((layerName) => ({
     ...layers[layerName],
-    visible: layerVisibility[layerName],
-    toggle: () => toggleLayerVisibility(layerName),
   }));
 
-  return { activeLayers, layerVisibility, toggleLayerVisibility };
+  return { activeLayers };
 };
