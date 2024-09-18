@@ -201,8 +201,10 @@ export const useSuggestFATLine = (
 
               mapRef.current.on("click", pathId, () => {
                 setSelectedPath({
-                  id: pathId,
+                  path_id: pathId,
                   color,
+                  Modem_ID: featureProperties.ID,
+                  Modem_EshopID: featureProperties.Eshop_ID,
                   FAT_ID: fat.FAT_ID,
                   FAT_Name: fat.Name,
                   path: extendedPath,
@@ -215,7 +217,7 @@ export const useSuggestFATLine = (
               });
             }
           }
-        }, delay); // Introduce delay between drawing each line
+        }, delay);
       }
     } catch (error) {
       console.error("Error generating paths:", error);
@@ -243,12 +245,37 @@ export const useSuggestFATLine = (
     []
   );
 
-  const handleSavePath = useCallback(() => {
+  const handleSavePath = useCallback(async () => {
     if (selectedPath) {
-      console.log("Saving path:", selectedPath);
       setIsPathPanelOpen(false);
+      console.log(
+        "Saving path:",
+        JSON.stringify({
+          path: selectedPath,
+        })
+      );
+      try {
+        const response = await fetch("/your-api-endpoint", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            path: selectedPath,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save the path.");
+        }
+
+        const result = await response.json();
+        console.log("Save response:", result);
+      } catch (error) {
+        console.error("Error saving the path:", error);
+      }
     }
-  }, [selectedPath]);
+  }, [selectedPath, setIsPathPanelOpen]);
 
   const handleCancelPath = () => {
     setIsPathPanelOpen(false);

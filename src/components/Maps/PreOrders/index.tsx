@@ -17,9 +17,9 @@ import {
   addFillLayer,
 } from "@/utils/mapLayers";
 
-import { FTTHMapProps } from "@/types/FTTHMapProps";
+import { FTTHMapProps, LayerType } from "@/types/FTTHMapProps";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
-
+import { dynamicZoom } from "@/utils/dynamicZoom";
 const PreOrdersMap = forwardRef<
   {
     handleEditPoint: (data: any) => void;
@@ -91,7 +91,7 @@ const PreOrdersMap = forwardRef<
             style: mapStyle,
             center: [52.6771, 36.538],
             zoom: 13.5,
-            maxZoom: 20,
+            maxZoom: 18,
           });
 
           mapRef.current.on("load", () => {
@@ -99,8 +99,12 @@ const PreOrdersMap = forwardRef<
 
             setTimeout(() => {
               addLayersToMap();
+              dynamicZoom(mapRef, layers as LayerType[]);
             }, 50);
           });
+          mapRef.current.on("zoom", () =>
+            dynamicZoom(mapRef, layers as LayerType[])
+          );
 
           mapRef.current.on("mouseenter", "suggestedFATSGrayFill", (e) => {
             mapRef.current!.getCanvas().style.cursor = "pointer";
@@ -254,36 +258,33 @@ const PreOrdersMap = forwardRef<
       };
     }, [layers, mapIsLoaded]);
 
-
     function debounce(func: (...args: any[]) => void, delay: number) {
-        let timeoutId: NodeJS.Timeout;
-        return (...args: any[]) => {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => func(...args), delay);
-        };
-      }
+      let timeoutId: NodeJS.Timeout;
+      return (...args: any[]) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func(...args), delay);
+      };
+    }
     const resizeMap = debounce(() => {
-        if (mapRef.current) {
-          mapRef.current.resize();
-        }
-      }, 100);
-      useEffect(() => {
-        const observer = new ResizeObserver(() => {
-          resizeMap();
-        });
-    
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    }, 100);
+    useEffect(() => {
+      const observer = new ResizeObserver(() => {
+        resizeMap();
+      });
+
+      if (mapContainerRef.current) {
+        observer.observe(mapContainerRef.current);
+      }
+
+      return () => {
         if (mapContainerRef.current) {
-          observer.observe(mapContainerRef.current);
+          observer.unobserve(mapContainerRef.current);
         }
-    
-        return () => {
-          if (mapContainerRef.current) {
-            observer.unobserve(mapContainerRef.current);
-          }
-        };
-      }, []);
-
-
+      };
+    }, []);
 
     const closeModal = () => {
       setIsModalOpen(false);

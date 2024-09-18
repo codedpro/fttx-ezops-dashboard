@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from "react";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Modal } from "./Panels/Modal-Info";
+import { dynamicZoom } from "@/utils/dynamicZoom";
+import { LayerType } from "@/types/FTTHMapProps";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 
@@ -42,12 +44,16 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
           style: mapStyle,
           center: [52.6771, 36.538],
           zoom: 13.5,
-          maxZoom: 20,
+          maxZoom: 18,
         });
 
         mapRef.current.on("load", () => {
           addLayersToMap();
+          dynamicZoom(mapRef, layers as LayerType[]);
         });
+        mapRef.current.on("zoom", () =>
+          dynamicZoom(mapRef, layers as LayerType[])
+        );
       }
     };
 

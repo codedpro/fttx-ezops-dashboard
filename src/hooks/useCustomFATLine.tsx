@@ -214,7 +214,7 @@ export const useCustomFATLine = (
     };
   }, [isDrawing, fatLayerIds, handleDrawNextPoint, handleConnectToFAT, mapRef]);
 
-  const handleSaveLine = useCallback(() => {
+  const handleSaveLine = useCallback(async () => {
     if (lineCoordinates.length > 1 && isConnectedToFAT && fatCoordinate) {
       const lastCoordinate = lineCoordinates[lineCoordinates.length - 1];
       if (
@@ -226,12 +226,38 @@ export const useCustomFATLine = (
           coordinates: lineCoordinates,
         };
 
-        console.log("Line Coordinates:", lineCoordinates);
-        console.log("FAT_ID:", fatFeatureData);
-        console.log("Start Feature Data:", startFeature);
-
         setDrawnLine(lineString);
         handleCancelLine();
+        console.log(
+          JSON.stringify({
+            lineCoordinates: lineCoordinates,
+            FAT_ID: fatFeatureData,
+            startFeature: startFeature,
+          })
+        );
+
+        try {
+          const response = await fetch("/your-api-endpoint", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              lineCoordinates: lineCoordinates,
+              FAT_ID: fatFeatureData,
+              startFeature: startFeature,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to save the line.");
+          }
+
+          const result = await response.json();
+          console.log("Save response:", result);
+        } catch (error) {
+          console.error("Error saving the line:", error);
+        }
       } else {
         alert("The last point must be connected to a FAT to save.");
       }
