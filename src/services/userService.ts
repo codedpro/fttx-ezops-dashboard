@@ -6,6 +6,7 @@ interface User {
   role: string[];
   UserName: string;
   Profile: string;
+  Phone: string;
 }
 
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
   private role: string[] | null = null;
   private userName: string | null = null;
   private profile: string | null = null;
-
+  private phone: string | null = null;
   constructor() {
     this.token = this.getTokenFromCookie();
     this.email = this.getEmailFromCookie();
@@ -23,6 +24,7 @@ export class UserService {
     this.role = this.getRoleFromCookie();
     this.userName = this.getUserNameFromCookie();
     this.profile = this.getProfileFromCookie();
+    this.phone = this.getPhoneFromCookie();
   }
 
   private getTokenFromCookie(): string | null {
@@ -99,9 +101,19 @@ export class UserService {
     }
     return null;
   }
-
   public getProfile(): string | null {
     return this.profile;
+  }
+
+  private getPhoneFromCookie(): string | null {
+    const phone = Cookies.get("Phone");
+    if (phone) {
+      return phone;
+    }
+    return null;
+  }
+  public getPhone(): string | null {
+    return this.phone;
   }
 
   public logout(): void {
@@ -111,12 +123,14 @@ export class UserService {
     Cookies.remove("Role");
     Cookies.remove("UserName");
     Cookies.remove("Profile");
+    Cookies.remove("Phone");
     this.token = null;
     this.email = null;
     this.name = null;
     this.role = null;
     this.userName = null;
     this.profile = null;
+    this.phone = null;
   }
 
   public setUserInfo(user: User, token: string): void {
@@ -126,5 +140,6 @@ export class UserService {
     Cookies.set("UserName", user.UserName);
     Cookies.set("Profile", user.Profile);
     Cookies.set("AccessToken", token);
+    Cookies.set("Phone", user.Phone);
   }
 }

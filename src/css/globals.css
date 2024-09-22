@@ -101,3 +101,26 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+/* Custom styles for the toast */
+.custom-toast {
+    background-color: #122031; /* Replace with your dark background color */
+    color: #ffffff; /* Text color */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Custom shadow */
+  }
+  
+  /* Custom styles for the body */
+  .custom-toast-body {
+    color: #b3b9c5; /* Replace with your text color for dark mode */
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+
+  .dark-toast {
+    background-color: #1c2a3a !important; /* Your custom dark mode background */
+  }
+  

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import { gsap } from "gsap";
 
 interface Props {
   children: React.ReactNode;
@@ -14,6 +15,22 @@ const ClickOutside: React.FC<Props> = ({
   className,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      gsap.fromTo(
+        wrapperRef.current,
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }
+      );
+    }
+
+    return () => {
+      if (wrapperRef.current) {
+        gsap.to(wrapperRef.current, { opacity: 0, scale: 0.8, duration: 0.2 });
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickListener = (event: MouseEvent) => {
