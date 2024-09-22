@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 
 const Loader = dynamic(() => import("@/components/common/Loader"), {
-  ssr: false,
+  ssr: true,
 });
 import { useInitializeFTTHModems } from "../hooks/useInitializeFTTHModems";
 import { useInitializeFTTHFats } from "@/hooks/useInitializeFTTHFats";
@@ -34,11 +34,17 @@ export default function RootLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
+    const handleContentLoaded = () => {
       setLoading(false);
-    }, 1000);
+    };
 
-    return () => clearTimeout(timeout);
+    if (document.readyState === "complete") {
+      handleContentLoaded();
+    } else {
+      window.addEventListener("load", handleContentLoaded);
+    }
+
+    return () => window.removeEventListener("load", handleContentLoaded);
   }, []);
 
   return (

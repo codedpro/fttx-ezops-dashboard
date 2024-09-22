@@ -29,7 +29,12 @@ export function PlaceholdersAndVanishInput({
   const newDataRef = useRef<any[]>([]);
   const [value, setValue] = useState("");
   const [animating, setAnimating] = useState(false);
-
+  const [currentPath, setCurrentPath] = useState<string>("");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentPath(window.location.pathname);
+    }
+  }, []);
   const startAnimation = () => {
     intervalRef.current = setInterval(() => {
       setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length);
@@ -240,7 +245,6 @@ export function PlaceholdersAndVanishInput({
     onSubmit && onSubmit(e);
   };
 
-  const currentPath = window.location.pathname;
   const handleSuggestionClick = (suggestion: string) => {
     setValue(suggestion);
     vanishAndSubmit();

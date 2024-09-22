@@ -1,5 +1,5 @@
 import { NearybyFATs } from "@/types/NearbyFATs";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { LineString } from "geojson";
 import mapboxgl from "mapbox-gl";
 
@@ -52,6 +52,7 @@ export const useSuggestFATLine = (
   const [suggestedPaths, setSuggestedPaths] = useState<any[]>([]);
   const [selectedPath, setSelectedPath] = useState<any>(null);
   const [isPathPanelOpen, setIsPathPanelOpen] = useState(false);
+  const isCanceled = useRef(false);
 
   const fetchNearbyFATs = async (featureProperties: FeatureProperties) => {
     try {
@@ -90,20 +91,18 @@ export const useSuggestFATLine = (
     duration: number
   ) => {
     let startTime: number | null = null;
-
     const totalSteps = 1000;
 
     const animate = (timestamp: number) => {
+      if (isCanceled.current) return;
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
       const step = Math.floor(progress * totalSteps);
-
       const numCoordinates = Math.floor(
         step * (path.coordinates.length / totalSteps)
       );
-
       const coordinates = path.coordinates.slice(0, numCoordinates);
 
       if (mapRef.current) {
@@ -123,7 +122,7 @@ export const useSuggestFATLine = (
       }
 
       if (progress < 1) {
-        requestAnimationFrame(animate); // Keep animating until complete
+        requestAnimationFrame(animate);
       }
     };
 
@@ -135,12 +134,14 @@ export const useSuggestFATLine = (
     fat: NearybyFATs,
     delay: number
   ) => {
+    if (isCanceled.current) return;
+
     try {
       const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${featureProperties.Long},${featureProperties.Lat};${fat.FAT_Long},${fat.FAT_Lat}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`;
       const response = await fetch(url);
       const data = await response.json();
 
-      if (data.routes && data.routes.length > 0) {
+      if (data.routes && data.routes.length > 0 && !isCanceled.current) {
         const path = data.routes[0];
         const color = generateUniqueColor();
         const pathId = generateUniqueId();
@@ -163,59 +164,59 @@ export const useSuggestFATLine = (
         const realDistance = path.distance + manualDistance;
 
         setTimeout(() => {
-          if (mapRef.current) {
-            mapRef.current.addSource(pathId, {
-              type: "geojson",
-              data: {
-                type: "Feature",
-                geometry: extendedPath,
-                properties: {},
-              },
+          if (isCanceled.current || !mapRef.current) return;
+
+          mapRef.current.addSource(pathId, {
+            type: "geojson",
+            data: {
+              type: "Feature",
+              geometry: extendedPath,
+              properties: {},
+            },
+          });
+
+          mapRef.current.addLayer({
+            id: pathId,
+            type: "line",
+            source: pathId,
+            paint: {
+              "line-color": color,
+              "line-width": 6,
+            },
+          });
+
+          setSuggestedPaths((prevPaths) => [
+            ...prevPaths,
+            { id: pathId, color, path: extendedPath },
+          ]);
+
+          animateLine(pathId, extendedPath, color, 3000);
+
+          if (mapRef.current.getLayer(pathId)) {
+            mapRef.current.on("mouseenter", pathId, () => {
+              mapRef.current!.getCanvas().style.cursor = "pointer";
             });
 
-            mapRef.current.addLayer({
-              id: pathId,
-              type: "line",
-              source: pathId,
-              paint: {
-                "line-color": color,
-                "line-width": 6,
-              },
+            mapRef.current.on("mouseleave", pathId, () => {
+              mapRef.current!.getCanvas().style.cursor = "";
             });
 
-            setSuggestedPaths((prevPaths) => [
-              ...prevPaths,
-              { id: pathId, color, path: extendedPath },
-            ]);
-
-            animateLine(pathId, extendedPath, color, 3000);
-
-            if (mapRef.current.getLayer(pathId)) {
-              mapRef.current.on("mouseenter", pathId, () => {
-                mapRef.current!.getCanvas().style.cursor = "pointer";
+            mapRef.current.on("click", pathId, () => {
+              setSelectedPath({
+                path_id: pathId,
+                color,
+                Modem_ID: featureProperties.ID,
+                Modem_EshopID: featureProperties.Eshop_ID,
+                FAT_ID: fat.FAT_ID,
+                FAT_Name: fat.Name,
+                path: extendedPath,
+                originalDistance: path.distance,
+                manualDistance,
+                realDistance,
+                duration: path.duration,
               });
-
-              mapRef.current.on("mouseleave", pathId, () => {
-                mapRef.current!.getCanvas().style.cursor = "";
-              });
-
-              mapRef.current.on("click", pathId, () => {
-                setSelectedPath({
-                  path_id: pathId,
-                  color,
-                  Modem_ID: featureProperties.ID,
-                  Modem_EshopID: featureProperties.Eshop_ID,
-                  FAT_ID: fat.FAT_ID,
-                  FAT_Name: fat.Name,
-                  path: extendedPath,
-                  originalDistance: path.distance,
-                  manualDistance,
-                  realDistance,
-                  duration: path.duration,
-                });
-                setIsPathPanelOpen(true);
-              });
-            }
+              setIsPathPanelOpen(true);
+            });
           }
         }, delay);
       }
@@ -235,6 +236,7 @@ export const useSuggestFATLine = (
 
   const handleSuggestFATLine = useCallback(
     async (featureProperties: FeatureProperties) => {
+      isCanceled.current = false;
       const nearbyFATs = await fetchNearbyFATs(featureProperties);
       if (nearbyFATs.length > 0) {
         generatePaths(featureProperties, nearbyFATs);
@@ -286,6 +288,8 @@ export const useSuggestFATLine = (
     const map = mapRef.current;
     if (!map) return;
 
+    isCanceled.current = true;
+
     suggestedPaths.forEach((path) => {
       if (map.getLayer(path.id)) {
         map.removeLayer(path.id);
@@ -295,7 +299,7 @@ export const useSuggestFATLine = (
       }
     });
 
-    setSuggestedPaths([]); // Clear the tracked paths after removal
+    setSuggestedPaths([]);
   };
 
   return {

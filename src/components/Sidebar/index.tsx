@@ -19,26 +19,28 @@ interface SidebarProps {
 const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isArrowClicked, setIsArrowClicked] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(
-    document.documentElement.classList.contains("dark")
-  );
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
-    const detectDarkMode = () => {
+    // This check ensures that the code is only executed in the client-side environment
+    if (typeof window !== "undefined") {
       setIsDarkMode(document.documentElement.classList.contains("dark"));
-    };
 
-    const observer = new MutationObserver(detectDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
+      const detectDarkMode = () => {
+        setIsDarkMode(document.documentElement.classList.contains("dark"));
+      };
 
-    return () => {
-      observer.disconnect();
-    };
+      const observer = new MutationObserver(detectDarkMode);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
+      return () => {
+        observer.disconnect();
+      };
+    }
   }, []);
-
   useEffect(() => {
     setCollapsed(!sidebarOpen);
   }, [sidebarOpen]);

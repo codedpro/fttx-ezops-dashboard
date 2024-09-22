@@ -1,6 +1,6 @@
 {
-  "name": "free-nextadmin-nextjs",
-  "version": "0.1.0",
+  "name": "mtn-irancell-fttx-dashboard",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",

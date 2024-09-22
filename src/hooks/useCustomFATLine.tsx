@@ -192,6 +192,9 @@ export const useCustomFATLine = (
     if (!mapRef.current) return;
 
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
+      if (!isDrawing) {
+        return;
+      }
       const fatFeatures = mapRef.current?.queryRenderedFeatures(e.point, {
         layers: fatLayerIds,
       });

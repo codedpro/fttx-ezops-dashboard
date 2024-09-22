@@ -35,14 +35,25 @@ const config: Config = {
         stroke: "#E6EBF1",
         "stroke-dark": "#27303E",
         dark: {
-          DEFAULT: "#0a0a0a", // Base black
-          2: "#0c0c0c", // Slightly lighter than DEFAULT
-          3: "#0e0e0e", // A bit lighter than 2
-          4: "#101010", // Slightly lighter than 3
-          5: "#1a1a1a", // Noticeably lighter but still very dark
-          6: "#1d1d1d", // Dark, but moving towards medium-dark
-          7: "#4d4d4d", // Medium-dark, hinting at gray
-          8: "#696969", // Still dark but lighter gray
+            DEFAULT: "#0a0a0a", // Base black
+            2: "#0c0c0c", // Slightly lighter than DEFAULT
+            3: "#0e0e0e", // A bit lighter than 2
+            4: "#101010", // Slightly lighter than 3
+            5: "#1a1a1a", // Noticeably lighter but still very dark
+            6: "#1d1d1d", // Dark, but moving towards medium-dark
+            7: "#4d4d4d", // Medium-dark, hinting at gray
+            8: "#696969", // Still dark but lighter gray
+          },
+  
+        darkgray: {
+          DEFAULT: "#111928",
+          2: "#1F2A37",
+          3: "#374151",
+          4: "#4B5563",
+          5: "#6B7280",
+          6: "#9CA3AF",
+          7: "#D1D5DB",
+          8: "#E5E7EB",
         },
 
         gray: {
