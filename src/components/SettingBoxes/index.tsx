@@ -38,9 +38,9 @@ const SettingBoxes = () => {
   const userservice = new UserService();
   const router = useRouter();
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
+    fullName: `${userservice.getName() ?? ""}`,
+    email: `${userservice.getEmail() ?? ""}`,
+    phone: `${userservice.getPhone() ?? ""}`,
     password: "",
     confirmPassword: "",
   });
@@ -61,7 +61,6 @@ const SettingBoxes = () => {
     e.preventDefault();
     const { fullName, email, phone, password, confirmPassword } = formData;
 
-    // Validation
     if (!fullName || !email || !phone) {
       toast.error("Full Name, Email, and Phone are required.");
       return;
@@ -75,23 +74,22 @@ const SettingBoxes = () => {
     try {
       setLoading(true);
 
-      // Sending JSON data
-      const response = await axios.put(
-        "/api/user/update", // Adjust this path to your actual API endpoint
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}/UserProfileUpdate`,
         {
-          fullName,
-          email,
-          phone,
-          password: password || undefined, // Send password only if it's filled
+          Name: fullName,
+          Email: email,
+          Phone: phone,
+          Password: password || null,
         },
         {
           headers: {
-            "Content-Type": "application/json", // Ensure the request is sent as JSON
+            Authorization: `Bearer ${userservice.getToken()}`,
+            "Content-Type": "application/json",
           },
         }
       );
 
-      // Handle response
       if (response.status !== 200) {
         toast.error(response.data.message || "Failed to update settings.");
       } else {
@@ -110,7 +108,9 @@ const SettingBoxes = () => {
     confirm(async () => {
       try {
         setLoading2(true);
-        const response = await axios.delete("/api/user/photo");
+        const response = await axios.delete(
+          `${process.env.NEXT_PUBLIC_LNM_API_URL}/UserProfileUpdate`
+        );
 
         if (response.status !== 200) {
           toast.error(response.data.message || "Failed to delete photo.");
@@ -122,6 +122,7 @@ const SettingBoxes = () => {
         toast.error("An error occurred while deleting the photo.");
       } finally {
         setLoading2(false);
+        router.push("/login");
       }
     });
   };
@@ -143,17 +144,21 @@ const SettingBoxes = () => {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        const response = await axios.post("/api/user/uploadPhoto", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_LNM_API_URL}/`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
         if (response.status !== 200) {
           toast.error(response.data.message || "Failed to upload photo.");
         } else {
           toast.success("Photo uploaded successfully!");
-          router.refresh(); // Refresh the page after successful upload
+          router.refresh();
         }
       } catch (error) {
         toast.error("An error occurred while uploading the photo.");
@@ -213,6 +218,7 @@ const SettingBoxes = () => {
                         name="fullName"
                         id="fullName"
                         placeholder={userservice.getName() ?? "Your First Name"}
+                        defaultValue={userservice.getName() ?? ""}
                         onChange={handleChange}
                       />
                     </div>
@@ -252,6 +258,7 @@ const SettingBoxes = () => {
                       placeholder={
                         userservice?.getEmail() || "FTTX@mtnirancell.ir"
                       }
+                      defaultValue={userservice?.getEmail() || ""}
                       onChange={handleChange}
                     />
                   </div>
@@ -291,6 +298,7 @@ const SettingBoxes = () => {
                       placeholder={
                         userservice?.getPhone() || "+98 935 200 1234"
                       }
+                      defaultValue={userservice?.getPhone() || ""}
                       onChange={handleChange}
                     />
                   </div>
