@@ -17,6 +17,12 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
       lng: 51.4701567993049,
       zoom: 16.5,
     },
+    {
+      name: "Arak",
+      lat: 34.0862719,
+      lng: 49.6893884,
+      zoom: 14,
+    },
   ];
 
   const toggleMinimized = () => {
