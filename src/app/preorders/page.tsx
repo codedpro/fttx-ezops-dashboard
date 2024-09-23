@@ -246,7 +246,7 @@ const FTTHModemsMap: React.FC = () => {
   };
 
   const FTTHSuggestedFATLayer = activeLayers.find(
-    (layer) => layer.id === "FTTHSuggestedFATLayer"
+    (layer) => layer.id === "suggestedFATSGrayFill"
   );
 
   useEffect(() => {
