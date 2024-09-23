@@ -23,6 +23,12 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick }) => {
       lng: 49.6893884,
       zoom: 14,
     },
+    {
+      name: "Tabriz",
+      lat: 38.0575953,
+      lng: 46.3000285,
+      zoom: 11.5,
+    },
   ];
 
   const toggleMinimized = () => {
