@@ -45,9 +45,11 @@ const FTTHModemsMap: React.FC = () => {
     "FTTHPreorderLayer",
     "MFATLayer",
     "SFATLayer",
+    "OLTLayer",
     "FTTHPreorderHMLayer",
     "FTTHSuggestedFATLayer",
     "FTTHSuggestedFATSmallFillLayer",
+
     //Lines
     "ODCLineLayer",
     "FATLineLayer",
@@ -62,6 +64,7 @@ const FTTHModemsMap: React.FC = () => {
     FTTHPreorderHMLayer: true,
     FTTHSuggestedFATLayer: false,
     FTTHSuggestedFATSmallFillLayer: false,
+    OLTLayer: false,
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,
