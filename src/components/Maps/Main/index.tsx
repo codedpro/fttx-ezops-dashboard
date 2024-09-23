@@ -31,9 +31,8 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-
   const [modalData, setModalData] = useState<any>(null);
-
+  const [isStyleloaded, setIsStyleloaded] = useState<boolean>(false);
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -50,6 +49,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
         mapRef.current.on("load", () => {
           addLayersToMap();
           dynamicZoom(mapRef, layers as LayerType[]);
+          setIsStyleloaded(true);
         });
         mapRef.current.on("zoom", () =>
           dynamicZoom(mapRef, layers as LayerType[])
@@ -71,7 +71,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
   }, [mapStyle]);
 
   useEffect(() => {
-    if (mapRef.current && zoomLocation) {
+    if (mapRef.current && zoomLocation && isStyleloaded) {
       mapRef.current.flyTo({
         center: [zoomLocation.lng, zoomLocation.lat],
         zoom: zoomLocation.zoom,
@@ -82,7 +82,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
       url.search = "";
       window.history.replaceState({}, "", url.toString());
     }
-  }, [zoomLocation]);
+  }, [zoomLocation, isStyleloaded]);
 
   const addLayersToMap = () => {
     layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
@@ -134,7 +134,7 @@ const FTTHMap: React.FC<FTTHMapProps> = ({
               mapRef.current?.on("click", id, (e) => {
                 const clickedFeatures = e.features;
                 if (clickedFeatures && clickedFeatures.length > 0) {
-                  setModalData(clickedFeatures[0].properties); // Set modal data based on clicked feature
+                  setModalData(clickedFeatures[0].properties);
                 }
               });
             })

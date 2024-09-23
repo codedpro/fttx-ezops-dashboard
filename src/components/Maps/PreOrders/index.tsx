@@ -45,6 +45,7 @@ const PreOrdersMap = forwardRef<
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalData, setModalData] = useState<any>(null);
     const isEditModeRef = useRef(isEditMode);
+    const [isStyleloaded, setIsStyleloaded] = useState<boolean>(false);
 
     const addLayersToMap = () => {
       if (!mapRef.current) return;
@@ -100,6 +101,7 @@ const PreOrdersMap = forwardRef<
             setTimeout(() => {
               addLayersToMap();
               dynamicZoom(mapRef, layers as LayerType[]);
+              setIsStyleloaded(true);
             }, 50);
           });
           mapRef.current.on("zoom", () =>
@@ -189,7 +191,7 @@ const PreOrdersMap = forwardRef<
     }, [mapStyle, mapIsLoaded]);
 
     useEffect(() => {
-      if (mapRef.current && zoomLocation) {
+      if (mapRef.current && zoomLocation && isStyleloaded) {
         mapRef.current.flyTo({
           center: [zoomLocation.lng, zoomLocation.lat],
           zoom: zoomLocation.zoom,
@@ -200,7 +202,7 @@ const PreOrdersMap = forwardRef<
         url.search = "";
         window.history.replaceState({}, "", url.toString());
       }
-    }, [zoomLocation]);
+    }, [zoomLocation, isStyleloaded]);
 
     useEffect(() => {
       if (mapRef.current && mapIsLoaded) {
