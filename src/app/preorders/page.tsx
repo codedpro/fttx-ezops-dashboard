@@ -11,6 +11,9 @@ import LegendPanel from "@/components/Maps/PreOrders/Panels/LegendPanel";
 import { useCustomFATLine } from "@/hooks/useCustomFATLine";
 import { LayerKeys } from "@/types/Layers";
 import { useLayerManager } from "@/utils/layerManager";
+import { FaDrawPolygon } from "react-icons/fa";
+import { usePolygonSelection } from "@/hooks/usePolygonSelection";
+import PolygonTool from "@/components/Polygon";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -251,6 +254,16 @@ const FTTHModemsMap: React.FC = () => {
   const FTTHSuggestedFATLayer = activeLayers.find(
     (layer) => layer.id === "suggestedFATSGrayFill"
   );
+  const {
+    isPolygonMode,
+    togglePolygonMode,
+    isModalOpen,
+    setIsModalOpen,
+    selectedFeatures,
+    takeScreenshot,
+    startPolygonMode,
+    deleteLastPolygon,
+  } = usePolygonSelection(ftthMapRef.current?.mapRef ?? { current: null });
 
   useEffect(() => {
     const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
@@ -266,6 +279,43 @@ const FTTHModemsMap: React.FC = () => {
         </div>
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden flex">
+          {isPolygonMode && (
+            <PolygonTool
+              startPolygonMode={startPolygonMode}
+              deleteLastPolygon={deleteLastPolygon}
+            />
+          )}
+          {/*          {isModalOpen && (
+            <div className="absolute top-50 right-4 z-10 bg-white shadow-lg p-4 rounded-lg">
+              <h2 className="font-bold">Selected Features</h2>
+              <ul>
+                {selectedFeatures.length > 0 ? (
+                  selectedFeatures.map((feature, index) => (
+                    <li key={index}>
+                      <strong>{feature.properties.Name || "Unnamed"}</strong>
+                    </li>
+                  ))
+                ) : (
+                  <li>No features found</li>
+                )}
+              </ul>
+              <div className="flex justify-between mt-4">
+                <button
+                  className="bg-blue-500 text-white px-3 py-1 rounded"
+                  onClick={takeScreenshot}
+                >
+                  Take Screenshot
+                </button>
+                <button
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )} */}
+
           <CityPanel onCityClick={handleCityClick} />
           {!isEditMode && (
             <>
@@ -277,6 +327,8 @@ const FTTHModemsMap: React.FC = () => {
                   setIsPointPanelMinimized((prev) => !prev)
                 }
                 customPosition="top-left"
+                isPolygonMode={isPolygonMode}
+                togglePolygonMode={togglePolygonMode}
               />
               <LayerPanel
                 title=""
@@ -284,6 +336,8 @@ const FTTHModemsMap: React.FC = () => {
                 isMinimized={isLinePanelMinimized}
                 toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
                 customPosition="bottom-left"
+                isPolygonMode={isPolygonMode}
+                togglePolygonMode={togglePolygonMode}
               />
               <StylePanel
                 onStyleChange={handleStyleChange}

@@ -12,6 +12,7 @@ import { useLayerManager } from "@/utils/layerManager";
 import { LayerKeys } from "@/types/Layers";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
+import IranFTTXMap from "@/components/Maps/IranFTTX";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -30,32 +31,20 @@ const FTTHModemsMap: React.FC = () => {
   const selectedLayers = [
     //Points
     "ModemLayer",
-    "MFATLayer",
-    "SFATLayer",
-    "HHLayer",
-    "OLTLayer",
-    "ODCLayer",
-    "TCLayer",
-    //Lines
-    "ODCLineLayer",
-    "FATLineLayer",
-    "MetroLineLayer",
-    "DropCableLineLayer",
+    "FTTHPreorderLayer",
+    "IranFTTXAreasFill",
   ] as LayerKeys[];
 
   const defaultVisibility = {
     ModemLayer: true,
-    MFATLayer: false,
-    SFATLayer: false,
-    HHLayer: false,
-    OLTLayer: false,
-    ODCLineLayer: true,
-    FATLineLayer: true,
-    MetroLineLayer: true,
-    DropCableLineLayer: true,
+    FTTHPreorderLayer: true,
+    IranFTTXAreasFill: true,
   };
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
-  const pointLayers = activeLayers.filter((layer) => layer.type === "point");
+
+  const pointLayers = activeLayers.filter(
+    (layer) => layer.type === "point" || layer.type === "fill"
+  );
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
 
   const handleStyleChange = (newStyle: string) => {
@@ -121,6 +110,7 @@ const FTTHModemsMap: React.FC = () => {
   useEffect(() => {
     const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
     if (areVisibleLayersLoaded) {
+      console.log(activeLayers);
       setLoading(false);
     }
   }, [activeLayers]);
@@ -149,21 +139,12 @@ const FTTHModemsMap: React.FC = () => {
             isPolygonMode={isPolygonMode}
             togglePolygonMode={togglePolygonMode}
           />
-          <LayerPanel
-            title=""
-            layers={lineLayers}
-            isMinimized={isLinePanelMinimized}
-            toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
-            customPosition="bottom-left"
-            isPolygonMode={isPolygonMode}
-            togglePolygonMode={togglePolygonMode}
-          />
           <StylePanel
             onStyleChange={handleStyleChange}
             selectedStyle={mapStyle}
           />
           <div className="z-20 w-full">
-            <FTTHMap
+            <IranFTTXMap
               ref={ftthMapRef}
               layers={activeLayers}
               mapStyle={mapStyle}

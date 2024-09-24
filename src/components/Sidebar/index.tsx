@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
-
+import { PiMapPinArea } from "react-icons/pi";
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
@@ -73,6 +73,11 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       label: "Modems",
       icon: <FaWifi />,
       route: "/modem",
+    },
+    {
+      label: "Iran FTTX",
+      icon: <PiMapPinArea />,
+      route: "/iranfttx",
     },
   ];
 

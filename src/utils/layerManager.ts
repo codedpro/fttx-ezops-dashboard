@@ -16,6 +16,7 @@ import { LayerKeys } from "@/types/Layers";
 import { useFTTHComplainLayer } from "@/components/Maps/Main/Layers/FTTHComplain";
 import { useTCLayer } from "@/components/Maps/Main/Layers/TCLayer";
 import { useODCLayer } from "@/components/Maps/Main/Layers/ODCLayer";
+import { useIranFTTXAreaLayer } from "@/components/Maps/IranFTTX/Layers/IranFTTXAreastsx";
 
 interface LayerConfig {
   id: string;
@@ -135,6 +136,14 @@ export const useLayerManager = (
       type: "fill",
       visible: layerVisibility.FTTHSuggestedFATSmallFillLayer,
       toggle: () => toggleLayerVisibility("FTTHSuggestedFATSmallFillLayer"),
+    },
+    IranFTTXAreasFill: {
+      ...useIranFTTXAreaLayer().fillLayer,
+      label: "Iran FTTX Areas",
+      icon: "",
+      type: "fill",
+      visible: layerVisibility.IranFTTXAreasFill,
+      toggle: () => toggleLayerVisibility("IranFTTXAreasFill"),
     },
     ModemLayer: {
       ...useFTTHModemLayer(),

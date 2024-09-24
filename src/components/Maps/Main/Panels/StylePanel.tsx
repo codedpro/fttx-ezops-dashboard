@@ -41,7 +41,10 @@ interface StylePanelProps {
   selectedStyle: string;
 }
 
-const StylePanel: React.FC<StylePanelProps> = ({ onStyleChange, selectedStyle }) => {
+const StylePanel: React.FC<StylePanelProps> = ({
+  onStyleChange,
+  selectedStyle,
+}) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -94,7 +97,10 @@ const StylePanel: React.FC<StylePanelProps> = ({ onStyleChange, selectedStyle })
                         ? "bg-primary text-white border border-primary scale-105"
                         : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
                     }`}
-                  onClick={() => onStyleChange(style.style)}
+                  onClick={() => {
+                    onStyleChange(style.style);
+                    setIsPanelOpen(false);
+                  }}
                 >
                   <span className="w-8 h-8 rounded-full mr-3 flex justify-center items-center text-2xl">
                     {style.icon}

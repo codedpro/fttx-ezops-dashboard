@@ -7,9 +7,15 @@ import React, {
 } from "react";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Modal } from "./Panels/Modal-Info";
+import { Modal } from "../Main/Panels/Modal-Info";
 import { dynamicZoom } from "@/utils/dynamicZoom";
 import { LayerType } from "@/types/FTTHMapProps";
+import {
+  addFillLayer,
+  addHeatmapLayer,
+  addLineLayer,
+  addPointLayer,
+} from "@/utils/mapLayers";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
 
@@ -30,7 +36,7 @@ interface FTTHMapProps {
   zoomLocation: { lat: number; lng: number; zoom: number } | null;
 }
 
-const FTTHMap = forwardRef<
+const IranFTTXMap = forwardRef<
   { mapRef: React.MutableRefObject<mapboxgl.Map | null> },
   FTTHMapProps
 >(({ layers, mapStyle, zoomLocation }, ref) => {
@@ -88,80 +94,40 @@ const FTTHMap = forwardRef<
       window.history.replaceState({}, "", url.toString());
     }
   }, [zoomLocation, isStyleloaded]);
-
   const addLayersToMap = () => {
+    if (!mapRef.current) return;
+
     layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
-      if (source && mapRef.current && !mapRef.current.getSource(id)) {
-        const geoJsonSource = {
+      const layerExists = mapRef.current?.getLayer(id);
+      const sourceExists = mapRef.current?.getSource(id);
+
+      if (!sourceExists && source) {
+        mapRef.current?.addSource(id, {
           ...source,
-          type: "geojson" as const,
-        };
+        });
+      }
 
-        mapRef.current.addSource(id, geoJsonSource);
-
-        if (type === "point") {
-          const iconPromises = Object.keys(icons || {}).map((key) => {
-            return new Promise<void>((resolve, reject) => {
-              if (!mapRef.current?.hasImage(key)) {
-                mapRef.current?.loadImage(icons[key], (error, image) => {
-                  if (error) {
-                    console.error(`Error loading icon ${key}:`, error);
-                    reject(error);
-                  } else if (image) {
-                    mapRef.current?.addImage(key, image);
-                    resolve();
-                  }
-                });
-              } else {
-                resolve();
-              }
-            });
-          });
-
-          Promise.all(iconPromises)
-            .then(() => {
-              mapRef.current?.addLayer({
-                id: id,
-                type: "symbol",
-                source: id,
-                layout: {
-                  "icon-image": ["get", "icon"],
-                  "icon-size": ["get", "iconSize"],
-                  "icon-allow-overlap": true,
-                },
-              });
-
-              mapRef.current?.setLayoutProperty(
-                id,
-                "visibility",
-                visible ? "visible" : "none"
-              );
-              mapRef.current?.on("click", id, (e) => {
-                const clickedFeatures = e.features;
-                if (clickedFeatures && clickedFeatures.length > 0) {
-                  setModalData(clickedFeatures[0].properties);
-                }
-              });
-            })
-            .catch((error) => {
-              console.error("Error loading icons:", error);
-            });
-        } else if (type === "line") {
-          mapRef.current.addLayer({
-            id: id,
-            type: "line",
-            source: id,
-            paint: {
-              "line-color": paint?.["line-color"] || "#ff0000",
-              "line-width": paint?.["line-width"] || 5,
-              "line-opacity": paint?.["line-opacity"] || 0.8,
-            },
-          });
+      if (!layerExists && mapRef.current?.getSource(id)) {
+        switch (type) {
+          case "point":
+            addPointLayer(mapRef, id, source, icons, visible);
+            break;
+          case "line":
+            addLineLayer(mapRef, id, source, paint, visible);
+            break;
+          case "heatmap":
+            addHeatmapLayer(mapRef, id, source, paint, visible);
+            break;
+          case "fill":
+            addFillLayer(mapRef, id, source, paint, visible);
+            break;
+          default:
+            console.error("Unknown layer type", type);
+            break;
         }
       }
     });
   };
-
   useEffect(() => {
     if (mapRef.current) {
       layers.forEach(({ id, source, visible }) => {
@@ -184,6 +150,32 @@ const FTTHMap = forwardRef<
         }
       });
     }
+  }, [layers]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const handleClick = (e: mapboxgl.MapMouseEvent) => {
+      const features = mapRef.current?.queryRenderedFeatures(e.point);
+      if (features && features.length > 0) {
+        const clickedFeature = features.find(
+          (feature) =>
+            feature.layer &&
+            layers.map((layer) => layer.id).includes(feature.layer.id)
+        );
+
+        if (clickedFeature) {
+          setModalData(clickedFeature.properties);
+        }
+      }
+    };
+
+    mapRef.current.on("click", handleClick);
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("click", handleClick);
+      }
+    };
   }, [layers]);
 
   function debounce(func: (...args: any[]) => void, delay: number) {
@@ -227,4 +219,4 @@ const FTTHMap = forwardRef<
   );
 });
 
-export default FTTHMap;
+export default IranFTTXMap;

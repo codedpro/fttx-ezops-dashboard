@@ -141,7 +141,8 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
                   key !== "iconSize" &&
                   key !== "Component_ID" &&
                   key !== "Chain_ID" &&
-                  key !== "FAT_ID"
+                  key !== "FAT_ID" &&
+                  key !== "ID"
               )
               .map((key, idx) => (
                 <div
