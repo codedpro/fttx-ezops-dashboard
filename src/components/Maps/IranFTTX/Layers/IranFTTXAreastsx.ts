@@ -79,10 +79,10 @@ export const useIranFTTXAreaLayer = () => {
           ["linear"],
           ["get", "Radius"],
           1,
-          "#ffcb00",
+          "#beca88",
         ],
-        "fill-opacity": 0.4,
-        "fill-outline-color": "black",
+        "fill-opacity": 0.75,
+
       },
     },
   };

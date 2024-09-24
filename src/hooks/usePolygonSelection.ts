@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import mapboxgl from "mapbox-gl";
-import { GeoJSON } from "geojson";
-import { start } from "repl";
 
 export const usePolygonSelection = (mapRef: any) => {
   const [isPolygonMode, setIsPolygonMode] = useState(false);
@@ -84,7 +82,7 @@ export const usePolygonSelection = (mapRef: any) => {
     }
 
     return () => {
-      if (isPolygonMode) {
+      if (isPolygonMode && mapRef.current) {
         mapRef.current
           .getCanvas()
           .removeEventListener("contextmenu", handleRightClick);
