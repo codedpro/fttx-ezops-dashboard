@@ -34,7 +34,7 @@ export const useEditFeature = (
     lat: number;
     lng: number;
   } | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);  // Reference to the marker
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   const handleEditPoint = (clickedFeature: CustomFeature | null) => {
     if (clickedFeature && clickedFeature.LayerID === "preorders") {
@@ -91,14 +91,13 @@ export const useEditFeature = (
             },
           });
 
-          // Create and store the editable marker in the ref
           const editableMarker = new mapboxgl.Marker({
             draggable: true,
           })
             .setLngLat(coordinates)
             .addTo(mapRef.current);
 
-          markerRef.current = editableMarker;  // Store marker in the ref
+          markerRef.current = editableMarker;
 
           editableMarker.on("dragend", () => {
             const lngLat = editableMarker.getLngLat();
@@ -127,7 +126,6 @@ export const useEditFeature = (
     }
   };
 
-  // Function to move the point and marker on the map without submitting
   const handleMovePoint = (newCoordinates: { lat: number; lng: number }) => {
     if (mapRef.current && editPointData && markerRef.current) {
       setCurrentCoordinates(newCoordinates);
@@ -141,17 +139,14 @@ export const useEditFeature = (
         properties: editPointData.properties || {},
       };
 
-      // Update the position of the point on the map
       (
         mapRef.current.getSource("editable-point") as mapboxgl.GeoJSONSource
       )?.setData(updatedPoint);
 
-      // Move the marker to the new coordinates
       markerRef.current.setLngLat([newCoordinates.lng, newCoordinates.lat]);
     }
   };
 
-  // Submit the updated coordinates to the server
   const handleSubmitEdit = async () => {
     if (!currentCoordinates || !editPointData) return;
 

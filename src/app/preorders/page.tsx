@@ -14,6 +14,7 @@ import { useLayerManager } from "@/utils/layerManager";
 import { FaDrawPolygon } from "react-icons/fa";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
+import PolygonDetailModal from "@/components/Polygon/PolygonDetailModal";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -280,11 +281,24 @@ const FTTHModemsMap: React.FC = () => {
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden flex">
           {isPolygonMode && (
-            <PolygonTool
-              startPolygonMode={startPolygonMode}
-              deleteLastPolygon={deleteLastPolygon}
-            />
+            <>
+              {" "}
+              <PolygonTool
+                startPolygonMode={startPolygonMode}
+                deleteLastPolygon={deleteLastPolygon}
+                takeScreenshot={takeScreenshot}
+                isPolygonMode={isPolygonMode}
+                selectedFeatures={selectedFeatures}
+                openDetailsModal={() => setIsModalOpen(true)}
+              />
+              <PolygonDetailModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                selectedFeatures={selectedFeatures}
+              />
+            </>
           )}
+
           {/*          {isModalOpen && (
             <div className="absolute top-50 right-4 z-10 bg-white shadow-lg p-4 rounded-lg">
               <h2 className="font-bold">Selected Features</h2>

@@ -16,6 +16,10 @@ export const usePolygonSelection = (mapRef: any) => {
   })[0];
 
   useEffect(() => {
+    console.log(selectedFeatures);
+  }, [selectedFeatures]);
+
+  useEffect(() => {
     if (!mapRef.current) return;
 
     const handleRightClick = (e: MouseEvent) => {
@@ -38,13 +42,13 @@ export const usePolygonSelection = (mapRef: any) => {
             });
 
             setSelectedFeatures(features);
-            setIsModalOpen(true);
 
             draw.changeMode("simple_select");
           }
         }
       }
     };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Backspace") {
         deleteLastPolygon();
@@ -73,7 +77,6 @@ export const usePolygonSelection = (mapRef: any) => {
             filter: ["within", polygon.geometry],
           });
           setSelectedFeatures(features);
-          setIsModalOpen(true);
         }
       });
     } else {
@@ -163,6 +166,12 @@ export const usePolygonSelection = (mapRef: any) => {
       draw.delete(existingPolygons[0].id as string);
     }
   };
+  const openDetailsModal = () => {
+    setIsModalOpen(true);
+  };
+  const closeDetailsModal = () => {
+    setIsModalOpen(false);
+  };
   return {
     isPolygonMode,
     togglePolygonMode,
@@ -172,5 +181,7 @@ export const usePolygonSelection = (mapRef: any) => {
     takeScreenshot,
     startPolygonMode,
     deleteLastPolygon,
+    openDetailsModal,
+    closeDetailsModal,
   };
 };

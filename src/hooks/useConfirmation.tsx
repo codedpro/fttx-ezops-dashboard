@@ -22,12 +22,9 @@ export const useConfirmation = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <ClickOutside
-          onClick={cancel}
-          exceptionRef={exceptionRef} // Ensure that clicks inside the modal don't close it
-        >
+        <ClickOutside onClick={cancel} exceptionRef={exceptionRef}>
           <div
-            ref={exceptionRef} // Attach the ref to the modal container
+            ref={exceptionRef}
             className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 dark:text-white text-gray-900"
           >
             <p className="mb-4 text-lg">{message}</p>
