@@ -13,6 +13,7 @@ import { LayerKeys } from "@/types/Layers";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
 import IranFTTXMap from "@/components/Maps/IranFTTX";
+import PolygonDetailModal from "@/components/Polygon/PolygonDetailModal";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -123,12 +124,25 @@ const FTTHModemsMap: React.FC = () => {
         </div>
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
-          {isPolygonMode && (
-            <PolygonTool
-              startPolygonMode={startPolygonMode}
-              deleteLastPolygon={deleteLastPolygon}
-            />
+            {isPolygonMode && (
+            <>
+              {" "}
+              <PolygonTool
+                startPolygonMode={startPolygonMode}
+                deleteLastPolygon={deleteLastPolygon}
+                takeScreenshot={takeScreenshot}
+                isPolygonMode={isPolygonMode}
+                selectedFeatures={selectedFeatures}
+                openDetailsModal={() => setIsModalOpen(true)}
+              />
+              <PolygonDetailModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                selectedFeatures={selectedFeatures}
+              />
+            </>
           )}
+
           <CityPanel onCityClick={handleCityClick} />
           <LayerPanel
             title=""

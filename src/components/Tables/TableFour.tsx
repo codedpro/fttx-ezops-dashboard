@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FaLightbulb } from "react-icons/fa";
 
 interface TableThreeProps {
@@ -7,15 +8,26 @@ interface TableThreeProps {
   emoji: string;
 }
 
-const TableThree: React.FC<TableThreeProps> = ({
+const TableFour: React.FC<TableThreeProps> = ({
   data,
   columns,
   header,
   emoji,
 }) => {
+  const [visibleRows, setVisibleRows] = useState(20);
+  const [loading, setLoading] = useState(false);
+
   const filteredColumns = columns.filter(
     (col) => col.key !== "ID" && col.key !== "FTTH_ID" && col.key !== "User_ID"
   );
+
+  const handleLoadMore = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setVisibleRows((prevVisibleRows) => prevVisibleRows + 100);
+      setLoading(false);
+    }, 500);
+  };
 
   return (
     <div className="rounded-[10px] border border-stroke bg-white  p-4 shadow-1 dark:border-[#1F2B37] dark:bg-[#122031] dark:shadow-card sm:p-7.5  hover:shadow-lg">
@@ -38,7 +50,7 @@ const TableThree: React.FC<TableThreeProps> = ({
             </tr>
           </thead>
           <tbody>
-            {data.map((item, index) => (
+            {data.slice(0, visibleRows).map((item, index) => (
               <tr
                 key={index}
                 className="hover:bg-[#F1F5F9]  dark:hover:bg-[#1C2C3A] transition-colors"
@@ -47,7 +59,7 @@ const TableThree: React.FC<TableThreeProps> = ({
                   <td
                     key={col.key}
                     className={`border-[#eee] px-6 py-4 dark:border-[#1F2B37] ${
-                      index === data.length - 1 ? "border-b-0" : "border-b"
+                      index === visibleRows - 1 ? "border-b-0" : "border-b"
                     }`}
                   >
                     <div className="text-dark text-center dark:text-[#E2E8F0] text-xs md:text-sm lg:text-base flex items-center justify-center space-x-2">
@@ -55,7 +67,7 @@ const TableThree: React.FC<TableThreeProps> = ({
                         {item[col.key]}
                       </p>{" "}
                       {col.key === "Sub_Service" && (
-                        <FaLightbulb className="text-primary" />
+                        <FaLightbulb className="text-yellow-400" />
                       )}
                     </div>
                   </td>
@@ -65,8 +77,21 @@ const TableThree: React.FC<TableThreeProps> = ({
           </tbody>
         </table>
       </div>
+      {visibleRows < data.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={handleLoadMore}
+            className={`px-4 py-2 text-white bg-primary hover:bg-primary-dark rounded ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Load More"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default TableThree;
+export default TableFour;

@@ -25,7 +25,9 @@ export const usePolygonSelection = (mapRef: any) => {
 
     const handleRightClick = (e: MouseEvent) => {
       e.preventDefault();
-      const drawControls = document.querySelector(".mapboxgl-draw_ctrl-toolbar");
+      const drawControls = document.querySelector(
+        ".mapboxgl-draw_ctrl-toolbar"
+      );
       if (drawControls) {
         drawControls.classList.add("hidden");
       }
@@ -87,12 +89,13 @@ export const usePolygonSelection = (mapRef: any) => {
 
     return () => {
       if (mapRef.current) {
-        mapRef.current
-          .getCanvas()
-          .removeEventListener("contextmenu", handleRightClick);
+        const canvas = mapRef.current.getCanvas();
+        if (canvas) {
+          canvas.removeEventListener("contextmenu", handleRightClick);
+        }
         window.removeEventListener("keydown", handleKeyDown);
 
-        if (draw && mapRef.current) {
+        if (draw && mapRef.current && mapRef.current.off) {
           mapRef.current.off("draw.create");
         }
 
@@ -153,7 +156,9 @@ export const usePolygonSelection = (mapRef: any) => {
     customDrawControls.className = "custom-draw-controls";
     document.body.appendChild(customDrawControls);
 
-    const drawControls = document.querySelector(".mapbox-gl-draw_ctrl-top-right");
+    const drawControls = document.querySelector(
+      ".mapbox-gl-draw_ctrl-top-right"
+    );
     if (drawControls) {
       customDrawControls.appendChild(drawControls);
     }

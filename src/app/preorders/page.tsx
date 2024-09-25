@@ -299,37 +299,6 @@ const FTTHModemsMap: React.FC = () => {
             </>
           )}
 
-          {/*          {isModalOpen && (
-            <div className="absolute top-50 right-4 z-10 bg-white shadow-lg p-4 rounded-lg">
-              <h2 className="font-bold">Selected Features</h2>
-              <ul>
-                {selectedFeatures.length > 0 ? (
-                  selectedFeatures.map((feature, index) => (
-                    <li key={index}>
-                      <strong>{feature.properties.Name || "Unnamed"}</strong>
-                    </li>
-                  ))
-                ) : (
-                  <li>No features found</li>
-                )}
-              </ul>
-              <div className="flex justify-between mt-4">
-                <button
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
-                  onClick={takeScreenshot}
-                >
-                  Take Screenshot
-                </button>
-                <button
-                  className="bg-red-500 text-white px-3 py-1 rounded"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )} */}
-
           <CityPanel onCityClick={handleCityClick} />
           {!isEditMode && (
             <>

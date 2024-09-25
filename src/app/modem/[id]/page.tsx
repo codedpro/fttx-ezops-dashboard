@@ -148,7 +148,6 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
         <div>
           <TableThree
-            count={100}
             data={modemDetails.IBSNG_Internet_Onlines}
             columns={internetOnlinesColumns}
             header="Internet Online Sessions"
@@ -158,7 +157,6 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
         <div>
           <TableThree
-            count={100}
             data={modemDetails.IBSNG_Connection_History}
             columns={connectionHistoryColumns}
             header="Connection History"
@@ -168,7 +166,6 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
         <div>
           <TableThree
-            count={100}
             data={modemDetails.IBSNG_Ballances}
             columns={ballancesColumns}
             header="Balances"
