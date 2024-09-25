@@ -77,6 +77,7 @@ export const useSuggestFATLine = (
       }
 
       const data: NearybyFATs[] = await response.json();
+      console.log(data);
       return data;
     } catch (error) {
       console.error("Error fetching nearby FATs:", error);

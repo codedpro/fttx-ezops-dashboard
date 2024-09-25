@@ -71,18 +71,10 @@ export const useIranFTTXAreaLayer = () => {
     fillLayer: {
       id: "IranFTTXAreasFill",
       source: fillSource,
-      visible: true,
       type: "fill",
       paint: {
-        "fill-color": [
-          "interpolate",
-          ["linear"],
-          ["get", "Radius"],
-          1,
-          "#beca88",
-        ],
+        "fill-color": "#beca88",
         "fill-opacity": 0.75,
-
       },
     },
   };

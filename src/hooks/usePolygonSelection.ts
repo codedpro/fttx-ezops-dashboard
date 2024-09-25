@@ -6,6 +6,7 @@ export const usePolygonSelection = (mapRef: any) => {
   const [isPolygonMode, setIsPolygonMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
+
   const draw = useState(() => {
     return new MapboxDraw({
       displayControlsDefault: false,
@@ -20,13 +21,11 @@ export const usePolygonSelection = (mapRef: any) => {
   }, [selectedFeatures]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !draw) return;
 
     const handleRightClick = (e: MouseEvent) => {
       e.preventDefault();
-      const drawControls = document.querySelector(
-        ".mapboxgl-draw_ctrl-toolbar"
-      );
+      const drawControls = document.querySelector(".mapboxgl-draw_ctrl-toolbar");
       if (drawControls) {
         drawControls.classList.add("hidden");
       }
@@ -40,9 +39,7 @@ export const usePolygonSelection = (mapRef: any) => {
             const features = mapRef.current.queryRenderedFeatures({
               filter: ["within", polygon.geometry],
             });
-
             setSelectedFeatures(features);
-
             draw.changeMode("simple_select");
           }
         }
@@ -57,39 +54,51 @@ export const usePolygonSelection = (mapRef: any) => {
     };
 
     if (isPolygonMode) {
-      mapRef.current.addControl(draw);
-      mapRef.current.getCanvas().style.cursor = "crosshair";
+      if (mapRef.current) {
+        mapRef.current.addControl(draw);
+        mapRef.current.getCanvas().style.cursor = "crosshair";
 
-      mapRef.current
-        .getCanvas()
-        .addEventListener("contextmenu", handleRightClick);
-      window.addEventListener("keydown", handleKeyDown);
+        mapRef.current
+          .getCanvas()
+          .addEventListener("contextmenu", handleRightClick);
+        window.addEventListener("keydown", handleKeyDown);
 
-      mapRef.current.on("draw.create", (e: any) => {
-        const existingPolygons = draw.getAll()?.features || [];
-        if (existingPolygons.length > 1 && existingPolygons[0].id) {
-          draw.delete(existingPolygons[0].id as string);
-        }
+        mapRef.current.on("draw.create", (e: any) => {
+          const existingPolygons = draw.getAll()?.features || [];
+          if (existingPolygons.length > 1 && existingPolygons[0].id) {
+            draw.delete(existingPolygons[0].id as string);
+          }
 
-        const polygon = e.features[0];
-        if (polygon.geometry.type === "Polygon") {
-          const features = mapRef.current.queryRenderedFeatures({
-            filter: ["within", polygon.geometry],
-          });
-          setSelectedFeatures(features);
-        }
-      });
+          const polygon = e.features[0];
+          if (polygon.geometry.type === "Polygon") {
+            const features = mapRef.current.queryRenderedFeatures({
+              filter: ["within", polygon.geometry],
+            });
+            setSelectedFeatures(features);
+          }
+        });
+      }
     } else {
-      mapRef.current.removeControl(draw);
-      mapRef.current.getCanvas().style.cursor = "";
+      if (mapRef.current && draw) {
+        mapRef.current.removeControl(draw);
+        mapRef.current.getCanvas().style.cursor = "";
+      }
     }
 
     return () => {
-      if (isPolygonMode && mapRef.current) {
+      if (mapRef.current) {
         mapRef.current
           .getCanvas()
           .removeEventListener("contextmenu", handleRightClick);
-        mapRef.current.off("draw.create");
+        window.removeEventListener("keydown", handleKeyDown);
+
+        if (draw && mapRef.current) {
+          mapRef.current.off("draw.create");
+        }
+
+        if (isPolygonMode && mapRef.current && draw) {
+          mapRef.current.removeControl(draw);
+        }
       }
     };
   }, [isPolygonMode, mapRef, draw]);
@@ -99,7 +108,7 @@ export const usePolygonSelection = (mapRef: any) => {
   };
 
   useEffect(() => {
-    if (isPolygonMode == true) {
+    if (isPolygonMode) {
       startPolygonMode();
     }
   }, [isPolygonMode]);
@@ -136,6 +145,7 @@ export const usePolygonSelection = (mapRef: any) => {
       console.error("Map or draw is not initialized.");
     }
   };
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -143,9 +153,7 @@ export const usePolygonSelection = (mapRef: any) => {
     customDrawControls.className = "custom-draw-controls";
     document.body.appendChild(customDrawControls);
 
-    const drawControls = document.querySelector(
-      ".mapbox-gl-draw_ctrl-top-right"
-    );
+    const drawControls = document.querySelector(".mapbox-gl-draw_ctrl-top-right");
     if (drawControls) {
       customDrawControls.appendChild(drawControls);
     }
@@ -157,7 +165,9 @@ export const usePolygonSelection = (mapRef: any) => {
 
   const startPolygonMode = () => {
     setIsPolygonMode(true);
-    draw.changeMode("draw_polygon");
+    if (draw) {
+      draw.changeMode("draw_polygon");
+    }
   };
 
   const deleteLastPolygon = () => {
@@ -166,12 +176,15 @@ export const usePolygonSelection = (mapRef: any) => {
       draw.delete(existingPolygons[0].id as string);
     }
   };
+
   const openDetailsModal = () => {
     setIsModalOpen(true);
   };
+
   const closeDetailsModal = () => {
     setIsModalOpen(false);
   };
+
   return {
     isPolygonMode,
     togglePolygonMode,

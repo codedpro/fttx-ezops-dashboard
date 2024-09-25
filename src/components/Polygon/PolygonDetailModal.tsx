@@ -1,11 +1,13 @@
 import React from "react";
 import TableThree from "../Tables/TableThree";
-import { FaMapMarkerAlt } from "react-icons/fa";
-import * as XLSX from "xlsx";
+import exportToKMZ from "@/utils/exportToKMZ";
+import { exportToExcel } from "@/utils/exportToExcel";
+import ClickOutside from "@/components/ClickOutside";
 
 interface Feature {
   source: string;
   properties: { [key: string]: any };
+  geometry: any;
 }
 
 interface PolygonDetailModalProps {
@@ -36,64 +38,98 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
     {}
   );
 
-  const exportToExcel = () => {
-    const dataToExport = filteredFeatures.map(
-      (feature: Feature) => feature.properties
-    );
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Polygon Features");
-    XLSX.writeFile(workbook, "polygon_features.xlsx");
-  };
+  // Calculate statistics for each section
+  const statistics = Object.keys(groupedFeatures).map((source) => ({
+    source,
+    count: groupedFeatures[source].length,
+  }));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-auto">
-      <div className="bg-white dark:bg-[#122031] p-6 rounded-lg w-full max-w-4xl space-y-6 max-h-[80vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold text-center mb-4 dark:text-white">
-          Polygon Feature Details
-        </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 custom-scrollbar">
+      <ClickOutside onClick={onClose} className="w-full max-w-5xl">
+        <div className="bg-white dark:bg-[#122031] p-6 rounded-lg w-full max-w-5xl space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+          <h2 className="text-2xl font-bold text-center mb-4 dark:text-white">
+            Polygon Area Details
+          </h2>
 
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={exportToExcel}
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-          >
-            Export to Excel
-          </button>
-        </div>
+          <div className="flex justify-between mb-4">
+            <button
+              onClick={() => exportToExcel(groupedFeatures)}
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
+            >
+              Export to Excel
+            </button>
+            <button
+              onClick={() => exportToKMZ(filteredFeatures)}
+              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-200"
+            >
+              Export to KMZ
+            </button>
+          </div>
 
-        {Object.keys(groupedFeatures).map((source) => {
-          const features = groupedFeatures[source];
-
-          if (features.length > 0) {
-            const columns = Object.keys(features[0].properties).map((key) => ({
-              key,
-              label: key.replace(/_/g, " ").toUpperCase(),
-            }));
-
-            return (
-              <div key={source} className="mb-6 max-h-[300px] overflow-y-auto">
-                <TableThree
-                  data={features.map((feature) => feature.properties)}
-                  columns={columns}
-                  header={`Source: ${source}`}
-                  emoji="📍"
-                />
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {statistics.map(({ source, count }, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-[#1b2a3c] bg-grid-black/[0.01] dark:bg-grid-white/[0.01]  p-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg"
+              >
+                <p className="text-sm dark:text-gray-400 mb-1">{source}</p>
+                <p className="font-semibold text-lg dark:text-[#E2E8F0]">
+                  Count: {count}
+                </p>
               </div>
-            );
-          }
-          return null;
-        })}
+            ))}
+          </div>
 
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-200"
-          >
-            Close
-          </button>
+          {/* Table Section */}
+          {Object.keys(groupedFeatures).map((source) => {
+            const features = groupedFeatures[source];
+
+            if (features.length > 0) {
+              const columns = Object.keys(features[0].properties)
+                .filter(
+                  (key) => key !== "ID" && key !== "icon" && key !== "iconSize"
+                )
+                .map((key) => ({
+                  key,
+                  label: key.replace(/_/g, " ").toUpperCase(),
+                }));
+
+              return (
+                <div
+                  key={source}
+                  className="mb-6 max-h-[300px] overflow-y-auto custom-scrollbar"
+                >
+                  <TableThree
+                    count={100}
+                    data={features.map((feature) => {
+                      const filteredProperties = { ...feature.properties };
+                      delete filteredProperties.ID;
+                      delete filteredProperties.icon;
+                      delete filteredProperties.iconSize;
+                      return filteredProperties;
+                    })}
+                    columns={columns}
+                    header={source}
+                    emoji="📍"
+                  />
+                </div>
+              );
+            }
+            return null;
+          })}
+
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-200"
+            >
+              Close
+            </button>
+          </div>
         </div>
-      </div>
+      </ClickOutside>
     </div>
   );
 };
