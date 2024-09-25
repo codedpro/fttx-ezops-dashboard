@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation"; // Import useRouter
 interface ModalProps {
   data: Record<string, any>;
   onClose: () => void;
+  onEdit?: (point: any) => void;
 }
 
-export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
+export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
@@ -106,6 +107,10 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
     setTimeout(() => setCopied(null), 1500);
   };
 
+  const formatLatLong = (lat: number, long: number) => {
+    return `${lat}, ${long}`;
+  };
+
   const handleShowDetails = () => {
     if (data.Modem_ID) {
       router.push(`/modem/${data.Modem_ID}`);
@@ -129,7 +134,7 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
         >
           <FaTimes size={24} />
         </button>
-        <h2 className="text-2xl font-bold dark:text-white mb-4">Quote</h2>
+        <h2 className="text-2xl font-bold dark:text-white mb-4">Details</h2>
 
         <div className="custom-scrollbar max-h-[50vh] overflow-auto pr-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -142,50 +147,70 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose }) => {
                   key !== "Component_ID" &&
                   key !== "Chain_ID" &&
                   key !== "FAT_ID" &&
-                  key !== "ID"
+                  key !== "Long"
               )
-              .map((key, idx) => (
-                <div
-                  key={idx}
-                  ref={(el) => {
-                    if (el) cardRefs.current[idx] = el;
-                  }}
-                  className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
-                >
-                  <p className="text-md text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                    {key}
-                  </p>
-                  <p
-                    className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${
-                      copied === key ? "text-green-500" : ""
-                    }`}
-                    onClick={() => copyToClipboard(data[key], key)}
-                  >
-                    {data[key] || "N/A"}
-                    {copied === key && (
-                      <span
-                        id={`copied-${key}`}
-                        className="ml-2 text-xs text-green-500"
-                      >
-                        Copied!
-                      </span>
-                    )}
-                  </p>
-                </div>
-              ))}
+              .map((key, idx) => {
+                const displayValue =
+                  key === "Lat" && data.Long
+                    ? formatLatLong(data.Lat, data.Long)
+                    : data[key];
 
+                const displayKey =
+                  key === "Lat" && data.Long ? "Lat/Long" : key;
+
+                return (
+                  <div
+                    key={idx}
+                    ref={(el) => {
+                      if (el) cardRefs.current[idx] = el;
+                    }}
+                    className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
+                  >
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                      {displayKey}
+                    </p>
+                    <p
+                      className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${
+                        copied === displayKey ? "text-green-500" : ""
+                      }`}
+                      onClick={() => copyToClipboard(displayValue, displayKey)}
+                    >
+                      {displayValue || "N/A"}
+                      {copied === displayKey && (
+                        <span
+                          id={`copied-${displayKey}`}
+                          className="ml-2 text-xs text-green-500"
+                        >
+                          Copied!
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                );
+              })}
           </div>
-        
-        </div>    {data.LayerID === "modems" && (
-              <div className="col-span-1 sm:col-span-2 mt-4">
-                <button
-                  onClick={handleShowDetails}
-                  className="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-2 rounded-lg"
-                >
-                  Show Details
-                </button>
-              </div>
-            )}
+        </div>
+
+        {data.LayerID === "modems" && (
+          <button
+            onClick={handleShowDetails}
+            className="mt-6 px-6 py-3 bg-primary  w-full text-white text-lg rounded-lg hover:opacity-80 transition-all transform scale-110"
+          >
+            Show Details
+          </button>
+        )}
+
+        {onEdit && data.LayerID === "preorders" && (
+          <button
+            onClick={() => {
+              onEdit(data);
+              onClose();
+            }}
+            className="mt-6 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all transform scale-110"
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );

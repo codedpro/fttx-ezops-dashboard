@@ -81,7 +81,7 @@ export const usePolygonSelection = (mapRef: any) => {
         });
       }
     } else {
-      if (mapRef.current && draw) {
+      if (mapRef.current && draw && mapRef.current !== undefined) {
         mapRef.current.removeControl(draw);
         mapRef.current.getCanvas().style.cursor = "";
       }
@@ -99,7 +99,12 @@ export const usePolygonSelection = (mapRef: any) => {
           mapRef.current.off("draw.create");
         }
 
-        if (isPolygonMode && mapRef.current && draw) {
+        if (
+          isPolygonMode &&
+          mapRef.current &&
+          draw &&
+          mapRef.current !== undefined
+        ) {
           mapRef.current.removeControl(draw);
         }
       }

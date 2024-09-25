@@ -14,7 +14,7 @@ const TableFour: React.FC<TableThreeProps> = ({
   header,
   emoji,
 }) => {
-  const [visibleRows, setVisibleRows] = useState(20);
+  const [visibleRows, setVisibleRows] = useState(10);
   const [loading, setLoading] = useState(false);
 
   const filteredColumns = columns.filter(

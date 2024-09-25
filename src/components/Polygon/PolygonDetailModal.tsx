@@ -38,7 +38,6 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
     {}
   );
 
-  // Calculate statistics for each section
   const statistics = Object.keys(groupedFeatures).map((source) => ({
     source,
     count: groupedFeatures[source].length,
@@ -52,23 +51,23 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
             Polygon Area Details
           </h2>
 
-          <div className="flex justify-between ">
+          <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
             <button
               onClick={() => exportToExcel(groupedFeatures)}
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
+              className="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
             >
               Export to Excel
             </button>
             <button
               onClick={() => exportToKMZ(filteredFeatures)}
-              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-200"
+              className="w-full sm:w-auto bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-200"
             >
               Export to KMZ
             </button>
           </div>
-          <div className=" overflow-y-auto max-h-[60vh] custom-scrollbar">
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+          <div className=" overflow-y-auto max-h-[60vh] custom-scrollbar overflow-x-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-2">
               {statistics.map(({ source, count }, idx) => (
                 <div
                   key={idx}
@@ -82,7 +81,6 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
               ))}
             </div>
 
-            {/* Table Section */}
             {Object.keys(groupedFeatures).map((source) => {
               const features = groupedFeatures[source];
 
@@ -98,7 +96,7 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
                   }));
 
                 return (
-                  <div key={source} className="mb-6 mt-16 mx-8">
+                  <div key={source} className="mb-6 mt-6 ">
                     <TableFour
                       data={features.map((feature) => {
                         const filteredProperties = { ...feature.properties };
