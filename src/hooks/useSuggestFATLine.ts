@@ -251,6 +251,7 @@ export const useSuggestFATLine = (
   const handleSavePath = useCallback(async () => {
     if (selectedPath) {
       setIsPathPanelOpen(false);
+      console.log(selectedPath)
       console.log(
         "Saving path:",
         JSON.stringify({

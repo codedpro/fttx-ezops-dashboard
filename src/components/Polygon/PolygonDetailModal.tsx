@@ -3,17 +3,13 @@ import exportToKMZ from "@/utils/exportToKMZ";
 import { exportToExcel } from "@/utils/exportToExcel";
 import ClickOutside from "@/components/ClickOutside";
 import TableFour from "../Tables/TableFour";
-
-interface Feature {
-  source: string;
-  properties: { [key: string]: any };
-  geometry: any;
-}
+import { ExtendedFeature } from "@/types/ExtendedFeature";
+import { Feature, Geometry, GeoJsonProperties } from "geojson";
 
 interface PolygonDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedFeatures: Feature[];
+  selectedFeatures: ExtendedFeature[];
 }
 
 const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
@@ -24,12 +20,12 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
   if (!isOpen) return null;
 
   const filteredFeatures = selectedFeatures.filter(
-    (feature: Feature) =>
+    (feature: ExtendedFeature) =>
       feature.source !== "composite" && !feature.source.startsWith("mapbox")
   );
 
   const groupedFeatures = filteredFeatures.reduce(
-    (acc: { [key: string]: Feature[] }, feature: Feature) => {
+    (acc: { [key: string]: ExtendedFeature[] }, feature: ExtendedFeature) => {
       const source = feature.source;
       if (!acc[source]) acc[source] = [];
       acc[source].push(feature);
@@ -37,6 +33,25 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
     },
     {}
   );
+
+  const mapToExtendedFeatures = (grouped: {
+    [key: string]: ExtendedFeature[];
+  }): { [key: string]: ExtendedFeature[] } => {
+    return Object.keys(grouped).reduce(
+      (acc: { [key: string]: ExtendedFeature[] }, source) => {
+        acc[source] = grouped[source].map(
+          ({ source, properties, geometry }) => ({
+            source,
+            type: "Feature",
+            geometry: geometry ?? ({} as Geometry),
+            properties: properties ?? {},
+          })
+        );
+        return acc;
+      },
+      {}
+    );
+  };
 
   const statistics = Object.keys(groupedFeatures).map((source) => ({
     source,
@@ -53,7 +68,9 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
 
           <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
             <button
-              onClick={() => exportToExcel(groupedFeatures)}
+              onClick={() =>
+                exportToExcel(mapToExtendedFeatures(groupedFeatures))
+              }
               className="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
             >
               Export to Excel
@@ -66,12 +83,12 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
             </button>
           </div>
 
-          <div className=" overflow-y-auto max-h-[60vh] custom-scrollbar overflow-x-hidden">
+          <div className="overflow-y-auto max-h-[60vh] custom-scrollbar overflow-x-hidden">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-2">
               {statistics.map(({ source, count }, idx) => (
                 <div
                   key={idx}
-                  className="bg-white dark:bg-[#1b2a3c] bg-grid-black/[0.01] dark:bg-grid-white/[0.01]  p-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg"
+                  className="bg-white dark:bg-[#1b2a3c] bg-grid-black/[0.01] dark:bg-grid-white/[0.01] p-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg"
                 >
                   <p className="text-sm dark:text-gray-400 mb-1">{source}</p>
                   <p className="font-semibold text-lg dark:text-[#E2E8F0]">
@@ -85,7 +102,7 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
               const features = groupedFeatures[source];
 
               if (features.length > 0) {
-                const columns = Object.keys(features[0].properties)
+                const columns = Object.keys(features[0].properties ?? {})
                   .filter(
                     (key) =>
                       key !== "ID" && key !== "icon" && key !== "iconSize"
@@ -96,13 +113,13 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
                   }));
 
                 return (
-                  <div key={source} className="mb-6 mt-6 ">
+                  <div key={source} className="mb-6 mt-6">
                     <TableFour
                       data={features.map((feature) => {
                         const filteredProperties = { ...feature.properties };
-                        delete filteredProperties.ID;
-                        delete filteredProperties.icon;
-                        delete filteredProperties.iconSize;
+                        delete filteredProperties?.ID;
+                        delete filteredProperties?.icon;
+                        delete filteredProperties?.iconSize;
                         return filteredProperties;
                       })}
                       columns={columns}

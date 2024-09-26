@@ -11,10 +11,10 @@ import { useLayerManager } from "@/utils/layerManager";
 import { LayerKeys } from "@/types/Layers";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
-import IranFTTXMap from "@/components/Maps/IranFTTX";
 import PolygonDetailModal from "@/components/Polygon/PolygonDetailModal";
+import DesignDeskMap from "@/components/Maps/DesignDesk";
 
-const FTTHModemsMap: React.FC = () => {
+const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/dark-v10");
   const modems = useFTTHModemsStore((state) => state.modems);
@@ -27,12 +27,7 @@ const FTTHModemsMap: React.FC = () => {
   const searchParams = useSearchParams();
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
 
-  const selectedLayers = [
-    //Points
-    "ModemLayer",
-    "FTTHPreorderLayer",
-    "IranFTTXAreasFill",
-  ] as LayerKeys[];
+  const selectedLayers = ["FTTHPreorderLayer"] as LayerKeys[];
 
   const defaultVisibility = {
     ModemLayer: true,
@@ -155,7 +150,7 @@ const FTTHModemsMap: React.FC = () => {
             selectedStyle={mapStyle}
           />
           <div className="z-20 w-full">
-            <IranFTTXMap
+            <DesignDeskMap
               ref={ftthMapRef}
               layers={activeLayers}
               mapStyle={mapStyle}
@@ -168,4 +163,4 @@ const FTTHModemsMap: React.FC = () => {
   );
 };
 
-export default FTTHModemsMap;
+export default DesignDesk;

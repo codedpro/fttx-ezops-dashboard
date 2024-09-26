@@ -1,11 +1,8 @@
 import * as XLSX from "xlsx";
+import { ExtendedFeature } from "@/types/ExtendedFeature"; // Import the correct type
 
-interface Feature {
-  source: string;
-  properties: { [key: string]: any };
-}
-
-export const exportToExcel = (groupedFeatures: { [key: string]: Feature[] }) => {
+// Update the function to accept ExtendedFeature
+export const exportToExcel = (groupedFeatures: { [key: string]: ExtendedFeature[] }) => {
   const workbook = XLSX.utils.book_new();
 
   Object.keys(groupedFeatures).forEach((source) => {

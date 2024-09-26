@@ -6,11 +6,12 @@ import {
   FaCogs,
   FaWifi,
   FaChevronLeft,
+  FaPaintBrush,
 } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
-import { PiMapPinArea } from "react-icons/pi";
+import { PiDesk, PiMapPinArea, PiPaintBrush, PiPaintBrushBroad, PiPaintBrushBroadDuotone } from "react-icons/pi";
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
@@ -79,6 +80,11 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       icon: <PiMapPinArea />,
       route: "/iranfttx",
     },
+    {
+        label: "Design Desk",
+        icon: <FaPaintBrush />,
+        route: "/design-desk",
+      },
   ];
 
   if (!sidebarOpen) {
