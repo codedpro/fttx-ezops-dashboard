@@ -57,7 +57,7 @@ export const useSuggestFATLine = (
   const fetchNearbyFATs = async (featureProperties: FeatureProperties) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/GetNearbyFATs`,
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}NearbyFATs`,
         {
           method: "POST",
           headers: {

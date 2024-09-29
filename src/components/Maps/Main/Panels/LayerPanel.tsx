@@ -18,8 +18,8 @@ interface LayerPanelProps {
   isMinimized: boolean;
   toggleMinimized: () => void;
   customPosition: "top-left" | "bottom-left";
-  isPolygonMode: boolean;
-  togglePolygonMode: () => void;
+  isPolygonMode?: boolean;
+  togglePolygonMode?: () => void;
 }
 
 const LayerPanel: React.FC<LayerPanelProps> = ({
@@ -111,7 +111,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
         )}
       </div>
 
-      {customPosition === "top-left" ? (
+      {(customPosition === "top-left"  && isPolygonMode !== undefined)? (
         <div className="flex ml-2">
           <FaDrawPolygon
             className={`cursor-pointer  transition-colors duration-300 ${isPolygonMode ? "text-green-500" : "dark:text-red-500 "}`}

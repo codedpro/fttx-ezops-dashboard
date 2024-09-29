@@ -27,7 +27,7 @@ export const useHHLayer = () => {
               Chain_ID: component.Chain_ID,
               Type: component.Type,
               Is_Plan: component.Is_Plan,
-              icon: "handHoldIcon",
+              icon: "HH",
               iconSize: 0.8,
               Long: component.Long,
               Lat: component.Lat,
@@ -48,6 +48,6 @@ export const useHHLayer = () => {
     source,
     visible: true,
     type: "point" as const,
-    icons: { handHoldIcon: "/images/map/HandHole.png" },
+    icons: { HH: "/images/map/HandHole.png" },
   };
 };

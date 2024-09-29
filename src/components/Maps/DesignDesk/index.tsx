@@ -5,8 +5,8 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl, { StyleSpecification } from "mapbox-gl";
+
 import { Modal } from "../Main/Panels/Modal-Info";
 import { dynamicZoom } from "@/utils/dynamicZoom";
 import { LayerType } from "@/types/FTTHMapProps";
@@ -16,13 +16,10 @@ import {
   addLineLayer,
   addPointLayer,
 } from "@/utils/mapLayers";
-
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
-
 interface FTTHMapProps {
   layers: Array<{
     id: string;
-    source: GeoJSONSourceSpecification | null;
+    source: any | null;
     visible: boolean;
     type: "point" | "line" | "heatmap" | "fill";
     icons?: { [key: string]: string };
@@ -32,7 +29,7 @@ interface FTTHMapProps {
       "line-opacity"?: number;
     };
   }>;
-  mapStyle: string;
+  mapStyle: StyleSpecification; 
   zoomLocation: { lat: number; lng: number; zoom: number } | null;
 }
 
@@ -43,16 +40,18 @@ const DesignDeskMap = forwardRef<
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [modalData, setModalData] = useState<any>(null);
-  const [isStyleloaded, setIsStyleloaded] = useState<boolean>(false);
+
+  const [isStyleloaded, setIsStyleLoaded] = useState<boolean>(false);
+
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
     const initializeMap = () => {
-      if (mapRef.current === null && mapContainerRef.current) {
+      if (!mapRef.current && mapContainerRef.current) {
         mapRef.current = new mapboxgl.Map({
           container: mapContainerRef.current,
-          style: mapStyle,
-          center: [52.6771, 36.538],
+          style: mapStyle, // Use the custom mapStyle here
+          center: [52.6771, 36.538], // Center position
           zoom: 13.5,
           maxZoom: 18,
         });
@@ -60,8 +59,9 @@ const DesignDeskMap = forwardRef<
         mapRef.current.on("load", () => {
           addLayersToMap();
           dynamicZoom(mapRef, layers as LayerType[]);
-          setIsStyleloaded(true);
+          setIsStyleLoaded(true);
         });
+
         mapRef.current.on("zoom", () =>
           dynamicZoom(mapRef, layers as LayerType[])
         );
@@ -73,13 +73,11 @@ const DesignDeskMap = forwardRef<
 
   useEffect(() => {
     if (mapRef.current) {
-      mapRef.current.setStyle(mapStyle);
-
       mapRef.current.once("styledata", () => {
         addLayersToMap();
       });
     }
-  }, [mapStyle]);
+  }, [mapRef.current?.isStyleLoaded]);
 
   useEffect(() => {
     if (mapRef.current && zoomLocation && isStyleloaded) {
