@@ -16,6 +16,9 @@ import {
   addLineLayer,
   addPointLayer,
 } from "@/utils/mapLayers";
+
+
+mapboxgl.accessToken = "dummy-token"
 interface FTTHMapProps {
   layers: Array<{
     id: string;
@@ -92,6 +95,18 @@ const DesignDeskMap = forwardRef<
       window.history.replaceState({}, "", url.toString());
     }
   }, [zoomLocation, isStyleloaded]);
+
+
+
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setStyle(mapStyle);
+
+      mapRef.current.once("styledata", () => {
+        addLayersToMap();
+      });
+    }
+  }, [mapStyle]);
   const addLayersToMap = () => {
     if (!mapRef.current) return;
 

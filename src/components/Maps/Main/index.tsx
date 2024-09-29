@@ -5,13 +5,16 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
+import mapboxgl, {
+  GeoJSONSourceSpecification,
+  StyleSpecification,
+} from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Modal } from "./Panels/Modal-Info";
 import { dynamicZoom } from "@/utils/dynamicZoom";
 import { LayerType } from "@/types/FTTHMapProps";
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_API ?? "???";
+mapboxgl.accessToken = "Dummy";
 
 interface FTTHMapProps {
   layers: Array<{
@@ -26,7 +29,7 @@ interface FTTHMapProps {
       "line-opacity"?: number;
     };
   }>;
-  mapStyle: string;
+  mapStyle: StyleSpecification;
   zoomLocation: { lat: number; lng: number; zoom: number } | null;
 }
 

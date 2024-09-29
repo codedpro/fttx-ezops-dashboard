@@ -1,49 +1,151 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FaMap, FaSatellite, FaMountain, FaSun, FaMoon } from "react-icons/fa";
+import { FaMap, FaSatellite, FaMountain } from "react-icons/fa";
 import { gsap } from "gsap";
 import ClickOutside from "@/components/ClickOutside";
+import {
+  StyleSpecification,
+  RasterSourceSpecification,
+  RasterLayerSpecification,
+} from "mapbox-gl";
 
-const mapStyles = [
+const lightStyle: StyleSpecification = {
+  version: 8,
+  sources: {
+    "osm-tiles": {
+      type: "raster",
+      tiles: [
+        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      ],
+      tileSize: 256,
+    },
+  },
+  layers: [
+    {
+      id: "osm-tiles-layer",
+      type: "raster",
+      source: "osm-tiles",
+      minzoom: 0,
+      maxzoom: 19,
+    },
+  ],
+};
+
+const DarkStyle: StyleSpecification = {
+  version: 8,
+  sources: {
+    "grayscale-tiles": {
+      type: "raster",
+      tiles: [
+        "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+      ],
+      tileSize: 256,
+      attribution: "Irancell",
+    } as RasterSourceSpecification,
+  },
+  layers: [
+    {
+      id: "grayscale-layer",
+      type: "raster",
+      source: "grayscale-tiles",
+      minzoom: 0,
+      maxzoom: 20,
+    } as RasterLayerSpecification,
+  ],
+};
+const terrainStyle: StyleSpecification = {
+    version: 8,
+    sources: {
+      "stadia-satellite-tiles": {
+        type: "raster",
+        tiles: [
+          "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}.jpg",
+        ],
+        tileSize: 256,
+        attribution:
+          '© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | ' +
+          '© <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> | ' +
+          '© <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> | ' +
+          '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      } as RasterSourceSpecification,
+    },
+    layers: [
+      {
+        id: "stadia-satellite-layer",
+        type: "raster",
+        source: "stadia-satellite-tiles",
+        minzoom: 0,
+        maxzoom: 20,
+      } as RasterLayerSpecification,
+    ],
+  };
+  
+
+const satelliteStyle: StyleSpecification = {
+  version: 8,
+  sources: {
+    "satellite-tiles": {
+      type: "raster",
+      tiles: ["http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
+      tileSize: 256,
+      subdomains: ["mt0", "mt1", "mt2", "mt3"],
+      attribution: "Irancell",
+    } as RasterSourceSpecification,
+  },
+  layers: [
+    {
+      id: "satellite-layer",
+      type: "raster",
+      source: "satellite-tiles",
+      minzoom: 0,
+      maxzoom: 20,
+    } as RasterLayerSpecification,
+  ],
+};
+
+interface MapStyle {
+  id: string;
+  name: string;
+  style: StyleSpecification;
+  icon: React.ReactNode;
+}
+
+const mapStyles: MapStyle[] = [
   {
-    id: "streets",
-    name: "Streets",
-    style: "mapbox://styles/mapbox/streets-v12",
+    id: "Light",
+    name: "Light",
+    style: lightStyle,
     icon: <FaMap />,
   },
   {
-    id: "satellite",
-    name: "Satellite",
-    style: "mapbox://styles/mapbox/satellite-v9",
-    icon: <FaSatellite />,
+    id: "Dark",
+    name: "Dark",
+    style: DarkStyle,
+    icon: <FaMap />,
   },
   {
-    id: "outdoors",
-    name: "Outdoors",
-    style: "mapbox://styles/mapbox/outdoors-v11",
+    id: "terrain",
+    name: "Terrain",
+    style: terrainStyle,
     icon: <FaMountain />,
   },
-  {
-    id: "light",
-    name: "Light",
-    style: "mapbox://styles/mapbox/light-v10",
-    icon: <FaSun />,
-  },
-  {
-    id: "dark",
-    name: "Dark",
-    style: "mapbox://styles/mapbox/dark-v10",
-    icon: <FaMoon />,
-  },
+//  {
+ //   id: "satellite",
+  //  name: "Satellite",
+   // style: satelliteStyle,
+  //  icon: <FaSatellite />,
+  //},
 ];
 
 interface StylePanelProps {
-  onStyleChange: (style: string) => void;
-  selectedStyle: string;
+  onStyleChange: (style: StyleSpecification, id: string) => void;
+  selectedStyleId: string;
 }
 
 const StylePanel: React.FC<StylePanelProps> = ({
   onStyleChange,
-  selectedStyle,
+  selectedStyleId,
 }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -93,12 +195,12 @@ const StylePanel: React.FC<StylePanelProps> = ({
                   key={style.id}
                   className={`p-3 flex items-center rounded-lg cursor-pointer transition-transform duration-300 transform
                     ${
-                      selectedStyle === style.style
+                      selectedStyleId === style.id
                         ? "bg-primary text-white border border-primary scale-105"
                         : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
                     }`}
                   onClick={() => {
-                    onStyleChange(style.style);
+                    onStyleChange(style.style, style.id);
                     setIsPanelOpen(false);
                   }}
                 >
@@ -107,7 +209,7 @@ const StylePanel: React.FC<StylePanelProps> = ({
                   </span>
                   <span
                     className={`flex-grow ${
-                      selectedStyle === style.style
+                      selectedStyleId === style.id
                         ? "text-white dark:text-gray-300"
                         : "text-gray-700 dark:text-gray-300"
                     } text-sm`}

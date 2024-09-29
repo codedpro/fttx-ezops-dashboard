@@ -13,10 +13,34 @@ import { LayerKeys } from "@/types/Layers";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
 import PolygonDetailModal from "@/components/Polygon/PolygonDetailModal";
+import { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "mapbox-gl";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/dark-v10");
+  const [mapStyle, setMapStyle] = useState<StyleSpecification>({
+  version: 8,
+  sources: {
+    "grayscale-tiles": {
+      type: "raster",
+      tiles: [
+        "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+      ],
+      tileSize: 256,
+      attribution: "Irancell",
+    } as RasterSourceSpecification,
+  },
+  layers: [
+    {
+      id: "grayscale-layer",
+      type: "raster",
+      source: "grayscale-tiles",
+      minzoom: 0,
+      maxzoom: 20,
+    } as RasterLayerSpecification,
+  ],
+  });
+  const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
+
   const modems = useFTTHModemsStore((state) => state.modems);
   const others = useFTTHComponentsOtherStore((state) => state.others);
   const [zoomLocation, setZoomLocation] = useState<{
@@ -59,9 +83,14 @@ const FTTHModemsMap: React.FC = () => {
   const pointLayers = activeLayers.filter((layer) => layer.type === "point");
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
 
-  const handleStyleChange = (newStyle: string) => {
+  const handleStyleChange = (
+    newStyle: StyleSpecification,
+    newStyleId: string
+  ) => {
     setMapStyle(newStyle);
+    setSelectedStyleId(newStyleId); // Set the selected style ID
   };
+
 
   const handleCityClick = (city: {
     lat: number;
@@ -172,9 +201,9 @@ const FTTHModemsMap: React.FC = () => {
             isPolygonMode={isPolygonMode}
             togglePolygonMode={togglePolygonMode}
           />
-          <StylePanel
+        <StylePanel
             onStyleChange={handleStyleChange}
-            selectedStyle={mapStyle}
+            selectedStyleId={selectedStyleId}
           />
           <div className="z-20 w-full">
             <FTTHMap

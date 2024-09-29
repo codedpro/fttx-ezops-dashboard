@@ -11,34 +11,39 @@ import { useLayerManager } from "@/utils/layerManager";
 import { LayerKeys } from "@/types/Layers";
 import DesignDeskMap from "@/components/Maps/DesignDesk";
 import MenuPanel from "@/components/Maps/DesignDesk/Panels/Menu";
-import { StyleSpecification } from "mapbox-gl";
+import {
+  RasterLayerSpecification,
+  RasterSourceSpecification,
+  StyleSpecification,
+} from "mapbox-gl";
 
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
+
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
     version: 8,
     sources: {
-      "osm-tiles": {
+      "grayscale-tiles": {
         type: "raster",
         tiles: [
-          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
         ],
         tileSize: 256,
-      },
+        attribution: "Irancell",
+      } as RasterSourceSpecification,
     },
     layers: [
       {
-        id: "osm-tiles-layer",
+        id: "grayscale-layer",
         type: "raster",
-        source: "osm-tiles",
+        source: "grayscale-tiles",
         minzoom: 0,
-        maxzoom: 19,
-      },
+        maxzoom: 20,
+      } as RasterLayerSpecification,
     ],
   });
-  
+  const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
+
   const modems = useFTTHModemsStore((state) => state.modems);
   const others = useFTTHComponentsOtherStore((state) => state.others);
   const [zoomLocation, setZoomLocation] = useState<{
@@ -51,7 +56,6 @@ const DesignDesk: React.FC = () => {
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
 
   const selectedLayers = [
-    //Points
     "FTTHPreorderLayer",
     "ModemLayer",
     "MFATLayer",
@@ -60,7 +64,6 @@ const DesignDesk: React.FC = () => {
     "OLTLayer",
     "ODCLayer",
     "TCLayer",
-    //Lines
     "ODCLineLayer",
     "FATLineLayer",
     "MetroLineLayer",
@@ -83,10 +86,13 @@ const DesignDesk: React.FC = () => {
 
   const pointLayers = activeLayers.filter((layer) => layer.type === "point");
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
-
- /*  const handleStyleChange = (newStyle: string) => {
+  const handleStyleChange = (
+    newStyle: StyleSpecification,
+    newStyleId: string
+  ) => {
     setMapStyle(newStyle);
-  }; */
+    setSelectedStyleId(newStyleId);
+  };
 
   const handleCityClick = (city: {
     lat: number;
@@ -143,12 +149,10 @@ const DesignDesk: React.FC = () => {
 
   const handleAddObject = (object: string) => {
     alert(`Add Object: ${object}`);
-    // Actual logic for adding objects
   };
 
   const handleDrawLine = (line: string) => {
     alert(`Draw Line: ${line}`);
-    // Actual logic for drawing lines
   };
 
   const handleAddKMZ = () => {
@@ -158,7 +162,12 @@ const DesignDesk: React.FC = () => {
   const handleSelectDraft = (draft: string) => {
     alert(`Select Draft: ${draft}`);
   };
-
+  const handleFlyToObject = (points: any) => {
+    console.log(points);
+  };
+  const handleFlyToLine = (points: any) => {
+    console.log(points);
+  };
   return (
     <DefaultLayout>
       {loading ? (
@@ -173,6 +182,8 @@ const DesignDesk: React.FC = () => {
             onAddKMZ={handleAddKMZ}
             onSelectKMZ={handleAddKMZ}
             onSelectDraft={handleSelectDraft}
+            onFlyToObject={handleFlyToObject}
+            onFlyToLine={handleFlyToLine}
           />
           <CityPanel onCityClick={handleCityClick} />
           <LayerPanel
@@ -189,10 +200,10 @@ const DesignDesk: React.FC = () => {
             toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
             customPosition="bottom-left"
           />
-       {/*    <StylePanel
+          <StylePanel
             onStyleChange={handleStyleChange}
-            selectedStyle={mapStyle}
-          /> */}
+            selectedStyleId={selectedStyleId}
+          />
           <div className="z-20 w-full">
             <DesignDeskMap
               ref={ftthMapRef}

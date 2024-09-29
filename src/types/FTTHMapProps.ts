@@ -1,4 +1,4 @@
-import { GeoJSONSourceSpecification } from "mapbox-gl";
+import { GeoJSONSourceSpecification, StyleSpecification } from "mapbox-gl";
 
 export type GeoJSONSourceType = GeoJSONSourceSpecification | null;
 
@@ -29,7 +29,7 @@ export interface ZoomLocation {
 
 export interface FTTHMapProps {
   layers: Array<LayerType>;
-  mapStyle: string;
+  mapStyle: StyleSpecification;
   zoomLocation: ZoomLocation | null;
   onEdit: (point: any) => void;
   isEditMode: boolean;
