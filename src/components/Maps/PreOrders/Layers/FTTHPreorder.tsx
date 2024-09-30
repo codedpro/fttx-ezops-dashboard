@@ -38,6 +38,9 @@ export const useFTTHPreorderLayer = () => {
       setSource({
         type: "geojson",
         data: geoJsonData,
+        cluster: true,
+        clusterMaxZoom: 7,
+        clusterRadius: 1,
       });
     }
   }, [preorders]);
