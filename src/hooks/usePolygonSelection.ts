@@ -8,9 +8,11 @@ export const usePolygonSelection = (
 ) => {
   const [isPolygonMode, setIsPolygonMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isScreenShotModalOpen, setIsScreenShotModalOpen] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState<ExtendedFeature[]>(
     []
   );
+  const [screenshotData, setScreenshotData] = useState<string | null>(null);
 
   const draw = useState(() => {
     return new MapboxDraw({
@@ -39,6 +41,21 @@ export const usePolygonSelection = (
     }
   };
 
+  const updateSelectedFeatures = () => {
+    if (mapRef?.current && draw) {
+      const activeDrawings = draw.getAll()?.features || [];
+      if (activeDrawings.length > 0) {
+        const polygon = activeDrawings[0];
+        if (polygon.geometry.type === "Polygon") {
+          const features = mapRef.current.queryRenderedFeatures({
+            filter: ["within", polygon.geometry],
+          });
+          setSelectedFeatures(features);
+        }
+      }
+    }
+  };
+
   const addEventListeners = () => {
     if (!mapRef?.current) {
       console.error("Map instance is not initialized.");
@@ -55,18 +72,8 @@ export const usePolygonSelection = (
       }
 
       if (isPolygonMode && draw && mapRef.current) {
-        const activeDrawings = draw.getAll()?.features || [];
-
-        if (activeDrawings.length > 0) {
-          const polygon = activeDrawings[0];
-          if (polygon.geometry.type === "Polygon") {
-            const features = mapRef.current.queryRenderedFeatures({
-              filter: ["within", polygon.geometry],
-            });
-            setSelectedFeatures(features);
-            draw.changeMode("simple_select");
-          }
-        }
+        updateSelectedFeatures();
+        draw.changeMode("simple_select");
       }
     };
 
@@ -76,6 +83,10 @@ export const usePolygonSelection = (
         setSelectedFeatures([]);
       }
     };
+
+    mapRef.current.on("draw.create", updateSelectedFeatures);
+    mapRef.current.on("draw.update", updateSelectedFeatures);
+    mapRef.current.on("draw.delete", () => setSelectedFeatures([]));
 
     mapRef.current
       .getCanvas()
@@ -87,6 +98,9 @@ export const usePolygonSelection = (
         mapRef.current
           .getCanvas()
           .removeEventListener("contextmenu", handleRightClick);
+        mapRef.current.off("draw.create", updateSelectedFeatures);
+        mapRef.current.off("draw.update", updateSelectedFeatures);
+        mapRef.current.off("draw.delete", () => setSelectedFeatures([]));
       }
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -159,28 +173,26 @@ export const usePolygonSelection = (
         mapRef.current.fitBounds(bounds, { padding: 20 });
 
         mapRef.current.once("idle", () => {
-          const canvas = mapRef.current?.getCanvas(); // Safely access getCanvas()
+          const canvas = mapRef.current?.getCanvas();
           if (!canvas) {
             console.error("Canvas not available");
             return;
           }
           const image = canvas.toDataURL("image/png");
-          const link = document.createElement("a");
-          link.href = image;
-          link.download = "map-screenshot.png";
-          link.click();
+          setScreenshotData(image);
+          setIsScreenShotModalOpen(true);
         });
       }
     } else {
       console.error("No polygon to capture for the screenshot.");
     }
   };
-
   useEffect(() => {
     if (isPolygonMode === true) {
       startPolygonMode();
     }
   }, [isPolygonMode]);
+
   return {
     isPolygonMode,
     togglePolygonMode,
@@ -190,5 +202,8 @@ export const usePolygonSelection = (
     takeScreenshot,
     startPolygonMode,
     deleteLastPolygon,
+    screenshotData,
+    isScreenShotModalOpen,
+    setIsScreenShotModalOpen,
   };
 };

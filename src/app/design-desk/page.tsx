@@ -16,6 +16,7 @@ import {
   RasterSourceSpecification,
   StyleSpecification,
 } from "mapbox-gl";
+import { useAddObjectHook } from "@/hooks/useAddObjectHook";
 
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -142,13 +143,49 @@ const DesignDesk: React.FC = () => {
   useEffect(() => {
     const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
     if (areVisibleLayersLoaded) {
-      console.log(activeLayers);
       setLoading(false);
     }
   }, [activeLayers]);
 
-  const handleAddObject = (object: string) => {
+  const {
+    startAddingObject,
+    objectLat,
+    objectLng,
+    setObjectLat,
+    setObjectLng,
+    finalizeObjectPosition,
+    cancelObjectAdding,
+  } = useAddObjectHook(ftthMapRef.current?.mapRef ?? { current: null });
+
+  const handleAddObject = (
+    object: string,
+    lat: number,
+    lng: number,
+    selectedObjectImage: string
+  ) => {
     alert(`Add Object: ${object}`);
+    startAddingObject(lat, lng, selectedObjectImage);
+  };
+
+  const handleIsAddingObjectChange = (
+    isAdding: boolean,
+    objectDetails: {
+      object: string | null;
+      lat: number | null;
+      lng: number | null;
+      image: string | null;
+    } | null
+  ) => {
+    if (isAdding) {
+      console.log("Started adding object:", objectDetails);
+      startAddingObject(
+        objectDetails?.lat ?? 0,
+        objectDetails?.lng ?? 0,
+        objectDetails?.image ?? ""
+      );
+    } else {
+      console.log("Stopped adding object.");
+    }
   };
 
   const handleDrawLine = (line: string) => {
@@ -184,6 +221,7 @@ const DesignDesk: React.FC = () => {
             onSelectDraft={handleSelectDraft}
             onFlyToObject={handleFlyToObject}
             onFlyToLine={handleFlyToLine}
+            onIsAddingObjectChange={handleIsAddingObjectChange}
           />
           <CityPanel onCityClick={handleCityClick} />
           <LayerPanel

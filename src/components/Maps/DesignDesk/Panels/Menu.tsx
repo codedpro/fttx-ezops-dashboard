@@ -14,16 +14,30 @@ import {
 import { OBJECTS, LINES, KMZ_FILES, DRAFTS } from "@/data/designdeskMenu";
 import { ActionButton } from "@/components/Buttons/ActionButton";
 interface MenuPanelProps {
-  onAddObject: (object: string, lat: string, lng: string) => void;
+  onAddObject: (
+    object: string,
+    lat: number,
+    lng: number,
+    selectedObjectImage: string
+  ) => void;
   onDrawLine: (
     lineType: string,
-    points: { lat: string; lng: string }[]
+    points: { lat: number; lng: number }[]
   ) => void;
-  onFlyToObject: (lat: string, lng: string) => void;
-  onFlyToLine: (points: { lat: string; lng: string }[]) => void;
+  onFlyToObject: (lat: number, lng: number) => void;
+  onFlyToLine: (points: { lat: number; lng: number }[]) => void;
   onAddKMZ: () => void;
   onSelectKMZ: (kmz: string) => void;
   onSelectDraft: (draft: string) => void;
+  onIsAddingObjectChange: (
+    isAdding: boolean,
+    objectDetails: {
+      object: string | null;
+      lat: number | null;
+      lng: number | null;
+      image: string | null;
+    } | null
+  ) => void;
 }
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -34,6 +48,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onAddKMZ,
   onSelectKMZ,
   onSelectDraft,
+  onIsAddingObjectChange,
 }) => {
   const [currentMenu, setCurrentMenu] = useState<
     | "main"
@@ -49,19 +64,20 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     null
   );
   const [selectedObject, setSelectedObject] = useState<string | null>(null);
-  const [lat, setLat] = useState("");
-  const [lng, setLng] = useState("");
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
 
-  const [linePoints, setLinePoints] = useState<{ lat: string; lng: string }[]>(
+  const [linePoints, setLinePoints] = useState<{ lat: number; lng: number }[]>(
     []
   );
   const [selectedLine, setSelectedLine] = useState<string | null>(null);
+  const [isAddingObject, setIsAddingObject] = useState(false);
 
   const handleAddPoint = () => {
     if (lat && lng) {
       setLinePoints([...linePoints, { lat, lng }]);
-      setLat("");
-      setLng("");
+      setLat(null);
+      setLng(null);
     }
   };
 
@@ -70,12 +86,24 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   };
 
   const handleCancel = () => {
-    setLat("");
-    setLng("");
+    setLat(null);
+    setLng(null);
+    const objectDetails = selectedObject
+      ? {
+          object: selectedObject,
+          lat: null,
+          lng: null,
+          image: null,
+        }
+      : null;
+
     setSelectedObject(null);
     setLinePoints([]);
+    setIsAddingObject(false);
+    onIsAddingObjectChange(false, objectDetails);
+
     if (previousMenu) {
-      setCurrentMenu(previousMenu); // Go back to previous menu
+      setCurrentMenu(previousMenu);
     } else {
       setCurrentMenu("main");
     }
@@ -154,62 +182,66 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   );
 
   const renderObjectDetails = () => {
-    // Find the selected object's image
     const selectedObjectData = OBJECTS.find(
       (object) => object.label === selectedObject
     );
+
     return (
-      <>
-        <div className="flex items-center space-x-2">
-          <ActionButton
-            label={selectedObject || ""}
-            icon={
-              selectedObjectData ? (
-                <img src={selectedObjectData.image} className="w-6" />
-              ) : null
+      <div className="flex items-center space-x-2">
+        <ActionButton
+          label={selectedObject || ""}
+          icon={
+            selectedObjectData ? (
+              <img src={selectedObjectData.image} className="w-6" />
+            ) : null
+          }
+          onClick={() => {}}
+        />
+        <input
+          type="number"
+          placeholder="Latitude"
+          value={lat !== null ? lat : ""}
+          onChange={(e) => setLat(parseFloat(e.target.value) || null)}
+          className="p-2 border rounded w-24"
+        />
+        <input
+          type="number"
+          placeholder="Longitude"
+          value={lng !== null ? lng : ""}
+          onChange={(e) => setLng(parseFloat(e.target.value) || null)}
+          className="p-2 border rounded w-24"
+        />
+        <ActionButton
+          label="Done"
+          icon={<FaCheck />}
+          onClick={() => {
+            if (
+              selectedObject &&
+              lat !== null &&
+              lng !== null &&
+              selectedObjectData
+            ) {
+              onAddObject(selectedObject, lat, lng, selectedObjectData.image);
+              handleCancel();
             }
-            onClick={() => {}}
-          />
-          <input
-            type="text"
-            placeholder="Latitude"
-            value={lat}
-            onChange={(e) => setLat(e.target.value)}
-            className="p-2 border rounded w-24"
-          />
-          <input
-            type="text"
-            placeholder="Longitude"
-            value={lng}
-            onChange={(e) => setLng(e.target.value)}
-            className="p-2 border rounded w-24"
-          />
-          <ActionButton
-            label="Done"
-            icon={<FaCheck />}
-            onClick={() => {
-              if (selectedObject && lat && lng) {
-                onAddObject(selectedObject, lat, lng);
-                handleCancel();
-              }
-            }}
-          />
-          <ActionButton
-            label="Fly to"
-            icon={<FaMapMarkedAlt />}
-            onClick={() => {
-              if (lat && lng) {
-                onFlyToObject(lat, lng);
-              }
-            }}
-          />
-          <ActionButton
-            label="Cancel"
-            icon={<FaTimes />}
-            onClick={handleCancel}
-          />
-        </div>
-      </>
+          }}
+        />
+
+        <ActionButton
+          label="Fly to"
+          icon={<FaMapMarkedAlt />}
+          onClick={() => {
+            if (lat && lng) {
+              onFlyToObject(lat, lng);
+            }
+          }}
+        />
+        <ActionButton
+          label="Cancel"
+          icon={<FaTimes />}
+          onClick={handleCancel}
+        />
+      </div>
     );
   };
 
@@ -232,19 +264,21 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
             onClick={() => {}}
           />
           <input
-            type="text"
+            type="number"
             placeholder="Latitude"
-            value={lat}
-            onChange={(e) => setLat(e.target.value)}
+            value={lat !== null ? lat : ""}
+            onChange={(e) => setLat(parseFloat(e.target.value) || null)}
             className="p-2 border rounded w-24"
           />
+
           <input
-            type="text"
+            type="number"
             placeholder="Longitude"
-            value={lng}
-            onChange={(e) => setLng(e.target.value)}
+            value={lng !== null ? lng : ""}
+            onChange={(e) => setLng(parseFloat(e.target.value) || null)}
             className="p-2 border rounded w-24"
           />
+
           <ActionButton
             label="Add Point"
             icon={<FaPlus />}
@@ -291,8 +325,20 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         renderSubMenu("Add Objects", OBJECTS, (object) => {
           setPreviousMenu("objects");
           setSelectedObject(object);
+          const selectedObjectData = OBJECTS.find(
+            (obj) => obj.label === object
+          );
+
+          setIsAddingObject(true);
+          onIsAddingObjectChange(true, {
+            object,
+            lat: null,
+            lng: null,
+            image: selectedObjectData?.image || null,
+          });
           setCurrentMenu("objectDetails");
         })}
+
       {currentMenu === "lines" &&
         renderSubMenu("Draw Lines", LINES, (line) => {
           setPreviousMenu("lines");

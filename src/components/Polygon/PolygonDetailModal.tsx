@@ -5,6 +5,7 @@ import ClickOutside from "@/components/ClickOutside";
 import TableFour from "../Tables/TableFour";
 import { ExtendedFeature } from "@/types/ExtendedFeature";
 import { Feature, Geometry, GeoJsonProperties } from "geojson";
+import { FiX } from "react-icons/fi";
 
 interface PolygonDetailModalProps {
   isOpen: boolean;
@@ -60,13 +61,22 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 custom-scrollbar">
-      <ClickOutside onClick={onClose} className="w-full max-w-5xl">
-        <div className="bg-white dark:bg-[#122031] p-6 rounded-lg w-full max-w-5xl space-y-6 max-h-[80vh] overflow-hidden">
+      {/*       <ClickOutside onClick={onClose} className="w-full max-w-5xl"> */}
+      <ClickOutside onClick={onClose} className="w-full max-w-2xl">
+        <div className="relative bg-white dark:bg-[#122031] p-6 rounded-lg w-full max-w-5xl space-y-6 max-h-[80vh]  overflow-hidden">
           <h2 className="text-2xl font-bold text-center mb-2 dark:text-white">
-            Polygon Area Details
+            Polygon Area Export
           </h2>
 
-          <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+          {/* Close Icon at the top right corner */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-500 transition duration-200"
+          >
+            <FiX size={24} />
+          </button>
+
+          <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4 ">
             <button
               onClick={() =>
                 exportToExcel(mapToExtendedFeatures(groupedFeatures))
@@ -83,7 +93,7 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
             </button>
           </div>
 
-          <div className="overflow-y-auto max-h-[60vh] custom-scrollbar overflow-x-hidden">
+          <div className="overflow-y-auto max-h-[60vh] custom-scrollbar overflow-x-hidden min-h-[15vh] ">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-2">
               {statistics.map(({ source, count }, idx) => (
                 <div
@@ -92,13 +102,13 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
                 >
                   <p className="text-sm dark:text-gray-400 mb-1">{source}</p>
                   <p className="font-semibold text-lg dark:text-[#E2E8F0]">
-                    Count: {count}
+                    {count}
                   </p>
                 </div>
               ))}
             </div>
 
-            {Object.keys(groupedFeatures).map((source) => {
+            {/* =     {Object.keys(groupedFeatures).map((source) => {
               const features = groupedFeatures[source];
 
               if (features.length > 0) {
@@ -130,16 +140,7 @@ const PolygonDetailModal: React.FC<PolygonDetailModalProps> = ({
                 );
               }
               return null;
-            })}
-
-            <div className="flex justify-end">
-              <button
-                onClick={onClose}
-                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-200"
-              >
-                Close
-              </button>
-            </div>
+            })} */}
           </div>
         </div>
       </ClickOutside>

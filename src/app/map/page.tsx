@@ -13,31 +13,36 @@ import { LayerKeys } from "@/types/Layers";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
 import PolygonDetailModal from "@/components/Polygon/PolygonDetailModal";
-import { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "mapbox-gl";
+import {
+  RasterLayerSpecification,
+  RasterSourceSpecification,
+  StyleSpecification,
+} from "mapbox-gl";
+import ScreenshotEditorModal from "@/components/ScreenshotEditorModal";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
-  version: 8,
-  sources: {
-    "grayscale-tiles": {
-      type: "raster",
-      tiles: [
-        "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      attribution: "Irancell",
-    } as RasterSourceSpecification,
-  },
-  layers: [
-    {
-      id: "grayscale-layer",
-      type: "raster",
-      source: "grayscale-tiles",
-      minzoom: 0,
-      maxzoom: 20,
-    } as RasterLayerSpecification,
-  ],
+    version: 8,
+    sources: {
+      "grayscale-tiles": {
+        type: "raster",
+        tiles: [
+          "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+        attribution: "Irancell",
+      } as RasterSourceSpecification,
+    },
+    layers: [
+      {
+        id: "grayscale-layer",
+        type: "raster",
+        source: "grayscale-tiles",
+        minzoom: 0,
+        maxzoom: 20,
+      } as RasterLayerSpecification,
+    ],
   });
   const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
 
@@ -88,9 +93,8 @@ const FTTHModemsMap: React.FC = () => {
     newStyleId: string
   ) => {
     setMapStyle(newStyle);
-    setSelectedStyleId(newStyleId); // Set the selected style ID
+    setSelectedStyleId(newStyleId);
   };
-
 
   const handleCityClick = (city: {
     lat: number;
@@ -146,6 +150,9 @@ const FTTHModemsMap: React.FC = () => {
     takeScreenshot,
     startPolygonMode,
     deleteLastPolygon,
+    screenshotData,
+    isScreenShotModalOpen,
+    setIsScreenShotModalOpen,
   } = usePolygonSelection(ftthMapRef.current?.mapRef ?? { current: null });
 
   useEffect(() => {
@@ -179,6 +186,15 @@ const FTTHModemsMap: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 selectedFeatures={selectedFeatures}
               />
+              {screenshotData ? (
+                <ScreenshotEditorModal
+                  isOpen={isScreenShotModalOpen}
+                  onClose={() => setIsScreenShotModalOpen(false)}
+                  screenshotData={screenshotData}
+                />
+              ) : (
+                <></>
+              )}
             </>
           )}
 
@@ -201,7 +217,7 @@ const FTTHModemsMap: React.FC = () => {
             isPolygonMode={isPolygonMode}
             togglePolygonMode={togglePolygonMode}
           />
-        <StylePanel
+          <StylePanel
             onStyleChange={handleStyleChange}
             selectedStyleId={selectedStyleId}
           />

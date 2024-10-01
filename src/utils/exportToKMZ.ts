@@ -36,7 +36,7 @@ const exportToKMZ = async (filteredFeatures: any[]) => {
 
     console.log(JSON.stringify(geojsonDataArray));
     const url = process.env.NEXT_PUBLIC_LNM_API_URL;
-    const response = await fetch(url  + "/GeoToKMZ", {
+    const response = await fetch(url + "/GeoToKMZ", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,8 +49,9 @@ const exportToKMZ = async (filteredFeatures: any[]) => {
     }
 
     const blob = await response.blob();
-
-    saveAs(blob, "MTN_Irancell_FTTX_Time.kmz");
+    const now = new Date();
+    const formattedDateTime = now.toISOString().replace(/[:.-]/g, "_");
+    saveAs(blob, `MTN_Irancell_FTTX_${formattedDateTime}.kmz`);
   } catch (error) {
     console.error("Error during KMZ export:", error);
   }

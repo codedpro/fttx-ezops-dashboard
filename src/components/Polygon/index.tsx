@@ -35,20 +35,21 @@ const PolygonTool: React.FC<PolygonToolProps> = ({
           </button>
 
           {selectedFeatures.length > 0 && (
-            <button
-              onClick={openDetailsModal}
-              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-            >
-              Details
-            </button>
+            <>
+              <button
+                onClick={openDetailsModal}
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
+              >
+                Export
+              </button>
+              <button
+                onClick={takeScreenshot}
+                className="bg-yellow-400 text-white py-2 px-4 rounded hover:bg-yellow-500 transition duration-200"
+              >
+                Screenshot
+              </button>{" "}
+            </>
           )}
-
-          <button
-            onClick={takeScreenshot}
-            className="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600 transition duration-200"
-          >
-            Screenshot
-          </button>
         </div>
       </div>
     </>

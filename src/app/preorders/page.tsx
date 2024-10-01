@@ -20,6 +20,7 @@ import {
   RasterSourceSpecification,
   StyleSpecification,
 } from "mapbox-gl";
+import ScreenshotEditorModal from "@/components/ScreenshotEditorModal";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -296,6 +297,9 @@ const FTTHModemsMap: React.FC = () => {
     takeScreenshot,
     startPolygonMode,
     deleteLastPolygon,
+    screenshotData,
+    isScreenShotModalOpen,
+    setIsScreenShotModalOpen,
   } = usePolygonSelection(ftthMapRef.current?.mapRef ?? { current: null });
 
   useEffect(() => {
@@ -328,6 +332,15 @@ const FTTHModemsMap: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 selectedFeatures={selectedFeatures}
               />
+              {screenshotData ? (
+                <ScreenshotEditorModal
+                  isOpen={isScreenShotModalOpen}
+                  onClose={() => setIsScreenShotModalOpen(false)}
+                  screenshotData={screenshotData}
+                />
+              ) : (
+                <></>
+              )}
             </>
           )}
 
