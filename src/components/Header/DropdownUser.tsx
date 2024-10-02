@@ -67,20 +67,9 @@ const DropdownUser = () => {
           <div className="flex items-center gap-2.5 px-5 pb-5.5 pt-3.5">
             {
               <span className="relative block h-12 w-12 rounded-full">
-                <Image
-                  width={112}
-                  height={112}
-                  //      src={user?.profile ? user.profile : "/images/user/user-02.png"}
-                  src="/images/user/user-03.png"
-                  style={{
-                    width: "auto",
-                    height: "auto",
-                  }}
-                  alt="User"
-                  className="overflow-hidden rounded-full"
-                />
+     
 
-                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green dark:border-gray-dark"></span>
+                <span className="absolute top-2 right-0 h-3 w-3 rounded-full border-2 border-white bg-green dark:border-gray-dark"></span>
               </span>
             }
             <span className="block">
