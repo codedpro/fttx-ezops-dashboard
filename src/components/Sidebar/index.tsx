@@ -80,11 +80,11 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       icon: <PiMapPinArea />,
       route: "/iranfttx",
     },
-/*     {
+     {
         label: "Design Desk",
         icon: <FaPaintBrush />,
         route: "/design-desk",
-      }, */
+      }, 
   ];
 
   if (!sidebarOpen) {

@@ -1,23 +1,51 @@
+"use client";
 import { ApexOptions } from "apexcharts";
-import React from "react";
+import React, { useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import DefaultSelectOption from "@/components/SelectOption/DefaultSelectOption";
 
-const ChartOne: React.FC = () => {
+interface ChartOneProps {
+  dailyData: {
+    Date: string;
+    Total_Created: number;
+    Closed_or_Resolved: number;
+  }[];
+  totalClosed: number;
+  totalRunning: number;
+}
+
+const ChartOne: React.FC<ChartOneProps> = ({
+  dailyData,
+  totalClosed,
+  totalRunning,
+}) => {
+  const [filter, setFilter] = useState<string>("Week");
+
+  const filteredData = dailyData.slice(filter === "Week" ? -7 : -30);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+  };
+
+  const dates = filteredData.map((item) => formatDate(item.Date));
+  const createdData = filteredData.map((item) => item.Total_Created);
+  const resolvedData = filteredData.map((item) => item.Closed_or_Resolved);
+
   const series = [
     {
-      name: "Received Amount",
-      data: [0, 20, 35, 45, 35, 55, 65, 50, 65, 75, 60, 75],
+      name: "Total Created",
+      data: createdData,
     },
     {
-      name: "Due Amount",
-      data: [15, 9, 17, 32, 25, 68, 80, 68, 84, 94, 74, 62],
+      name: "Closed or Resolved",
+      data: resolvedData,
     },
   ];
 
   const options: ApexOptions = {
     legend: {
-      show: false,
+      show: true,
       position: "top",
       horizontalAlign: "left",
     },
@@ -36,30 +64,8 @@ const ChartOne: React.FC = () => {
         opacityTo: 0,
       },
     },
-    responsive: [
-      {
-        breakpoint: 1024,
-        options: {
-          chart: {
-            height: 300,
-          },
-        },
-      },
-      {
-        breakpoint: 1366,
-        options: {
-          chart: {
-            height: 320,
-          },
-        },
-      },
-    ],
     stroke: {
       curve: "smooth",
-    },
-
-    markers: {
-      size: 0,
     },
     grid: {
       strokeDashArray: 5,
@@ -77,40 +83,14 @@ const ChartOne: React.FC = () => {
     dataLabels: {
       enabled: false,
     },
-    tooltip: {
-      fixed: {
-        enabled: !1,
-      },
-      x: {
-        show: !1,
-      },
-      y: {
-        title: {
-          formatter: function (e) {
-            return "";
-          },
-        },
-      },
-      marker: {
-        show: !1,
-      },
-    },
     xaxis: {
       type: "category",
-      categories: [
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-      ],
+      categories: dates,
+      labels: {
+        style: {
+          fontSize: "20px",
+        },
+      },
       axisBorder: {
         show: false,
       },
@@ -129,17 +109,20 @@ const ChartOne: React.FC = () => {
 
   return (
     <div className="col-span-12 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card xl:col-span-7">
-      <div className="mb-3.5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-3.5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div>
           <h4 className="text-body-2xlg font-bold text-dark dark:text-white">
-            Payments Overview
+            UT Complains Overview
           </h4>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="relative z-20 flex items-center gap-2.5">
           <p className="font-medium uppercase text-dark dark:text-dark-6">
-            Short by:
+            Filter by:
           </p>
-          <DefaultSelectOption options={["Monthly", "Yearly"]} />
+          <DefaultSelectOption
+            options={["Week", "Month"]}
+            onChange={(value: string) => setFilter(value)}
+          />
         </div>
       </div>
       <div>
@@ -147,23 +130,23 @@ const ChartOne: React.FC = () => {
           <ReactApexChart
             options={options}
             series={series}
-            type="area"
+            type="bar"
             height={310}
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 text-center xsm:flex-row xsm:gap-0">
+      <div className="flex flex-col gap-2 text-center xsm:flex-row xsm:gap-0 mt-4">
         <div className="border-stroke dark:border-dark-3 xsm:w-1/2 xsm:border-r">
-          <p className="font-medium">Received Amount</p>
+          <p className="font-medium">Total Closed UT Tickets</p>
           <h4 className="mt-1 text-xl font-bold text-dark dark:text-white">
-            $45,070.00
+            {totalClosed}
           </h4>
         </div>
         <div className="xsm:w-1/2">
-          <p className="font-medium">Due Amount</p>
+          <p className="font-medium">Total Running UT Tickets</p>
           <h4 className="mt-1 text-xl font-bold text-dark dark:text-white">
-            $32,400.00
+            {totalRunning}
           </h4>
         </div>
       </div>

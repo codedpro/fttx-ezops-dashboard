@@ -46,3 +46,47 @@ export const performHardRefresh = async (modemId: string) => {
 
   return true;
 };
+
+export const fetchFTTHDashboard = async (token: string) => {
+  const config = {
+    method: "get",
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboard`,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  try {
+    const response = await axios.request(config);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching FTTH dashboard data:", error);
+    throw new Error("Failed to fetch FTTH dashboard data");
+  }
+};
+
+export const fetchFTTHDailyChartData = async (token: string) => {
+  try {
+    const data = JSON.stringify({
+      start: 0,
+      end: 30,
+    });
+
+    const config = {
+      method: "post",
+      url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/GetFTTHDashboardUTDailyChart`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data: data,
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch daily chart data:", error);
+    throw error;
+  }
+};

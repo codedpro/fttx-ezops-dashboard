@@ -144,18 +144,18 @@ export default function Signin() {
   return (
     <>
       <div ref={separatorRef} className="my-4 flex items-center justify-center">
-        <span className="block h-px w-full bg-dark-8"></span>
-        <div className="block w-full min-w-fit  px-2 text-center font-medium text-dark-8 ">
+        <span className="block h-px w-full bg-darkgray-8"></span>
+        <div className="block w-full min-w-fit  px-2 text-center font-medium text-darkgray-8 ">
           Sign in using Username
         </div>
-        <span className="block h-px w-full bg-dark-7"></span>
+        <span className="block h-px w-full bg-darkgray-7"></span>
       </div>
 
       <div ref={formRef}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-field">
             <LabelInputContainer>
-              <Label htmlFor="UserName" className="block text-dark-8">
+              <Label htmlFor="UserName" className="block text-darkgray-8">
                 UserName
               </Label>
               <Input
@@ -174,7 +174,7 @@ export default function Signin() {
           </div>
           <div className="form-field">
             <LabelInputContainer>
-              <Label htmlFor="Password" className="block text-dark-8">
+              <Label htmlFor="Password" className="block text-darkgray-8">
                 Password
               </Label>
               <Input
@@ -193,7 +193,7 @@ export default function Signin() {
           </div>
           <button
             ref={buttonRef}
-            className={`bg-gradient-to-br relative group/btn from-dark-5 to-dark-6 block w-full text-white rounded-md h-10 font-medium border border-solid border-zinc-800 shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset] ${loading ? "cursor-not-allowed opacity-70" : ""}`}
+            className={`bg-gradient-to-br relative group/btn from-darkgray-5 to-darkgray-6 block w-full text-white rounded-md h-10 font-medium border border-solid border-zinc-800 shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset] ${loading ? "cursor-not-allowed opacity-70" : ""}`}
             type="submit"
             disabled={loading}
           >

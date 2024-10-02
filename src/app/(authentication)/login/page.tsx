@@ -109,7 +109,7 @@ const SignIn: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-dark-4 relative flex flex-col items-center justify-center antialiased ">
+    <div className="min-h-screen w-full bg-darkgray-4 relative flex flex-col items-center justify-center antialiased ">
       <div className="z-30 hidden sm:flex ">
         <BackgroundBeams />
       </div>
@@ -118,7 +118,7 @@ const SignIn: React.FC = () => {
         <div className="w-full">
           <div
             ref={contentRef}
-            className="overflow-hidden rounded-2xl p-6 md:px-10 md:pt-10 bg-dark-6/50"
+            className="overflow-hidden rounded-2xl p-6 md:px-10 md:pt-10 bg-darkgray-6/50"
           >
             <div className="mb-8 flex justify-center items-center animate-content">
               <Logo />
