@@ -56,6 +56,13 @@ export const usePolygonSelection = (
     }
   };
 
+  const handleClickOnMap = (e: MouseEvent) => {
+    if (isPolygonMode) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const addEventListeners = () => {
     if (!mapRef?.current) {
       console.error("Map instance is not initialized.");
@@ -84,10 +91,7 @@ export const usePolygonSelection = (
       }
     };
 
-    mapRef.current.on("draw.create", updateSelectedFeatures);
-    mapRef.current.on("draw.update", updateSelectedFeatures);
-    mapRef.current.on("draw.delete", () => setSelectedFeatures([]));
-
+    mapRef.current.getCanvas().addEventListener("click", handleClickOnMap);
     mapRef.current
       .getCanvas()
       .addEventListener("contextmenu", handleRightClick);
@@ -98,6 +102,9 @@ export const usePolygonSelection = (
         mapRef.current
           .getCanvas()
           .removeEventListener("contextmenu", handleRightClick);
+        mapRef.current
+          .getCanvas()
+          .removeEventListener("click", handleClickOnMap);
         mapRef.current.off("draw.create", updateSelectedFeatures);
         mapRef.current.off("draw.update", updateSelectedFeatures);
         mapRef.current.off("draw.delete", () => setSelectedFeatures([]));
@@ -134,6 +141,12 @@ export const usePolygonSelection = (
       console.error("Draw instance is not initialized.");
       return;
     }
+
+    const existingPolygons = draw.getAll()?.features || [];
+    if (existingPolygons.length > 0 && existingPolygons[0].id) {
+      draw.delete(existingPolygons[0].id as string);
+    }
+
     draw.changeMode("draw_polygon");
   };
 
@@ -187,6 +200,7 @@ export const usePolygonSelection = (
       console.error("No polygon to capture for the screenshot.");
     }
   };
+
   useEffect(() => {
     if (isPolygonMode === true) {
       startPolygonMode();
