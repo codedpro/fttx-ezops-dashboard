@@ -13,7 +13,6 @@ const Buttons = () => {
     <DefaultLayout>
       <Breadcrumb pageName="Buttons" />
 
-      {/* <!-- Normal Button Items --> */}
       <div className="mb-10 rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="border-b border-stroke px-7 py-4 dark:border-dark-3">
           <h3 className="font-medium text-dark dark:text-white">
@@ -102,7 +101,6 @@ const Buttons = () => {
         </div>
       </div>
 
-      {/* <!-- Button With Icon Items --> */}
       <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="border-b border-stroke px-7 py-4 dark:border-dark-3">
           <h3 className="font-medium text-dark dark:text-white">
