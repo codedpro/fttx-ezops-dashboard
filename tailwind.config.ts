@@ -34,6 +34,7 @@ const config: Config = {
         secondary: { DEFAULT: "#122031", 2: "#021223" },
         stroke: "#E6EBF1",
         "stroke-dark": "#27303E",
+        
         darkgray: {
           DEFAULT: "#0a0a0a", // Base black
           2: "#0c0c0c", // Slightly lighter than DEFAULT

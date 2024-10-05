@@ -34,7 +34,7 @@ const Dashboard = async () => {
     dashboardData?.online_Count || 2,
     dashboardData?.offline_Count || 1,
   ];
-  const colors = ["#5750F1", "#ADBCF2"];
+  const colors = ["#feca00", "#ADBCF2"];
   const labels = ["Online", "Offline"];
 
   const totalClosed = dashboardData?.uT_Closed || 0;
