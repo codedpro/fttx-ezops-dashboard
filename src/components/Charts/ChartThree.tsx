@@ -11,9 +11,15 @@ interface ChartThreeProps {
   series: number[];
   colors: string[];
   labels: string[];
+  header: string;
 }
 
-const ChartThree: React.FC<ChartThreeProps> = ({ series, colors, labels }) => {
+const ChartThree: React.FC<ChartThreeProps> = ({
+  series,
+  colors,
+  labels,
+  header,
+}) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -97,7 +103,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({ series, colors, labels }) => {
       <div className="mb-9 justify-between gap-4 sm:flex">
         <div>
           <h4 className="text-xl font-bold text-gray-800 dark:text-white">
-            FTTH Modem Status
+            {header}
           </h4>
         </div>
       </div>

@@ -34,9 +34,13 @@ const Dashboard = async () => {
     dashboardData?.online_Count || 2,
     dashboardData?.offline_Count || 1,
   ];
+  const series_Paid_to_Modems = [
+    dashboardData?.online_Count + dashboardData?.offline_Count || 2,
+    dashboardData?.preorder_Paid || 1,
+  ];
   const colors = ["#feca00", "#ADBCF2"];
   const labels = ["Online", "Offline"];
-
+  const labels_Paid_to_modems = [ "Delivered","Payment"];
   const totalClosed = dashboardData?.uT_Closed || 0;
   const totalRunning = dashboardData?.uT_Open || 0;
 
@@ -56,9 +60,22 @@ const Dashboard = async () => {
   return (
     <DefaultLayout>
       <DashboardCards cardData={cardData} />
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-        <ChartThree series={series} colors={colors} labels={labels} />
-
+      <div className="mt-4 md:mt-6  2xl:mt-9 flex flex-row items-center justify-around mx-4">
+        <ChartThree
+          header="FTTH Modem Status"
+          series={series}
+          colors={colors}
+          labels={labels}
+        />
+        <ChartThree
+          header="Payment vs Delivery Overview"
+          series={series_Paid_to_Modems}
+          colors={colors}
+          labels={labels_Paid_to_modems}
+        />{" "}
+      </div>{" "}
+      <div className="mt-4 w-full gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
+        {" "}
         <ChartOne
           dailyData={dailyData}
           totalClosed={totalClosed}
