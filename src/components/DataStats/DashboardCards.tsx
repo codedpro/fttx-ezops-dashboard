@@ -29,7 +29,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
         return <FaTicketAlt size={30} className="text-red-500" />;
       case "OLT":
         return (
-          <Image src="/images/map/olt.png" alt="OLT" width={40} height={40} />
+          <Image src="/images/map/OLT.png" alt="OLT" width={40} height={40} />
         );
       case "Hand Hole":
         return (
@@ -42,11 +42,11 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
         );
       case "ODC":
         return (
-          <Image src="/images/map/odc.png" alt="ODC" width={40} height={40} />
+          <Image src="/images/map/ODC.png" alt="ODC" width={40} height={40} />
         );
       case "TC":
         return (
-          <Image src="/images/map/tc.png" alt="TC" width={40} height={40} />
+          <Image src="/images/map/TC.png" alt="TC" width={40} height={40} />
         );
       case "MFAT":
         return (
