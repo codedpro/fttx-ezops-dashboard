@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { UserService } from "@/services/userService";
 import AddOtherObjectModal from "@/components/Maps/DesignDesk/Panels/AddOtherObjectModal";
 import { useLineDrawing } from "@/hooks/useLineDrawing";
+import { useLineEditing } from "@/hooks/useLineEditing";
 
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -191,6 +192,16 @@ const DesignDesk: React.FC = () => {
     "mfat-layer",
   ]);
 
+  const {
+    isEditing,
+    startEditingLine,
+    handleFinishEditing,
+    handleFeatureClick,
+  } = useLineEditing(ftthMapRef.current?.mapRef ?? { current: null }, [
+    "sfat-layer",
+    "mfat-layer",
+  ]);
+
   const handleAddObject = (
     object: string,
     lat: number,
@@ -316,6 +327,7 @@ const DesignDesk: React.FC = () => {
 
   const handleOnEditLine = (LineData: LineData) => {
     //startDrawing(LineData.type || "Unknown", LineData);
+    startEditingLine(LineData);
   };
   return (
     <DefaultLayout className="p-0 md:p-0">

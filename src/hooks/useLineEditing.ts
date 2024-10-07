@@ -17,8 +17,9 @@ export const useLineEditing = (
 
   const snappingDistance = 0.0001;
 
-  const draw = useState(() => new MapboxDraw({ displayControlsDefault: false, controls: {} }))[0];
+  const draw = useState(() => new MapboxDraw({ displayControlsDefault: true, controls: {} }))[0];
 
+  // Add draw control to map
   const addDrawControl = () => {
     if (mapRef.current && draw && !mapRef.current.hasControl(draw)) {
       mapRef.current.addControl(draw);
@@ -26,6 +27,7 @@ export const useLineEditing = (
     }
   };
 
+  // Remove draw control from map
   const removeDrawControl = () => {
     if (mapRef.current && draw) {
       try {
@@ -37,6 +39,7 @@ export const useLineEditing = (
     }
   };
 
+  // Snapping to the nearest feature if within a certain distance
   const snapToFeature = useCallback(
     (point: { lat: number; lng: number }, featureCoords: [number, number]) => {
       const distance = Math.sqrt(
@@ -48,6 +51,7 @@ export const useLineEditing = (
     []
   );
 
+  // Handle clicking on features to add points for line editing
   const handleFeatureClick = useCallback((clickedFeature: Feature) => {
     const geometry = clickedFeature.geometry;
     if (geometry.type === "Point") {
@@ -66,6 +70,7 @@ export const useLineEditing = (
     }
   }, [firstClickedFeature, snapToFeature]);
 
+  // Check if two coordinates match within a very small margin
   const checkCoordinatesMatch = useCallback(
     (point: { lat: number; lng: number }, coordinates: [number, number]) => {
       return (
@@ -76,6 +81,7 @@ export const useLineEditing = (
     []
   );
 
+  // Handle finishing the line editing process
   const handleFinishEditing = useCallback(async () => {
     if (linePoints.length > 1 && isConnectedToFeature && firstClickedFeature && lastClickedFeature) {
       const firstPointMatches = checkCoordinatesMatch(linePoints[0], initialFirstFeatureCoords!);
@@ -100,9 +106,10 @@ export const useLineEditing = (
     }
   }, [linePoints, isConnectedToFeature, firstClickedFeature, lastClickedFeature, checkCoordinatesMatch, removeDrawControl]);
 
+  // Start editing an existing line
   const startEditingLine = useCallback(
-    (lineData: { coordinates: [number, number][] }) => {
-      if (lineData?.coordinates?.length) {
+    (lineData: { coordinates: [number, number][]; chainId: number | null }) => {
+      if (lineData?.coordinates?.length && lineData.chainId !== null) {
         const newLinePoints = lineData.coordinates.map(([lng, lat]) => ({ lng, lat }));
         setLinePoints(newLinePoints);
         setIsEditing(true);
@@ -110,13 +117,18 @@ export const useLineEditing = (
         addDrawControl();
 
         const lineFeature: Feature<LineString> = {
+          id: String(lineData.chainId), // Use chainId as the featureId
           type: "Feature",
           geometry: { type: "LineString", coordinates: lineData.coordinates },
           properties: {},
         };
 
         draw.add(lineFeature);
-        draw.changeMode("direct_select", { featureId: lineFeature.id as string });
+
+        // Use chainId as the featureId for direct_select mode
+        draw.changeMode("direct_select", { featureId: String(lineData.chainId) });
+      } else {
+        console.error("Invalid LineData: Missing coordinates or chainId");
       }
     },
     [addDrawControl, draw]
