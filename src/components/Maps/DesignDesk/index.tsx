@@ -17,8 +17,12 @@ import {
   addPointLayer,
 } from "@/utils/mapLayers";
 
-
-mapboxgl.accessToken = "dummy-token"
+mapboxgl.accessToken = "dummy-token";
+interface LineData {
+  coordinates: [number, number][];
+  chainId: number | null;
+  type: string | null;
+}
 interface FTTHMapProps {
   layers: Array<{
     id: string;
@@ -32,18 +36,20 @@ interface FTTHMapProps {
       "line-opacity"?: number;
     };
   }>;
-  mapStyle: StyleSpecification; 
+  mapStyle: StyleSpecification;
   zoomLocation: { lat: number; lng: number; zoom: number } | null;
+  isDrawing: boolean;
+  onEditLines: (lineData: LineData) => void;
 }
 
 const DesignDeskMap = forwardRef<
   { mapRef: React.MutableRefObject<mapboxgl.Map | null> },
   FTTHMapProps
->(({ layers, mapStyle, zoomLocation }, ref) => {
+>(({ layers, mapStyle, zoomLocation, isDrawing, onEditLines }, ref) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [modalData, setModalData] = useState<any>(null);
-
+  const [modalLineData, setModalLineData] = useState<any>(null);
   const [isStyleloaded, setIsStyleLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -53,10 +59,10 @@ const DesignDeskMap = forwardRef<
       if (!mapRef.current && mapContainerRef.current) {
         mapRef.current = new mapboxgl.Map({
           container: mapContainerRef.current,
-          style: mapStyle, // Use the custom mapStyle here
-          center: [52.6771, 36.538], // Center position
+          style: mapStyle,
+          center: [52.6771, 36.538],
           zoom: 13.5,
-          maxZoom: 18,
+          maxZoom: 19,
         });
 
         mapRef.current.on("load", () => {
@@ -95,8 +101,6 @@ const DesignDeskMap = forwardRef<
       window.history.replaceState({}, "", url.toString());
     }
   }, [zoomLocation, isStyleloaded]);
-
-
 
   useEffect(() => {
     if (mapRef.current) {
@@ -176,8 +180,9 @@ const DesignDeskMap = forwardRef<
             layers.map((layer) => layer.id).includes(feature.layer.id)
         );
 
-        if (clickedFeature) {
+        if (clickedFeature && !isDrawing) {
           setModalData(clickedFeature.properties);
+          setModalLineData(clickedFeature);
         }
       }
     };
@@ -225,8 +230,13 @@ const DesignDeskMap = forwardRef<
   return (
     <>
       <div ref={mapContainerRef} className="w-full h-screen" />
-      {modalData && (
-        <Modal data={modalData} onClose={() => setModalData(null)} />
+      {modalData && !isDrawing && (
+        <Modal
+          data={modalData}
+          lineData={modalLineData}
+          onClose={() => setModalData(null)}
+          onEditLine={onEditLines}
+        />
       )}
     </>
   );

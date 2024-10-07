@@ -21,6 +21,7 @@ export const useFTTHPreorderLayer = () => {
             properties: {
               ID: preorder.ID,
               Eshop_ID: preorder.Eshop_ID,
+              FTTH_ID: preorder.FTTH_ID,
               Tracking_Code: preorder.Tracking_Code,
               Province: preorder.Province,
               City: preorder.City,
@@ -39,8 +40,8 @@ export const useFTTHPreorderLayer = () => {
         type: "geojson",
         data: geoJsonData,
         cluster: true,
-        clusterMaxZoom: 7,
-        clusterRadius: 1,
+        clusterMaxZoom: 10,
+        clusterRadius: 2,
       });
     }
   }, [preorders]);

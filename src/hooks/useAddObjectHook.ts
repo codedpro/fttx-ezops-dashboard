@@ -1,134 +1,228 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-
-interface DrawEvent {
-  type: "draw.create" | "draw.delete" | "draw.update";
-  features: GeoJSON.Feature<GeoJSON.Geometry>[];
-}
 
 export const useAddObjectHook = (
-  mapRef: React.MutableRefObject<mapboxgl.Map | null>
+  mapRef: React.MutableRefObject<mapboxgl.Map | null> | null
 ) => {
   const [isAddingObject, setIsAddingObject] = useState(false);
   const [objectLat, setObjectLat] = useState<number | null>(null);
   const [objectLng, setObjectLng] = useState<number | null>(null);
   const [objectIcon, setObjectIcon] = useState<string | null>(null);
+  const objectIdRef = useRef<string | null>(null);
+  const sourceRef = useRef<mapboxgl.GeoJSONSource | null>(null);
 
-  const [draw, setDraw] = useState<MapboxDraw | null>(null);
-  const [drawnFeatureId, setDrawnFeatureId] = useState<string | null>(null);
-
-  const startAddingObject = (lat: number, lng: number, icon: string) => {
+  const startAddingObject = (
+    lat: number | null,
+    lng: number | null,
+    icon: string
+  ) => {
     setIsAddingObject(true);
     setObjectLat(lat);
     setObjectLng(lng);
     setObjectIcon(icon);
+    objectIdRef.current = null;
+    sourceRef.current = null;
+  };
+
+  const addImageToMap = async (
+    map: mapboxgl.Map,
+    imageName: string,
+    imageUrl: string
+  ) => {
+    if (map.hasImage(imageName)) {
+      return;
+    }
+    return new Promise<void>((resolve, reject) => {
+      map.loadImage(imageUrl, (error, image) => {
+        if (error) {
+          reject(error);
+        } else {
+          map.addImage(imageName, image as HTMLImageElement | ImageBitmap);
+          resolve();
+        }
+      });
+    });
   };
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef?.current || !isAddingObject || !objectIcon) {
+      return;
+    }
 
     const map = mapRef.current;
 
-    const drawControl = new MapboxDraw({
-      displayControlsDefault: false,
-      controls: {
-        point: true,
-      },
-      styles: [
+    const initLayer = async () => {
+      try {
+        await addImageToMap(map, objectIcon, objectIcon);
+
+        if (!objectIdRef.current) {
+          const featureId = `object-${Date.now()}`;
+          objectIdRef.current = featureId;
+
+          map.addSource(featureId, {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
+
+          sourceRef.current = map.getSource(
+            featureId
+          ) as mapboxgl.GeoJSONSource;
+
+          const iconSize = objectIcon.includes("ODC") ? 0.15 : 0.6;
+
+          map.addLayer({
+            id: featureId,
+            type: "symbol",
+            source: featureId,
+            layout: {
+              "icon-image": objectIcon,
+              "icon-size": iconSize,
+              "icon-anchor": "bottom",
+            },
+          });
+
+          if (objectLat !== null && objectLng !== null) {
+            sourceRef.current.setData({
+              type: "FeatureCollection",
+              features: [
+                {
+                  type: "Feature",
+                  properties: {
+                    icon: objectIcon,
+                  },
+                  geometry: {
+                    type: "Point",
+                    coordinates: [objectLng, objectLat],
+                  },
+                },
+              ],
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error initializing layer:", error);
+      }
+    };
+
+    initLayer();
+
+    return () => {
+      if (objectIdRef.current && map) {
+        if (map.getLayer(objectIdRef.current)) {
+          map.removeLayer(objectIdRef.current);
+        }
+        if (map.getSource(objectIdRef.current)) {
+          map.removeSource(objectIdRef.current);
+        }
+        if (objectIcon && map.hasImage(objectIcon)) {
+          map.removeImage(objectIcon);
+        }
+      }
+    };
+  }, [mapRef, isAddingObject, objectIcon]);
+
+  useEffect(() => {
+    if (
+      !mapRef?.current ||
+      !sourceRef.current ||
+      objectLat === null ||
+      objectLng === null
+    ) {
+      return;
+    }
+
+    sourceRef.current.setData({
+      type: "FeatureCollection",
+      features: [
         {
-          id: "gl-draw-point-inactive",
-          type: "circle",
-          paint: {
-            "circle-radius": 10,
-            "circle-opacity": 0.5,
-            "circle-color": "#3887be",
+          type: "Feature",
+          properties: {
+            icon: objectIcon,
+          },
+          geometry: {
+            type: "Point",
+            coordinates: [objectLng, objectLat],
           },
         },
       ],
     });
-
-    map.addControl(drawControl);
-    setDraw(drawControl);
-
-    return () => {
-      map.removeControl(drawControl);
-    };
-  }, [mapRef]);
+  }, [objectLat, objectLng, objectIcon]);
 
   useEffect(() => {
-    if (
-      !mapRef.current ||
-      !isAddingObject ||
-      !draw ||
-      !objectIcon ||
-      objectLat === null ||
-      objectLng === null
-    )
+    if (!mapRef?.current || !isAddingObject || !objectIcon) {
       return;
+    }
 
     const map = mapRef.current;
 
-    if (objectLat !== null && objectLng !== null) {
-      const feature = {
-        type: "Feature",
-        properties: {
-          icon: objectIcon,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [objectLng, objectLat],
-        },
-      };
+    const handleMapClick = (event: mapboxgl.MapMouseEvent) => {
+      const { lng, lat } = event.lngLat;
 
-      const featureId = draw.add(feature as any);
-      setDrawnFeatureId(featureId[0]);
-
-      map.flyTo({
-        center: [objectLng, objectLat],
-        zoom: 18,
-      });
-    }
-
-    const handleUpdate = (event: DrawEvent) => {
-      const updatedFeature = event.features[0];
-      if (updatedFeature.geometry.type === "Point") {
-        const [lng, lat] = updatedFeature.geometry.coordinates;
-        setObjectLat(lat);
-        setObjectLng(lng);
+      if (!objectIdRef.current || !sourceRef.current) {
+        return;
       }
+
+      sourceRef.current.setData({
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              icon: objectIcon,
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [lng, lat],
+            },
+          },
+        ],
+      });
+
+      setObjectLat(lat);
+      setObjectLng(lng);
     };
 
-    map.on("draw.update", handleUpdate);
+    map.on("click", handleMapClick);
 
     return () => {
-      map.off("draw.update", handleUpdate);
-
-      if (drawnFeatureId) {
-        draw.delete(drawnFeatureId);
-      }
+      map.off("click", handleMapClick);
     };
-  }, [mapRef, isAddingObject, objectLat, objectLng, draw, objectIcon]);
+  }, [mapRef, isAddingObject, objectIcon]);
 
   const finalizeObjectPosition = () => {
     setIsAddingObject(false);
   };
 
   const cancelObjectAdding = () => {
-    if (drawnFeatureId && draw) {
-      draw.delete(drawnFeatureId);
+    if (objectIdRef.current && mapRef?.current) {
+      const map = mapRef.current;
+      if (map.getLayer(objectIdRef.current)) {
+        map.removeLayer(objectIdRef.current);
+      }
+      if (map.getSource(objectIdRef.current)) {
+        map.removeSource(objectIdRef.current);
+      }
+      if (objectIcon && map.hasImage(objectIcon)) {
+        map.removeImage(objectIcon);
+      }
     }
     setIsAddingObject(false);
-    setDrawnFeatureId(null);
+    objectIdRef.current = null;
+    sourceRef.current = null;
+    setObjectLat(null);
+    setObjectLng(null);
   };
 
   return {
     startAddingObject,
-    objectLat,
-    objectLng,
-    setObjectLat,
-    setObjectLng,
     finalizeObjectPosition,
     cancelObjectAdding,
+    setObjectLat,
+    setObjectLng,
+    objectLat,
+    objectLng,
   };
 };

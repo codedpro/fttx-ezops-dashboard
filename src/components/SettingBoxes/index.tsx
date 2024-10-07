@@ -170,11 +170,11 @@ const SettingBoxes = () => {
 
   return (
     <>
-      <div className="grid grid-cols-5 gap-8  text-darkgray dark:text-white">
+      <div className="grid grid-cols-5 gap-8  text-dark dark:text-white">
         <div className="col-span-5 xl:col-span-3">
-          <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-darkgray-3 dark:bg-gray-dark dark:shadow-card">
-            <div className="border-b border-stroke px-7 py-4 dark:border-darkgray-3">
-              <h3 className="font-medium text-darkgray dark:text-white">
+          <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card">
+            <div className="border-b border-stroke px-7 py-4 dark:border-dark-3">
+              <h3 className="font-medium text-dark dark:text-white">
                 Personal Information
               </h3>
             </div>
@@ -183,7 +183,7 @@ const SettingBoxes = () => {
                 <div className="mb-5.5 flex flex-col gap-5.5 sm:flex-row">
                   <div className="w-full">
                     <label
-                      className="mb-1 block text-body-sm font-medium text-darkgray dark:text-white"
+                      className="mb-1 block text-body-sm font-medium text-dark dark:text-white"
                       htmlFor="fullName"
                     >
                       Full Name
@@ -213,7 +213,7 @@ const SettingBoxes = () => {
                         </svg>
                       </span>
                       <input
-                        className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-darkgray focus:border-primary focus-visible:outline-none dark:border-darkgray-3 dark:bg-darkgray-2 dark:text-white dark:focus:border-primary"
+                        className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                         type="text"
                         name="fullName"
                         id="fullName"
@@ -227,7 +227,7 @@ const SettingBoxes = () => {
 
                 <div className="mb-5.5">
                   <label
-                    className="mb-1 block text-body-sm font-medium text-darkgray dark:text-white"
+                    className="mb-1 block text-body-sm font-medium text-dark dark:text-white"
                     htmlFor="emailAddress"
                   >
                     Email Address
@@ -251,7 +251,7 @@ const SettingBoxes = () => {
                       </svg>
                     </span>
                     <input
-                      className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-darkgray focus:border-primary focus-visible:outline-none dark:border-darkgray-3 dark:bg-darkgray-2 dark:text-white dark:focus:border-primary"
+                      className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                       type="email"
                       name="email"
                       id="email"
@@ -266,7 +266,7 @@ const SettingBoxes = () => {
 
                 <div className="mb-5.5">
                   <label
-                    className="mb-1 block text-body-sm font-medium text-darkgray dark:text-white"
+                    className="mb-1 block text-body-sm font-medium text-dark dark:text-white"
                     htmlFor="phoneNumber"
                   >
                     Phone Number
@@ -291,7 +291,7 @@ const SettingBoxes = () => {
                     </span>
 
                     <input
-                      className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-darkgray focus:border-primary focus-visible:outline-none dark:border-darkgray-3 dark:bg-darkgray-2 dark:text-white dark:focus:border-primary"
+                      className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                       type="text"
                       name="phone"
                       id="phone"
@@ -308,7 +308,7 @@ const SettingBoxes = () => {
                   <div className="w-1/2">
                     {" "}
                     <label
-                      className="mb-1 block text-body-sm font-medium text-darkgray dark:text-white"
+                      className="mb-1 block text-body-sm font-medium text-dark dark:text-white"
                       htmlFor="password"
                     >
                       New Password
@@ -319,7 +319,7 @@ const SettingBoxes = () => {
                       </span>
 
                       <input
-                        className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-darkgray focus:border-primary focus-visible:outline-none dark:border-darkgray-3 dark:bg-darkgray-2 dark:text-white dark:focus:border-primary"
+                        className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                         type="text"
                         name="password"
                         id="password"
@@ -331,7 +331,7 @@ const SettingBoxes = () => {
                   <div className="w-1/2">
                     {" "}
                     <label
-                      className="mb-1 block text-body-sm font-medium text-darkgray dark:text-white"
+                      className="mb-1 block text-body-sm font-medium text-dark dark:text-white"
                       htmlFor="confirmPassword"
                     >
                       Confirm Password
@@ -341,7 +341,7 @@ const SettingBoxes = () => {
                         <RiLockPasswordLine />
                       </span>
                       <input
-                        className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-darkgray focus:border-primary focus-visible:outline-none dark:border-darkgray-3 dark:bg-darkgray-2 dark:text-white dark:focus:border-primary"
+                        className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                         type="text"
                         name="confirmPassword"
                         id="confirmPassword"
@@ -354,7 +354,7 @@ const SettingBoxes = () => {
 
                 <div className="flex justify-end gap-3">
                   <button
-                    className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-darkgray hover:shadow-1 dark:border-darkgray-3 dark:text-white"
+                    className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
                     type="button"
                     onClick={() => window.location.reload()}
                   >
@@ -374,9 +374,9 @@ const SettingBoxes = () => {
           </div>
         </div>
         <div className="col-span-5 xl:col-span-2">
-          <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-darkgray-3 dark:bg-gray-dark dark:shadow-card">
-            <div className="border-b border-stroke px-7 py-4 dark:border-darkgray-3">
-              <h3 className="font-medium text-darkgray dark:text-white">
+          <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card">
+            <div className="border-b border-stroke px-7 py-4 dark:border-dark-3">
+              <h3 className="font-medium text-dark dark:text-white">
                 Your Photo
               </h3>
             </div>
@@ -395,7 +395,7 @@ const SettingBoxes = () => {
                     </>
                   </div>
                   <div>
-                    <span className="mb-1.5 font-medium text-darkgray dark:text-white">
+                    <span className="mb-1.5 font-medium text-dark dark:text-white">
                       Edit your photo
                     </span>
                     <span className="flex gap-3">
@@ -413,7 +413,7 @@ const SettingBoxes = () => {
                 <FileUpload onChange={handleFileUpload} />
                 <div className="flex justify-end gap-3">
                   <button
-                    className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-darkgray hover:shadow-1 dark:border-darkgray-3 dark:text-white"
+                    className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
                     type="button"
                     onClick={() => window.location.reload()}
                   >

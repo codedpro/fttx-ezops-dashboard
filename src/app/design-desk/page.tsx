@@ -17,9 +17,28 @@ import {
   StyleSpecification,
 } from "mapbox-gl";
 import { useAddObjectHook } from "@/hooks/useAddObjectHook";
+import AddObjectModal from "@/components/Maps/DesignDesk/Panels/AddObjectModal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { UserService } from "@/services/userService";
+import AddOtherObjectModal from "@/components/Maps/DesignDesk/Panels/AddOtherObjectModal";
+import { useLineDrawing } from "@/hooks/useLineDrawing";
 
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
+  const [objectDetails, setObjectDetails] = useState({
+    object: "",
+    lat: 0,
+    lng: 0,
+    image: "",
+  });
+  interface LineData {
+    coordinates: [number, number][];
+    chainId: number | null;
+    type: string | null;
+  }
 
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
     version: 8,
@@ -44,7 +63,7 @@ const DesignDesk: React.FC = () => {
     ],
   });
   const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
-
+  const userservice = new UserService();
   const modems = useFTTHModemsStore((state) => state.modems);
   const others = useFTTHComponentsOtherStore((state) => state.others);
   const [zoomLocation, setZoomLocation] = useState<{
@@ -55,6 +74,9 @@ const DesignDesk: React.FC = () => {
   const searchParams = useSearchParams();
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
+
+  const [currentLineType, setCurrentLineType] = useState<string | null>(null);
+  const [currentLineColor, setCurrentLineColor] = useState<string | null>(null);
 
   const selectedLayers = [
     "FTTHPreorderLayer",
@@ -87,6 +109,7 @@ const DesignDesk: React.FC = () => {
 
   const pointLayers = activeLayers.filter((layer) => layer.type === "point");
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
+
   const handleStyleChange = (
     newStyle: StyleSpecification,
     newStyleId: string
@@ -157,14 +180,100 @@ const DesignDesk: React.FC = () => {
     cancelObjectAdding,
   } = useAddObjectHook(ftthMapRef.current?.mapRef ?? { current: null });
 
+  const {
+    isDrawing,
+    startDrawing,
+    handleFinishLineDraw,
+    handleCancelLineDraw,
+    linePoints,
+  } = useLineDrawing(ftthMapRef.current?.mapRef ?? { current: null }, [
+    "sfat-layer",
+    "mfat-layer",
+  ]);
+
   const handleAddObject = (
     object: string,
     lat: number,
     lng: number,
     selectedObjectImage: string
   ) => {
-    alert(`Add Object: ${object}`);
-    startAddingObject(lat, lng, selectedObjectImage);
+    setObjectDetails({ object, lat, lng, image: selectedObjectImage });
+    if (object === "MFAT" || object === "SFAT") {
+      setIsModalOpen(true);
+    } else {
+      setIsOtherModalOpen(true);
+    }
+  };
+
+  const handleModalSubmit = (data: {
+    OLT: string;
+    POP: string;
+    FAT: string;
+    City: string;
+  }) => {
+    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewFATPoint`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...objectDetails,
+        ...data,
+        Plan_Type: 0,
+        Type: objectDetails.object,
+        Long: objectDetails.lng,
+        Name: "",
+      }),
+      headers: {
+        Authorization: `Bearer ${userservice.getToken()}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("Object added successfully!");
+
+          setTimeout(() => {
+            finalizeObjectPosition();
+            setIsModalOpen(false);
+          }, 300);
+        } else {
+          toast.error("Failed to add object.");
+        }
+      })
+      .catch((err) => {
+        toast.error("Error adding object:" + err);
+      });
+  };
+
+  const handleOtherModalSubmit = (data: { City: string }) => {
+    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewComponentPoint`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...objectDetails,
+        ...data,
+        Plan_Type: 0,
+        Type: objectDetails.object,
+        Long: objectDetails.lng,
+        Name: "",
+      }),
+      headers: {
+        Authorization: `Bearer ${userservice.getToken()}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("Object added successfully!");
+
+          setTimeout(() => {
+            finalizeObjectPosition();
+            setIsModalOpen(false);
+          }, 300);
+        } else {
+          toast.error("Failed to add object.");
+        }
+      })
+      .catch((err) => {
+        toast.error("Error adding object:" + err);
+      });
   };
 
   const handleIsAddingObjectChange = (
@@ -177,19 +286,14 @@ const DesignDesk: React.FC = () => {
     } | null
   ) => {
     if (isAdding) {
-      console.log("Started adding object:", objectDetails);
       startAddingObject(
         objectDetails?.lat ?? 0,
         objectDetails?.lng ?? 0,
         objectDetails?.image ?? ""
       );
     } else {
-      console.log("Stopped adding object.");
+      cancelObjectAdding();
     }
-  };
-
-  const handleDrawLine = (line: string) => {
-    alert(`Draw Line: ${line}`);
   };
 
   const handleAddKMZ = () => {
@@ -199,14 +303,41 @@ const DesignDesk: React.FC = () => {
   const handleSelectDraft = (draft: string) => {
     alert(`Select Draft: ${draft}`);
   };
-  const handleFlyToObject = (points: any) => {
+  const handleFlyToObject = (lat: number, lng: number) => {
+    setZoomLocation({ lat, lng, zoom: 20 });
+  };
+  const handleFlyToLine = (points: { lat: number; lng: number }[]) => {
     console.log(points);
   };
-  const handleFlyToLine = (points: any) => {
-    console.log(points);
+
+  const handleStartDrawing = (lineType: string) => {
+    startDrawing(lineType);
+  };
+
+  const handleOnEditLine = (LineData: LineData) => {
+    //startDrawing(LineData.type || "Unknown", LineData);
   };
   return (
     <DefaultLayout className="p-0 md:p-0">
+      <AddObjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        object={objectDetails.object}
+        lat={objectDetails.lat}
+        lng={objectDetails.lng}
+        image={objectDetails.image}
+        onSubmit={handleModalSubmit}
+      />
+      <AddOtherObjectModal
+        isOpen={isOtherModalOpen}
+        onClose={() => setIsOtherModalOpen(false)}
+        object={objectDetails.object}
+        lat={objectDetails.lat}
+        lng={objectDetails.lng}
+        image={objectDetails.image}
+        onSubmit={handleOtherModalSubmit}
+      />
+      <ToastContainer position="top-right" autoClose={5000} />
       {loading ? (
         <div className="flex items-center justify-center w-full h-[80vh] dark:bg-gray-800 dark:text-white">
           <div className="text-2xl font-bold">Loading Map...</div>
@@ -214,14 +345,21 @@ const DesignDesk: React.FC = () => {
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
           <MenuPanel
+            setObjectLat={setObjectLat}
+            setObjectLng={setObjectLng}
             onAddObject={handleAddObject}
-            onDrawLine={handleDrawLine}
+            onStartLineDraw={handleStartDrawing}
+            onFinishLineDraw={handleFinishLineDraw}
+            onCancelLineDraw={handleCancelLineDraw}
             onAddKMZ={handleAddKMZ}
             onSelectKMZ={handleAddKMZ}
             onSelectDraft={handleSelectDraft}
             onFlyToObject={handleFlyToObject}
             onFlyToLine={handleFlyToLine}
             onIsAddingObjectChange={handleIsAddingObjectChange}
+            objectLat={objectLat}
+            objectLng={objectLng}
+            linePoints={linePoints}
           />
           <CityPanel onCityClick={handleCityClick} />
           <LayerPanel
@@ -244,10 +382,12 @@ const DesignDesk: React.FC = () => {
           />
           <div className="z-20 w-full">
             <DesignDeskMap
+              isDrawing={isDrawing}
               ref={ftthMapRef}
               layers={activeLayers}
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
+              onEditLines={handleOnEditLine}
             />
           </div>
         </div>

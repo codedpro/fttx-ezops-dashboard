@@ -2,14 +2,29 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { gsap, Power3, Power2, Back } from "gsap";
 import { useRouter } from "next/navigation"; // Import useRouter
+import { Feature } from "geojson";
+
+interface LineData {
+  coordinates: [number, number][];
+  chainId: number | null;
+  type: string | null;
+}
 
 interface ModalProps {
   data: Record<string, any>;
   onClose: () => void;
   onEdit?: (point: any) => void;
+  onEditLine: (lineData: LineData) => void;
+  lineData: Feature;
 }
 
-export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
+export const Modal: React.FC<ModalProps> = ({
+  data,
+  onClose,
+  onEdit,
+  onEditLine,
+  lineData,
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
@@ -17,6 +32,7 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
   const router = useRouter(); // Initialize the router
 
   useEffect(() => {
+    console.log(data);
     if (modalRef.current) {
       gsap.fromTo(
         modalRef.current,
@@ -117,6 +133,18 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
     }
   };
 
+  const handleEditLine = (feature: any) => {
+    const coordinates = feature.geometry?.coordinates || [];
+    const chainId = feature.properties?.Chain_ID || null;
+    const type = feature.properties?.Type || null;
+
+    onEditLine({
+      coordinates, // LineString coordinates
+      chainId, // Chain_ID from properties
+      type, // Type from properties
+    });
+  };
+
   return (
     <div
       id="modal-overlay"
@@ -197,6 +225,18 @@ export const Modal: React.FC<ModalProps> = ({ data, onClose, onEdit }) => {
             className="mt-6 px-6 py-3 bg-primary  w-full text-white text-lg rounded-lg hover:opacity-80 transition-all transform scale-110"
           >
             Show Details
+          </button>
+        )}
+
+        {(data.Type === "Metro" || data.Type === "FAT" ) && (
+          <button
+            onClick={() => {
+              handleEditLine(lineData);
+              onClose();
+            }}
+            className="mt-6 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all transform scale-110"
+          >
+            Edit Line
           </button>
         )}
 
