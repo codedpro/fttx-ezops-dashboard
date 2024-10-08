@@ -42,7 +42,10 @@ interface MenuPanelProps {
   setObjectLng: (lng: number) => void;
   objectLat: number | null;
   objectLng: number | null;
-  linePoints: { lat: number; lng: number }[]; 
+  linePoints: { lat: number; lng: number }[];
+  isEditing: boolean;
+  onFinishLineEditing: () => void;
+  onCancelEditing: () => void;
 }
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -61,6 +64,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   objectLat,
   objectLng,
   linePoints,
+  isEditing,
+  onCancelEditing,
+  onFinishLineEditing,
 }) => {
   const [currentMenu, setCurrentMenu] = useState<
     | "main"
@@ -104,7 +110,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     setSelectedLine(null);
     setIsAddingObject(false);
     onIsAddingObjectChange(false, objectDetails);
-    onCancelLineDraw(); 
+    onCancelLineDraw();
 
     if (previousMenu) {
       setCurrentMenu(previousMenu);
@@ -181,6 +187,28 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         label="Back"
         icon={<FaArrowLeft />}
         onClick={() => setCurrentMenu("main")}
+      />
+    </>
+  );
+
+  const renderEditMenu = () => (
+    <>
+      <ActionButton
+        label="Done"
+        icon={<FaCheck />}
+        onClick={() => {
+          onFinishLineEditing();
+          handleCancel();
+          onCancelEditing();
+        }}
+      />
+      <ActionButton
+        label="Cancel"
+        icon={<FaTimes />}
+        onClick={() => {
+          handleCancel;
+          onCancelEditing();
+        }}
       />
     </>
   );
@@ -284,40 +312,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
             }
             onClick={() => {}}
           />
-          {/*       <input
-            type="number"
-            placeholder="Latitude"
-            value={objectLat !== null ? objectLat : ""}
-            onChange={(e) => {
-              const newLat = parseFloat(e.target.value);
-              if (!isNaN(newLat)) {
-                setObjectLat(newLat);
-              }
-            }}
-            className="p-2 border rounded w-24"
-          />
-          <input
-            type="number"
-            placeholder="Longitude"
-            value={objectLng !== null ? objectLng : ""}
-            onChange={(e) => {
-              const newLng = parseFloat(e.target.value);
-              if (!isNaN(newLng)) {
-                setObjectLng(newLng);
-              }
-            }}
-            className="p-2 border rounded w-24"
-          />
-          <ActionButton
-            label="Add Point"
-            icon={<FaPlus />}
-            onClick={() => {
-              if (objectLat !== null && objectLng !== null) {
-                onAddLinePoint({ lat: objectLat, lng: objectLng });
-              }
-            }}
-          /> */}
-
           <ActionButton
             label="Fly to"
             icon={<FaMapMarkedAlt />}
@@ -345,6 +339,13 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
     );
   };
 
+  if (isEditing) {
+    return (
+      <div className="absolute text-xs bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-row flex-wrap justify-center space-x-2 sm:space-x-4">
+        {renderEditMenu()}
+      </div>
+    );
+  }
   return (
     <div className="absolute text-xs bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-row flex-wrap justify-center space-x-2 sm:space-x-4">
       {currentMenu === "main" && renderMainMenu()}

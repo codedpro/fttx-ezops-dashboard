@@ -196,7 +196,8 @@ const DesignDesk: React.FC = () => {
     isEditing,
     startEditingLine,
     handleFinishEditing,
-    handleFeatureClick,
+
+    handleCancelEditing,
   } = useLineEditing(ftthMapRef.current?.mapRef ?? { current: null }, [
     "sfat-layer",
     "mfat-layer",
@@ -326,7 +327,6 @@ const DesignDesk: React.FC = () => {
   };
 
   const handleOnEditLine = (LineData: LineData) => {
-    //startDrawing(LineData.type || "Unknown", LineData);
     startEditingLine(LineData);
   };
   return (
@@ -357,6 +357,7 @@ const DesignDesk: React.FC = () => {
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
           <MenuPanel
+            isEditing={isEditing}
             setObjectLat={setObjectLat}
             setObjectLng={setObjectLng}
             onAddObject={handleAddObject}
@@ -372,6 +373,8 @@ const DesignDesk: React.FC = () => {
             objectLat={objectLat}
             objectLng={objectLng}
             linePoints={linePoints}
+            onCancelEditing={handleCancelEditing}
+            onFinishLineEditing={handleFinishEditing}
           />
           <CityPanel onCityClick={handleCityClick} />
           <LayerPanel
@@ -394,7 +397,7 @@ const DesignDesk: React.FC = () => {
           />
           <div className="z-20 w-full">
             <DesignDeskMap
-              isDrawing={isDrawing}
+             isDrawing={isDrawing || isEditing}
               ref={ftthMapRef}
               layers={activeLayers}
               mapStyle={mapStyle}
