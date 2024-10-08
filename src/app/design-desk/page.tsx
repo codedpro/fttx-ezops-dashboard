@@ -24,6 +24,9 @@ import { UserService } from "@/services/userService";
 import AddOtherObjectModal from "@/components/Maps/DesignDesk/Panels/AddOtherObjectModal";
 import { useLineDrawing } from "@/hooks/useLineDrawing";
 import { useLineEditing } from "@/hooks/useLineEditing";
+import PlacesSearchInput from "@/components/Maps/DesignDesk/Panels/PlacesSearchInput";
+import { fetchLocationData } from "@/lib/fetchLocationData";
+import useSearchPlaces from "@/hooks/useSearchPlaces";
 
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -329,6 +332,10 @@ const DesignDesk: React.FC = () => {
   const handleOnEditLine = (LineData: LineData) => {
     startEditingLine(LineData);
   };
+  const { handleSearchPlaces } = useSearchPlaces(
+    ftthMapRef.current?.mapRef ?? { current: null }
+  );
+
   return (
     <DefaultLayout className="p-0 md:p-0">
       <AddObjectModal
@@ -356,6 +363,7 @@ const DesignDesk: React.FC = () => {
         </div>
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
+          <PlacesSearchInput onSearch={handleSearchPlaces} />
           <MenuPanel
             isEditing={isEditing}
             setObjectLat={setObjectLat}
@@ -397,7 +405,7 @@ const DesignDesk: React.FC = () => {
           />
           <div className="z-20 w-full">
             <DesignDeskMap
-             isDrawing={isDrawing || isEditing}
+              isDrawing={isDrawing || isEditing}
               ref={ftthMapRef}
               layers={activeLayers}
               mapStyle={mapStyle}
