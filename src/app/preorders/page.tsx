@@ -21,6 +21,7 @@ import {
   StyleSpecification,
 } from "mapbox-gl";
 import ScreenshotEditorModal from "@/components/ScreenshotEditorModal";
+import useSearchPlaces from "@/hooks/useSearchPlaces";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -308,6 +309,10 @@ const FTTHModemsMap: React.FC = () => {
       setLoading(false);
     }
   }, [activeLayers]);
+
+  const { handleSearchPlaces } = useSearchPlaces(
+    ftthMapRef.current?.mapRef ?? { current: null }
+  );
   return (
     <DefaultLayout className="p-0 md:p-0">
       {loading ? (
@@ -315,7 +320,11 @@ const FTTHModemsMap: React.FC = () => {
           <div className="text-2xl font-bold">Loading Map...</div>
         </div>
       ) : (
-        <div className="w-full h-[80vh] relative overflow-hidden flex">
+        <div className="w-full h-[80vh] relative overflow-hidden">
+          <CityPanel
+            onCityClick={handleCityClick}
+            onSearch={handleSearchPlaces}
+          />
           {isPolygonMode && (
             <>
               {" "}
@@ -344,7 +353,6 @@ const FTTHModemsMap: React.FC = () => {
             </>
           )}
 
-          <CityPanel onCityClick={handleCityClick} />
           {!isEditMode && (
             <>
               <LayerPanel
@@ -399,7 +407,7 @@ const FTTHModemsMap: React.FC = () => {
               handleSaveEditCoordinates={handleSaveEditPointCoordinates}
             />
           )}
-          <div className="w-full">
+          <div className="w-full z-0">
             <FTTHMap
               ref={ftthMapRef}
               layers={activeLayers}

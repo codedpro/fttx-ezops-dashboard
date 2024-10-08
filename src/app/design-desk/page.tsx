@@ -363,7 +363,6 @@ const DesignDesk: React.FC = () => {
         </div>
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden">
-          <PlacesSearchInput onSearch={handleSearchPlaces} />
           <MenuPanel
             isEditing={isEditing}
             setObjectLat={setObjectLat}
@@ -384,7 +383,12 @@ const DesignDesk: React.FC = () => {
             onCancelEditing={handleCancelEditing}
             onFinishLineEditing={handleFinishEditing}
           />
-          <CityPanel onCityClick={handleCityClick} />
+
+          <CityPanel
+            onCityClick={handleCityClick}
+            onSearch={handleSearchPlaces}
+          />
+
           <LayerPanel
             title=""
             layers={pointLayers}
