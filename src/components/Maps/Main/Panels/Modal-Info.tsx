@@ -14,8 +14,8 @@ interface ModalProps {
   data: Record<string, any>;
   onClose: () => void;
   onEdit?: (point: any) => void;
-  onEditLine: (lineData: LineData) => void;
-  lineData: Feature;
+  onEditLine?: (lineData: LineData) => void;
+  lineData?: Feature;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -134,6 +134,9 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   const handleEditLine = (feature: any) => {
+    if (!onEditLine) {
+      return;
+    }
     const coordinates = feature.geometry?.coordinates || [];
     const chainId = feature.properties?.Chain_ID || null;
     const type = feature.properties?.Type || null;
@@ -228,7 +231,7 @@ export const Modal: React.FC<ModalProps> = ({
           </button>
         )}
 
-        {(data.Type === "Metro" || data.Type === "FAT" ) && (
+        {onEditLine && (data.Type === "Metro" || data.Type === "FAT") && (
           <button
             onClick={() => {
               handleEditLine(lineData);
