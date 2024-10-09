@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { gsap, Power3, Power2, Back } from "gsap";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 import { Feature } from "geojson";
+import { OBJECTS } from "@/data/designdeskMenu"; // Import OBJECTS
 
 interface LineData {
   coordinates: [number, number][];
@@ -17,7 +18,7 @@ interface ModalProps {
   onEditLine?: (lineData: LineData) => void;
   lineData?: Feature;
   onDeleteLine?: (lineData: LineData) => void;
-  onAddObjectToLine?: (lineData: LineData) => void;
+  onAddObjectToLine?: (lineData: LineData, objectLabel: string) => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -33,7 +34,11 @@ export const Modal: React.FC<ModalProps> = ({
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
+  const [showObjectMenu, setShowObjectMenu] = useState(false); // State to control object menu
+  const [selectedLineData, setSelectedLineData] = useState<LineData | null>(
+    null
+  ); // State to store lineData
 
   useEffect(() => {
     console.log(data);
@@ -167,19 +172,19 @@ export const Modal: React.FC<ModalProps> = ({
     });
   };
 
-  const handleAddObjectToLine = (feature: any) => {
-    if (!onAddObjectToLine) {
-      return;
-    }
+  const handleAddObjectClick = (feature: any) => {
     const coordinates = feature.geometry?.coordinates || [];
     const chainId = feature.properties?.Chain_ID || null;
     const type = feature.properties?.Type || null;
 
-    onAddObjectToLine({
+    const lineData = {
       coordinates,
       chainId,
       type,
-    });
+    };
+
+    setSelectedLineData(lineData);
+    setShowObjectMenu(true);
   };
 
   return (
@@ -199,117 +204,154 @@ export const Modal: React.FC<ModalProps> = ({
         >
           <FaTimes size={24} />
         </button>
-        <h2 className="text-2xl font-bold dark:text-white mb-4">Details</h2>
+        <h2 className="text-2xl font-bold dark:text-white mb-4">
+          {showObjectMenu ? "Select Object" : "Details"}
+        </h2>
 
-        <div className="custom-scrollbar max-h-[50vh] overflow-auto pr-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {Object.keys(data)
-              .filter(
-                (key) =>
-                  key !== "icon" &&
-                  key !== "LayerID" &&
-                  key !== "iconSize" &&
-                  key !== "Component_ID" &&
-                  key !== "Chain_ID" &&
-                  key !== "FAT_ID" &&
-                  key !== "Long"
-              )
-              .map((key, idx) => {
-                const displayValue =
-                  key === "Lat" && data.Long
-                    ? formatLatLong(data.Lat, data.Long)
-                    : data[key];
+        {showObjectMenu ? (
+          <div>
+            <button
+              onClick={() => setShowObjectMenu(false)}
+              className="mb-4 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              Back
+            </button>
+            <div className="grid grid-cols-2 gap-4">
+              {OBJECTS.map((obj, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => {
+                    if (onAddObjectToLine && selectedLineData) {
+                      onAddObjectToLine(selectedLineData, obj.label);
+                      onClose();
+                    }
+                  }}
+                  className="cursor-pointer bg-white dark:bg-gray-800 p-4 rounded-md flex flex-col items-center hover:shadow-lg transition-shadow"
+                >
+                  <img
+                    src={obj.image}
+                    alt={obj.label}
+                    className="w-16 h-16 mb-2"
+                  />
+                  <p className="text-gray-900 dark:text-white">{obj.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="custom-scrollbar max-h-[50vh] overflow-auto pr-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {Object.keys(data)
+                  .filter(
+                    (key) =>
+                      key !== "icon" &&
+                      key !== "LayerID" &&
+                      key !== "iconSize" &&
+                      key !== "Component_ID" &&
+                      key !== "Chain_ID" &&
+                      key !== "FAT_ID" &&
+                      key !== "Long"
+                  )
+                  .map((key, idx) => {
+                    const displayValue =
+                      key === "Lat" && data.Long
+                        ? formatLatLong(data.Lat, data.Long)
+                        : data[key];
 
-                const displayKey =
-                  key === "Lat" && data.Long ? "Lat/Long" : key;
+                    const displayKey =
+                      key === "Lat" && data.Long ? "Lat/Long" : key;
 
-                return (
-                  <div
-                    key={idx}
-                    ref={(el) => {
-                      if (el) cardRefs.current[idx] = el;
-                    }}
-                    className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
-                  >
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                      {displayKey}
-                    </p>
-                    <p
-                      className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${
-                        copied === displayKey ? "text-green-500" : ""
-                      }`}
-                      onClick={() => copyToClipboard(displayValue, displayKey)}
-                    >
-                      {displayValue || "N/A"}
-                      {copied === displayKey && (
-                        <span
-                          id={`copied-${displayKey}`}
-                          className="ml-2 text-xs text-green-500"
+                    return (
+                      <div
+                        key={idx}
+                        ref={(el) => {
+                          if (el) cardRefs.current[idx] = el;
+                        }}
+                        className="bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-70 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-transform transform hover:scale-105 hover:shadow-2xl hover:border-gray-400 dark:hover:border-gray-500"
+                      >
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                          {displayKey}
+                        </p>
+                        <p
+                          className={`font-semibold text-xs text-gray-900 dark:text-white cursor-pointer transition-colors hover:text-blue-500 dark:hover:text-gray-400 ${
+                            copied === displayKey ? "text-green-500" : ""
+                          }`}
+                          onClick={() =>
+                            copyToClipboard(displayValue, displayKey)
+                          }
                         >
-                          Copied!
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                );
-              })}
-          </div>
-        </div>
+                          {displayValue || "N/A"}
+                          {copied === displayKey && (
+                            <span
+                              id={`copied-${displayKey}`}
+                              className="ml-2 text-xs text-green-500"
+                            >
+                              Copied!
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
 
-        {data.LayerID === "modems" && (
-          <button
-            onClick={handleShowDetails}
-            className="mt-6 px-6 py-3 bg-primary  w-full text-white text-lg rounded-lg hover:opacity-80 transition-all transform scale-110"
-          >
-            Show Details
-          </button>
-        )}
+            {data.LayerID === "modems" && (
+              <button
+                onClick={handleShowDetails}
+                className="mt-6 px-6 py-3 bg-primary  w-full text-white text-lg rounded-lg hover:opacity-80 transition-all transform scale-110"
+              >
+                Show Details
+              </button>
+            )}
 
-        {onEditLine &&
-          onDeleteLine &&
-          onAddObjectToLine &&
-          (data.Type === "Metro" || data.Type === "FAT") && (
-            <div className="flex flex-wrap items-center justify-center gap-4 w-full mt-4">
-            <button
-              onClick={() => {
-                handleEditLine(lineData);
-                onClose();
-              }}
-              className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-base rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-transform duration-300 ease-in-out transform hover:scale-105"
-            >
-              Edit Line
-            </button>
-            <button
-              onClick={() => {
-                handleAddObjectToLine(lineData);
-                onClose();
-              }}
-              className="flex-1 px-4 py-2 bg-primary text-white text-base rounded-md hover:bg-primaryhover transition-transform duration-300 ease-in-out transform hover:scale-105"
-            >
-              Add Object
-            </button>
-            <button
-              onClick={() => {
-                handleDeleteLine(lineData);
-                onClose();
-              }}
-              className="flex-1 px-4 py-2 bg-red-600 text-white text-base rounded-md hover:bg-red-700 transition-transform duration-300 ease-in-out transform hover:scale-105"
-            >
-              Delete Line
-            </button>
-          </div>
-          )}
+            {onEditLine &&
+              onDeleteLine &&
+              onAddObjectToLine &&
+              (data.Type === "Metro" || data.Type === "FAT") && (
+                <div className="flex flex-wrap items-center justify-center gap-4 w-full mt-4">
+                  <button
+                    onClick={() => {
+                      handleEditLine(lineData);
+                      onClose();
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-base rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-transform duration-300 ease-in-out transform hover:scale-105"
+                  >
+                    Edit Line
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleAddObjectClick(lineData);
+                    }}
+                    className="flex-1 px-4 py-2 bg-primary text-white text-base rounded-md hover:bg-primaryhover transition-transform duration-300 ease-in-out transform hover:scale-105"
+                  >
+                    Add Object
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleDeleteLine(lineData);
+                      onClose();
+                    }}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white text-base rounded-md hover:bg-red-700 transition-transform duration-300 ease-in-out transform hover:scale-105"
+                  >
+                    Delete Line
+                  </button>
+                </div>
+              )}
 
-        {onEdit && data.LayerID === "preorders" && (
-          <button
-            onClick={() => {
-              onEdit(data);
-              onClose();
-            }}
-            className="mt-6 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all transform scale-110"
-          >
-            Edit
-          </button>
+            {onEdit && data.LayerID === "preorders" && (
+              <button
+                onClick={() => {
+                  onEdit(data);
+                  onClose();
+                }}
+                className="mt-6 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all transform scale-110"
+              >
+                Edit
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

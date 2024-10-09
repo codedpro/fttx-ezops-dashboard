@@ -7,6 +7,7 @@ import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/FormElements/Select";
+import { Input } from "@/components/FormElements/InputDark";
 
 interface AddOtherObjectModalProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ interface AddOtherObjectModalProps {
   lat: number;
   lng: number;
   image: string;
-  onSubmit: (data: { City: string }) => void;
+  onSubmit: (data: { City: string; Name: string }) => void;
 }
 
 const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
@@ -28,7 +29,8 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
   onSubmit,
 }) => {
   const [City, setCity] = useState<string>("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [name, setName] = useState<string>("");
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
     const handleDarkModeChange = () => {
@@ -51,13 +53,13 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
   }, []);
 
   const handleSubmit = async () => {
-    if (!City) {
+    if (!City || !name) {
       toast.error("All fields are required.");
       return;
     }
 
     try {
-      onSubmit({ City });
+      onSubmit({ City, Name: name });
     } catch (error) {
       toast.error("An error occurred while submitting the form.");
     }
@@ -81,10 +83,9 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
             <FiX size={24} />
           </button>
           <h2 className="text-center text-2xl font-semibold mb-6 dark:text-white">
-            Add Object: {object}
+            Add {object}
           </h2>
 
-          {/* Image with Lat/Long Section */}
           <div className="flex flex-col items-center mb-6">
             <div className="relative w-20 h-20 mb-3 rounded-lg overflow-hidden shadow-lg">
               <Image
@@ -105,8 +106,14 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
             </div>
           </div>
 
-          {/* Select City Section */}
           <div className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+            />
             <Select
               value={City}
               onChange={(e) => setCity(e.target.value)}
@@ -118,7 +125,6 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
             </Select>
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end space-x-4 mt-8">
             <button
               onClick={onClose}
@@ -132,7 +138,9 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
                 "bg-blue-500 text-sm px-4 py-2 text-white rounded-md hover:bg-blue-600 transition-colors",
                 { "dark:bg-primary dark:hover:bg-primary-dark": isDarkMode }
               )}
-            ></button>
+            >
+              Submit
+            </button>
           </div>
         </div>
       </ClickOutside>

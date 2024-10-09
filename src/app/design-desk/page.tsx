@@ -27,6 +27,8 @@ import { useLineEditing } from "@/hooks/useLineEditing";
 import PlacesSearchInput from "@/components/Maps/DesignDesk/Panels/PlacesSearchInput";
 import { fetchLocationData } from "@/lib/fetchLocationData";
 import useSearchPlaces from "@/hooks/useSearchPlaces";
+import { useConfirmation } from "@/hooks/useConfirmation";
+import { cn } from "@/lib/utils";
 
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -79,9 +81,6 @@ const DesignDesk: React.FC = () => {
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
 
-  const [currentLineType, setCurrentLineType] = useState<string | null>(null);
-  const [currentLineColor, setCurrentLineColor] = useState<string | null>(null);
-
   const selectedLayers = [
     "FTTHPreorderLayer",
     "ModemLayer",
@@ -110,7 +109,7 @@ const DesignDesk: React.FC = () => {
     DropCableLineLayer: true,
   };
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
-
+  const { confirm, ConfirmationModal } = useConfirmation();
   const pointLayers = activeLayers.filter((layer) => layer.type === "point");
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
 
@@ -243,6 +242,7 @@ const DesignDesk: React.FC = () => {
     })
       .then((res) => {
         if (res.status === 200) {
+          console.log("A Request");
           toast.success("Object added successfully!");
 
           setTimeout(() => {
@@ -258,7 +258,7 @@ const DesignDesk: React.FC = () => {
       });
   };
 
-  const handleOtherModalSubmit = (data: { City: string }) => {
+  const handleOtherModalSubmit = (data: { City: string; Name: string }) => {
     fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewComponentPoint`, {
       method: "POST",
       body: JSON.stringify({
@@ -267,7 +267,6 @@ const DesignDesk: React.FC = () => {
         Plan_Type: 0,
         Type: objectDetails.object,
         Long: objectDetails.lng,
-        Name: "",
       }),
       headers: {
         Authorization: `Bearer ${userservice.getToken()}`,
@@ -333,10 +332,18 @@ const DesignDesk: React.FC = () => {
     startEditingLine(LineData);
   };
   const handleOnDeleteLine = (LineData: LineData) => {
-    startEditingLine(LineData);
+    confirm(() => {
+      console.log("Deleted", LineData.type);
+      toast.success("Line deleted successfully!");
+    });
   };
-  const handleOnAddObjectToLine = (LineData: LineData) => {
-    startEditingLine(LineData);
+  const handleOnAddObjectToLine = (
+    lineData: LineData,
+    objectLabel: string,
+    clickedLatLng: { lat: number; lng: number }
+  ) => {
+    alert("Object Added on Line" );
+    console.log(clickedLatLng);
   };
   const { handleSearchPlaces } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
@@ -344,6 +351,8 @@ const DesignDesk: React.FC = () => {
 
   return (
     <DefaultLayout className="p-0 md:p-0">
+      <ConfirmationModal message="Are you sure you want to delete this line?" />
+
       <AddObjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -362,7 +371,19 @@ const DesignDesk: React.FC = () => {
         image={objectDetails.image}
         onSubmit={handleOtherModalSubmit}
       />
-      <ToastContainer position="top-right" autoClose={5000} />
+      <ToastContainer
+        theme={"dark"}
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        toastClassName={cn("custom-toast dark-toast")}
+      />
       {loading ? (
         <div className="flex items-center justify-center w-full h-[80vh] dark:bg-gray-800 dark:text-white">
           <div className="text-2xl font-bold">Loading Map...</div>

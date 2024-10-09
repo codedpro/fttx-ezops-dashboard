@@ -6,8 +6,8 @@ import React, {
   forwardRef,
 } from "react";
 import mapboxgl, { StyleSpecification } from "mapbox-gl";
+import * as turf from "@turf/turf";
 
-import { Modal } from "../Main/Panels/Modal-Info";
 import { dynamicZoom } from "@/utils/dynamicZoom";
 import { LayerType } from "@/types/FTTHMapProps";
 import {
@@ -16,6 +16,7 @@ import {
   addLineLayer,
   addPointLayer,
 } from "@/utils/mapLayers";
+import { Modal } from "@/components/Modal-Info";
 
 mapboxgl.accessToken = "dummy-token";
 interface LineData {
@@ -41,7 +42,11 @@ interface FTTHMapProps {
   isDrawing: boolean;
   onEditLines: (lineData: LineData) => void;
   onDeleteLines: (lineData: LineData) => void;
-  onAddObjectToLines: (lineData: LineData) => void;
+  onAddObjectToLines?: (
+    lineData: LineData,
+    objectLabel: string,
+    clickedLatLng: { lat: number; lng: number }
+  ) => void;
 }
 
 const DesignDeskMap = forwardRef<
@@ -64,6 +69,11 @@ const DesignDeskMap = forwardRef<
     const mapRef = useRef<mapboxgl.Map | null>(null);
     const [modalData, setModalData] = useState<any>(null);
     const [modalLineData, setModalLineData] = useState<any>(null);
+    const [clickedLatLng, setClickedLatLng] = useState<{
+      lat: number;
+      lng: number;
+    } | null>(null);
+
     const [isStyleloaded, setIsStyleLoaded] = useState<boolean>(false);
 
     useEffect(() => {
@@ -185,6 +195,7 @@ const DesignDeskMap = forwardRef<
 
     useEffect(() => {
       if (!mapRef.current) return;
+
       const handleClick = (e: mapboxgl.MapMouseEvent) => {
         const features = mapRef.current?.queryRenderedFeatures(e.point);
         if (features && features.length > 0) {
@@ -195,8 +206,41 @@ const DesignDeskMap = forwardRef<
           );
 
           if (clickedFeature && !isDrawing) {
-            setModalData(clickedFeature.properties);
-            setModalLineData(clickedFeature);
+            if (clickedFeature.geometry.type === "LineString") {
+              const clickedLatLng = { lat: e.lngLat.lat, lng: e.lngLat.lng };
+
+              const lineCoords = clickedFeature.geometry.coordinates;
+
+              const line = turf.lineString(lineCoords);
+              const clickedPoint = turf.point([
+                clickedLatLng.lng,
+                clickedLatLng.lat,
+              ]);
+
+              const snappedPoint = turf.nearestPointOnLine(line, clickedPoint, {
+                units: "meters",
+              });
+
+              const snappedLatLng = {
+                lat: snappedPoint.geometry.coordinates[1],
+                lng: snappedPoint.geometry.coordinates[0],
+              };
+              setClickedLatLng(snappedLatLng);
+
+              const lineData = {
+                ...clickedFeature.properties,
+              };
+
+              setModalData(lineData);
+              setModalLineData(clickedFeature);
+            } else {
+              const featureData = {
+                ...clickedFeature.properties,
+              };
+              setClickedLatLng(null);
+              setModalData(featureData);
+              setModalLineData(null);
+            }
           }
         }
       };
@@ -208,7 +252,7 @@ const DesignDeskMap = forwardRef<
           mapRef.current.off("click", handleClick);
         }
       };
-    }, [layers]);
+    }, [layers, isDrawing]);
 
     function debounce(func: (...args: any[]) => void, delay: number) {
       let timeoutId: NodeJS.Timeout;
@@ -252,6 +296,7 @@ const DesignDeskMap = forwardRef<
             onEditLine={onEditLines}
             onDeleteLine={onDeleteLines}
             onAddObjectToLine={onAddObjectToLines}
+            clickedLatLng={clickedLatLng}
           />
         )}
       </>

@@ -37,7 +37,7 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
   const [POP, setPOP] = useState<string>("");
   const [FAT, setFAT] = useState<string>("");
   const [City, setCity] = useState<string>("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
             <FiX size={24} />
           </button>
           <h2 className="text-center text-2xl font-semibold mb-6 dark:text-white">
-            Add Object: {object}
+            Add {object}
           </h2>
 
           {/* Image with Lat/Long Section */}
