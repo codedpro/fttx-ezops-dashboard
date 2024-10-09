@@ -31,10 +31,13 @@ const config: Config = {
         transparent: "transparent",
         white: "#FFFFFF",
         primary: "#feca00",
+        primaryhover: "#e5b800",
+        primarydark: "#b38600",
+        primarydarkhover: "#8c6900",
         secondary: { DEFAULT: "#122031", 2: "#021223" },
         stroke: "#E6EBF1",
         "stroke-dark": "#27303E",
-        
+
         darkgray: {
           DEFAULT: "#0a0a0a", // Base black
           2: "#0c0c0c", // Slightly lighter than DEFAULT

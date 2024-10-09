@@ -8,6 +8,7 @@ interface FTTHPreordersState {
   fetchingInProgress: boolean;
   startFetching: (token: string) => void;
   stopFetching: () => void;
+  forceUpdate: (token: string) => void;
   hasStarted: boolean;
 }
 
@@ -74,5 +75,8 @@ export const useFTTHPreordersStore = create<FTTHPreordersState>((set, get) => ({
   },
   stopFetching: () => {
     set({ hasStarted: false, fetchingInProgress: false });
+  },
+  forceUpdate: (token: string) => {
+    get().startFetching(token);
   },
 }));

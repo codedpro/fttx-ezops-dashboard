@@ -8,6 +8,7 @@ interface FTTHSuggestedFATState {
   fetchingInProgress: boolean;
   startFetching: (token: string) => void;
   stopFetching: () => void;
+  forceUpdate: (token: string) => void;
   hasStarted: boolean;
 }
 
@@ -75,6 +76,9 @@ export const useFTTHSuggestedFATStore = create<FTTHSuggestedFATState>(
     },
     stopFetching: () => {
       set({ hasStarted: false, fetchingInProgress: false });
+    },
+    forceUpdate: (token: string) => {
+      get().startFetching(token);
     },
   })
 );

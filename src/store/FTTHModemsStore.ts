@@ -8,6 +8,7 @@ interface FTTHModemsState {
   fetchingInProgress: boolean;
   startFetching: (token: string) => void;
   stopFetching: () => void;
+  forceUpdate: (token: string) => void;
   hasStarted: boolean;
 }
 
@@ -72,5 +73,8 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
   },
   stopFetching: () => {
     set({ hasStarted: false, fetchingInProgress: false });
+  },
+  forceUpdate: (token: string) => {
+    get().startFetching(token);
   },
 }));

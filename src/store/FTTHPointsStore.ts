@@ -8,6 +8,7 @@ interface FTTHPointsState {
   fetchingInProgress: boolean;
   startFetching: (token: string) => void;
   stopFetching: () => void;
+  forceUpdate: (token: string) => void;
   hasStarted: boolean;
 }
 
@@ -72,5 +73,8 @@ export const useFTTHPointsStore = create<FTTHPointsState>((set, get) => ({
   },
   stopFetching: () => {
     set({ hasStarted: false, fetchingInProgress: false });
+  },
+  forceUpdate: (token: string) => {
+    get().startFetching(token);
   },
 }));

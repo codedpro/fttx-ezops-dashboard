@@ -332,6 +332,12 @@ const DesignDesk: React.FC = () => {
   const handleOnEditLine = (LineData: LineData) => {
     startEditingLine(LineData);
   };
+  const handleOnDeleteLine = (LineData: LineData) => {
+    startEditingLine(LineData);
+  };
+  const handleOnAddObjectToLine = (LineData: LineData) => {
+    startEditingLine(LineData);
+  };
   const { handleSearchPlaces } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
@@ -415,6 +421,8 @@ const DesignDesk: React.FC = () => {
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
               onEditLines={handleOnEditLine}
+              onDeleteLines={handleOnDeleteLine}
+              onAddObjectToLines={handleOnAddObjectToLine}
             />
           </div>
         </div>

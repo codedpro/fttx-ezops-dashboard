@@ -8,6 +8,7 @@ interface FTTHOtherComponentsState {
   fetchingInProgress: boolean;
   startFetching: (token: string) => void;
   stopFetching: () => void;
+  forceUpdate: (token: string) => void;
   hasStarted: boolean;
 }
 
@@ -75,6 +76,9 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
     },
     stopFetching: () => {
       set({ hasStarted: false, fetchingInProgress: false });
+    },
+    forceUpdate: (token: string) => {
+      get().startFetching(token);
     },
   })
 );

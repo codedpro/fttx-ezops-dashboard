@@ -16,6 +16,8 @@ interface ModalProps {
   onEdit?: (point: any) => void;
   onEditLine?: (lineData: LineData) => void;
   lineData?: Feature;
+  onDeleteLine?: (lineData: LineData) => void;
+  onAddObjectToLine?: (lineData: LineData) => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -24,6 +26,8 @@ export const Modal: React.FC<ModalProps> = ({
   onEdit,
   onEditLine,
   lineData,
+  onDeleteLine,
+  onAddObjectToLine,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -148,6 +152,36 @@ export const Modal: React.FC<ModalProps> = ({
     });
   };
 
+  const handleDeleteLine = (feature: any) => {
+    if (!onDeleteLine) {
+      return;
+    }
+    const coordinates = feature.geometry?.coordinates || [];
+    const chainId = feature.properties?.Chain_ID || null;
+    const type = feature.properties?.Type || null;
+
+    onDeleteLine({
+      coordinates,
+      chainId,
+      type,
+    });
+  };
+
+  const handleAddObjectToLine = (feature: any) => {
+    if (!onAddObjectToLine) {
+      return;
+    }
+    const coordinates = feature.geometry?.coordinates || [];
+    const chainId = feature.properties?.Chain_ID || null;
+    const type = feature.properties?.Type || null;
+
+    onAddObjectToLine({
+      coordinates,
+      chainId,
+      type,
+    });
+  };
+
   return (
     <div
       id="modal-overlay"
@@ -231,17 +265,40 @@ export const Modal: React.FC<ModalProps> = ({
           </button>
         )}
 
-        {onEditLine && (data.Type === "Metro" || data.Type === "FAT") && (
-          <button
-            onClick={() => {
-              handleEditLine(lineData);
-              onClose();
-            }}
-            className="mt-6 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white text-lg rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all transform scale-110"
-          >
-            Edit Line
-          </button>
-        )}
+        {onEditLine &&
+          onDeleteLine &&
+          onAddObjectToLine &&
+          (data.Type === "Metro" || data.Type === "FAT") && (
+            <div className="flex flex-wrap items-center justify-center gap-4 w-full mt-4">
+            <button
+              onClick={() => {
+                handleEditLine(lineData);
+                onClose();
+              }}
+              className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-base rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-transform duration-300 ease-in-out transform hover:scale-105"
+            >
+              Edit Line
+            </button>
+            <button
+              onClick={() => {
+                handleAddObjectToLine(lineData);
+                onClose();
+              }}
+              className="flex-1 px-4 py-2 bg-primary text-white text-base rounded-md hover:bg-primaryhover transition-transform duration-300 ease-in-out transform hover:scale-105"
+            >
+              Add Object
+            </button>
+            <button
+              onClick={() => {
+                handleDeleteLine(lineData);
+                onClose();
+              }}
+              className="flex-1 px-4 py-2 bg-red-600 text-white text-base rounded-md hover:bg-red-700 transition-transform duration-300 ease-in-out transform hover:scale-105"
+            >
+              Delete Line
+            </button>
+          </div>
+          )}
 
         {onEdit && data.LayerID === "preorders" && (
           <button
