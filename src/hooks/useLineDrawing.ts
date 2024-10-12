@@ -183,7 +183,8 @@ export const useLineDrawing = (
         lastClickedFeature?.properties?.FAT_ID ||
         lastClickedFeature?.properties?.Component_ID;
       const endPointType = lastClickedFeature?.properties?.Type || "Unknown";
-
+      const startPointName = firstClickedFeature?.properties?.Name || "Unknown";
+      const endPointName = lastClickedFeature?.properties?.Name || "Unknown";
       const lines = linePoints.map((point) => ({
         Lat: point.lat,
         Long: point.lng,
@@ -194,6 +195,8 @@ export const useLineDrawing = (
         StartPointType: startPointType,
         EndPointId: endPointId,
         EndPointType: endPointType,
+        StartPointName: startPointName,
+        EndPointName: endPointName,
         LineType: lineType,
         Lines: lines,
       };

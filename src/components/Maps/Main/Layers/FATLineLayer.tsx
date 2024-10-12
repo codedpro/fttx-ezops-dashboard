@@ -16,6 +16,7 @@ export const useFATLineLayer = () => {
 
       setSource({
         type: "geojson",
+        
         data: geoJsonData,
       });
     }

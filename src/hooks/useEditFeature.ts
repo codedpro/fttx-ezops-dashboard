@@ -88,6 +88,7 @@ export const useEditFeature = (
               "icon-image": "marker-15",
               "icon-size": 1.5,
               "icon-allow-overlap": true,
+              "icon-anchor": "center",
             },
           });
 

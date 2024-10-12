@@ -26,6 +26,8 @@ interface AddNewRouteModalProps {
   >;
   startPointType: string;
   endPointType: string;
+  endPointName: string;
+  startPointName: string;
 }
 
 const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
@@ -36,6 +38,8 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
   setFormValues,
   startPointType,
   endPointType,
+  startPointName,
+  endPointName,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { cities } = useFTTHCitiesStore((state) => ({
@@ -88,10 +92,10 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
           >
             <FiX size={24} />
           </button>
-          <h2 className="text-center text-2xl font-semibold mb-6 dark:text-white">
+          <h2 className="text-center text-xs font-semibold mb-6 dark:text-white">
             {formValues.isReverse
-              ? `${endPointType}_to_${startPointType}`
-              : `${startPointType}_to_${endPointType}`}
+              ? `${endPointName}_to_${startPointName}`
+              : `${startPointName}_to_${endPointName}`}
           </h2>
 
           <div className="space-y-4">

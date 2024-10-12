@@ -33,11 +33,16 @@ import { drawingLayers } from "@/data/drawingLayers";
 import AddNewRouteModal from "@/components/Maps/DesignDesk/Panels/AddNewRouteModal";
 import axios from "axios";
 import { useFTTHComponentsFatStore } from "@/store/FTTHComponentsFatStore";
+import { useEditObjectHook } from "@/hooks/useEditObjectHook";
+import { ObjectData } from "@/types/ObjectData";
+import { OBJECTS } from "@/data/designdeskMenu";
 interface RouteData {
   StartPointId: number;
   StartPointType: string;
+  StartPointName: string;
   EndPointId: number;
   EndPointType: string;
+  EndPointName: string;
   LineType: string;
   Lines: {
     Lat: number;
@@ -91,6 +96,7 @@ const DesignDesk: React.FC = () => {
     ],
   });
   const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
+  const [objectLabel, setObjectLabel] = useState<string>("MFAT");
   const userservice = new UserService();
   const modems = useFTTHModemsStore((state) => state.modems);
   const others = useFTTHComponentsOtherStore((state) => state.others);
@@ -207,6 +213,17 @@ const DesignDesk: React.FC = () => {
     finalizeObjectPosition,
     cancelObjectAdding,
   } = useAddObjectHook(ftthMapRef.current?.mapRef ?? { current: null });
+
+  const {
+    startEditingObject,
+    finalizeObjectPosition: finilizeObjectEditPosition,
+    isEditingObject,
+    cancelObjectEditing,
+    setEditObjectLat: setEditObjectLat,
+    setEditObjectLng: setEditObjectLng,
+    editObjectLat: editObjectLat,
+    editObjectLng: editObjectLng,
+  } = useEditObjectHook(ftthMapRef.current?.mapRef ?? { current: null });
 
   const {
     isDrawing,
@@ -388,9 +405,32 @@ const DesignDesk: React.FC = () => {
     }
   };
 
+  const handleOnEditObject = (ObjectData: ObjectData) => {
+    const object = OBJECTS.find((o) => o.label === ObjectData.Type);
+    console.log(ObjectData);
+    console.log(object);
+
+    if (ObjectData && object) {
+      startEditingObject(
+
+        object?.image ?? "/images/map/odc.png",
+        ObjectData
+      );
+    }
+    setObjectLabel(ObjectData.Type);
+  };
+  const handleOnDeleteObject = (ObjectData: ObjectData) => {
+    confirm(() => {
+      console.log("Deleted", ObjectData.ID);
+      toast.success("Line deleted successfully!");
+    });
+  };
   const handleRouteModalSubmit = () => {
     const payload = {
       ...routeData,
+      Name: formLineValues.isReverse
+        ? routeData?.EndPointName + "_To_" + routeData?.StartPointName
+        : routeData?.StartPointName + "_To_" + routeData?.EndPointName,
       City: formLineValues.city,
       Plan_Type: formLineValues.planType,
       IsReverse: formLineValues.isReverse,
@@ -416,6 +456,9 @@ const DesignDesk: React.FC = () => {
 
     setIsRouteModalOpen(false);
   };
+  const handleSubmitObjectEditing = () => {
+    finilizeObjectEditPosition();
+  };
 
   return (
     <DefaultLayout className="p-0 md:p-0">
@@ -435,6 +478,8 @@ const DesignDesk: React.FC = () => {
         setFormValues={setFormLineValues}
         startPointType={routeData?.StartPointType ?? ""}
         endPointType={routeData?.EndPointType ?? ""}
+        endPointName={routeData?.StartPointName ?? ""}
+        startPointName={routeData?.EndPointName ?? ""}
       />
       <AddObjectModal
         isOpen={isModalOpen}
@@ -475,6 +520,7 @@ const DesignDesk: React.FC = () => {
         <div className="w-full h-[80vh] relative overflow-hidden">
           <MenuPanel
             isEditing={isEditing}
+            isEditingObject={isEditingObject}
             setObjectLat={setObjectLat}
             setObjectLng={setObjectLng}
             onAddObject={handleAddObject}
@@ -489,9 +535,16 @@ const DesignDesk: React.FC = () => {
             onIsAddingObjectChange={handleIsAddingObjectChange}
             objectLat={objectLat}
             objectLng={objectLng}
+            editObjectLat={editObjectLat}
+            editObjectLng={editObjectLng}
             linePoints={linePoints}
+            setEditObjectLat={setEditObjectLat}
+            setEditObjectLng={setEditObjectLng}
             onCancelEditing={handleCancelEditing}
             onFinishLineEditing={handleFinishEditing}
+            onFinishObjectEditing={handleSubmitObjectEditing}
+            onCancelObjectEditing={cancelObjectEditing}
+            EditingObjectLabel={objectLabel}
           />
 
           <CityPanel
@@ -527,6 +580,8 @@ const DesignDesk: React.FC = () => {
               onEditLines={handleOnEditLine}
               onDeleteLines={handleOnDeleteLine}
               onAddObjectToLines={handleOnAddObjectToLine}
+              onEditObject={handleOnEditObject}
+              onDeleteObject={handleOnDeleteObject}
             />
           </div>
         </div>

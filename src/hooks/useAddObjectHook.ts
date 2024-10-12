@@ -80,7 +80,7 @@ export const useAddObjectHook = (
             layout: {
               "icon-image": objectIcon,
               "icon-size": iconSize,
-              "icon-anchor": "bottom",
+              "icon-anchor": "center",
             },
           });
 

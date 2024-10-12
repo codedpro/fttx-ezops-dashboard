@@ -6,12 +6,9 @@ import { Feature } from "geojson";
 import { DataCards } from "./DataCards";
 import { ObjectMenu } from "./ObjectMenu";
 import { ActionButtons } from "./ActionButtons";
-
-interface LineData {
-  coordinates: [number, number][];
-  chainId: number | null;
-  type: string | null;
-}
+import { ActionButtonsObject } from "./ActionButtonsObject";
+import { LineData } from "@/types/LineData";
+import { ObjectData } from "@/types/ObjectData";
 
 interface ModalProps {
   data: Record<string, any>;
@@ -26,6 +23,8 @@ interface ModalProps {
     clickedLatLng: { lat: number; lng: number }
   ) => void;
   clickedLatLng?: { lat: number; lng: number } | null;
+  onEditObject?: (ObjectData: ObjectData) => void;
+  onDeleteObject?: (ObjectData: ObjectData) => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -37,6 +36,8 @@ export const Modal: React.FC<ModalProps> = ({
   onDeleteLine,
   onAddObjectToLine,
   clickedLatLng,
+  onEditObject,
+  onDeleteObject,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -144,6 +145,51 @@ export const Modal: React.FC<ModalProps> = ({
     });
   };
 
+  const handleDeleteObject = (feature: any) => {
+    if (!onDeleteObject) {
+      return;
+    }
+    const lat = feature.Lat;
+    const lng = feature.Long;
+    const type = feature.Type;
+    const id = feature.FAT_ID || feature.Component_ID;
+    const name = feature.Name;
+    const chain_ID = feature.Chain_ID;
+
+    onDeleteObject({
+      Lat: lat,
+      Long: lng,
+      Type: type,
+      ID: id,
+      Name: name,
+      Chain_ID: chain_ID,
+    });
+  };
+
+  const handleEditObject = (feature: any) => {
+    if (!onEditObject) {
+      return;
+    }
+    const lat = feature.Lat;
+    const lng = feature.Long;
+    const type = feature.Type;
+    const id = feature.FAT_ID || feature.Component_ID;
+    const name = feature.Name;
+    const chain_ID = feature.Chain_ID;
+    console.log(name, lat, lng, type, id, name, chain_ID);
+    console.log(feature);
+    if (feature) {
+      onEditObject({
+        Lat: lat,
+        Long: lng,
+        Type: type,
+        ID: id,
+        Name: name,
+        Chain_ID: chain_ID,
+      });
+    }
+  };
+
   const handleAddObjectClick = (feature: any) => {
     const coordinates = feature.geometry?.coordinates || [];
     const chainId = feature.properties?.Chain_ID || null;
@@ -209,6 +255,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {onEditLine &&
               onDeleteLine &&
+              lineData &&
               onAddObjectToLine &&
               (data.Type === "Metro" ||
                 data.Type === "FAT" ||
@@ -224,6 +271,25 @@ export const Modal: React.FC<ModalProps> = ({
                   }}
                   handleDeleteLine={() => {
                     handleDeleteLine(lineData);
+                    onClose();
+                  }}
+                />
+              )}
+
+            {onEditObject &&
+              onDeleteObject &&
+              (data.Type === "MFAT" ||
+                data.Type === "SFAT" ||
+                data.Type === "HH" ||
+                data.Type === "TC" ||
+                data.Type === "ODC") && (
+                <ActionButtonsObject
+                  handleEditObject={() => {
+                    handleEditObject(data);
+                    onClose();
+                  }}
+                  handleDeleteObject={() => {
+                    handleDeleteObject(data);
                     onClose();
                   }}
                 />

@@ -17,6 +17,7 @@ import {
   addPointLayer,
 } from "@/utils/mapLayers";
 import { Modal } from "@/components/Modal-Info";
+import { ObjectData } from "@/types/ObjectData";
 
 mapboxgl.accessToken = "dummy-token";
 interface LineData {
@@ -42,6 +43,8 @@ interface FTTHMapProps {
   isDrawing: boolean;
   onEditLines: (lineData: LineData) => void;
   onDeleteLines: (lineData: LineData) => void;
+  onEditObject: (ObjectData: ObjectData) => void;
+  onDeleteObject: (ObjectData: ObjectData) => void;
   onAddObjectToLines?: (
     lineData: LineData,
     objectLabel: string,
@@ -62,6 +65,8 @@ const DesignDeskMap = forwardRef<
       onEditLines,
       onDeleteLines,
       onAddObjectToLines,
+      onEditObject,
+      onDeleteObject,
     },
     ref
   ) => {
@@ -237,6 +242,7 @@ const DesignDeskMap = forwardRef<
               const featureData = {
                 ...clickedFeature.properties,
               };
+
               setClickedLatLng(null);
               setModalData(featureData);
               setModalLineData(null);
@@ -297,6 +303,8 @@ const DesignDeskMap = forwardRef<
             onDeleteLine={onDeleteLines}
             onAddObjectToLine={onAddObjectToLines}
             clickedLatLng={clickedLatLng}
+            onEditObject={onEditObject}
+            onDeleteObject={onDeleteObject}
           />
         )}
       </>

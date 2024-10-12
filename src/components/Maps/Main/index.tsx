@@ -130,6 +130,7 @@ const FTTHMap = forwardRef<
                 layout: {
                   "icon-image": ["get", "icon"],
                   "icon-size": ["get", "iconSize"],
+                  "icon-anchor": "center",
                   "icon-allow-overlap": true,
                 },
               });
