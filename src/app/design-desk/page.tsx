@@ -36,6 +36,7 @@ import { useFTTHComponentsFatStore } from "@/store/FTTHComponentsFatStore";
 import { useEditObjectHook } from "@/hooks/useEditObjectHook";
 import { ObjectData } from "@/types/ObjectData";
 import { OBJECTS } from "@/data/designdeskMenu";
+import ModeModal from "@/components/Maps/DesignDesk/Panels/ModeModal";
 interface RouteData {
   StartPointId: number;
   StartPointType: string;
@@ -72,6 +73,11 @@ const DesignDesk: React.FC = () => {
     planType: "",
     isReverse: false,
   });
+  const [isModeModalOpen, setIsModeModalOpen] = useState(false);
+  const [modeValue, setModeValue] = useState<number>(0);
+
+  const [objectDataToDelete, setObjectDataToDelete] =
+    useState<ObjectData | null>(null);
 
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
     version: 8,
@@ -381,8 +387,31 @@ const DesignDesk: React.FC = () => {
   };
   const handleOnDeleteLine = (LineData: LineData) => {
     confirm(() => {
-      console.log("Deleted", LineData.type);
-      toast.success("Line deleted successfully!");
+      const payload = LineData.chainId;
+
+      console.log("Deleting line with chainId:", payload);
+
+      axios
+        .post(
+          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDeleteRoute`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${userservice.getToken()}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success("Line deleted successfully!");
+          } else {
+            toast.error("Failed to delete line.");
+          }
+        })
+        .catch((error) => {
+          toast.error("Error deleting line: " + error.message);
+        });
     });
   };
   const handleOnAddObjectToLine = (
@@ -411,20 +440,59 @@ const DesignDesk: React.FC = () => {
     console.log(object);
 
     if (ObjectData && object) {
-      startEditingObject(
-
-        object?.image ?? "/images/map/odc.png",
-        ObjectData
-      );
+      startEditingObject(object?.image ?? "/images/map/odc.png", ObjectData);
     }
     setObjectLabel(ObjectData.Type);
   };
+
   const handleOnDeleteObject = (ObjectData: ObjectData) => {
-    confirm(() => {
-      console.log("Deleted", ObjectData.ID);
-      toast.success("Line deleted successfully!");
-    });
+    setObjectDataToDelete(ObjectData);
+    setIsModeModalOpen(true);
   };
+  const handleModeModalSubmit = (mode: number) => {
+    if (!objectDataToDelete) return;
+
+    confirm(() => {
+      const payload = {
+        id: Number(objectDataToDelete.ID),
+        type: objectDataToDelete.Type,
+        chain_ID: Number(objectDataToDelete.Chain_ID),
+        mode: mode,
+      };
+
+      console.log("Deleting object with payload:", payload);
+
+      axios
+        .post(
+          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDeleteComponent`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${userservice.getToken()}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success("Object deleted successfully!");
+            forceUpdateComponentsOther(userservice.getToken() ?? "");
+          } else {
+            toast.error("Failed to delete object.");
+          }
+        })
+        .catch((error) => {
+          toast.error("Error deleting object: " + error.message);
+        })
+        .finally(() => {
+          setObjectDataToDelete(null);
+          setModeValue(0);
+        });
+    });
+
+    setIsModeModalOpen(false);
+  };
+
   const handleRouteModalSubmit = () => {
     const payload = {
       ...routeData,
@@ -462,6 +530,16 @@ const DesignDesk: React.FC = () => {
 
   return (
     <DefaultLayout className="p-0 md:p-0">
+      <ModeModal
+        isOpen={isModeModalOpen}
+        onClose={() => {
+          setIsModeModalOpen(false);
+          setObjectDataToDelete(null);
+          setModeValue(0);
+        }}
+        chainId={objectDataToDelete?.Chain_ID ?? 0}
+        onSubmit={handleModeModalSubmit}
+      />
       <ConfirmationModal message="Are you sure you want to delete this ?" />
       <AddNewRouteModal
         isOpen={isRouteModalOpen}
