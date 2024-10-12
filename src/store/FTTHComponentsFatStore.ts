@@ -6,6 +6,7 @@ interface FTTHFatComponentsState {
   error: string | null;
   isLoading: boolean;
   fetchingInProgress: boolean;
+  intervalId: NodeJS.Timeout | null; // Store interval ID
   startFetching: (token: string) => void;
   stopFetching: () => void;
   forceUpdate: (token: string) => void;
@@ -19,6 +20,8 @@ export const useFTTHComponentsFatStore = create<FTTHFatComponentsState>(
     isLoading: false,
     fetchingInProgress: false,
     hasStarted: false,
+    intervalId: null, // Initialize intervalId
+
     startFetching: (token: string) => {
       if (get().hasStarted) return;
 
@@ -71,12 +74,18 @@ export const useFTTHComponentsFatStore = create<FTTHFatComponentsState>(
       };
 
       fetchFats();
-      const intervalId = setInterval(fetchFats, 10000);
-      set({ stopFetching: () => clearInterval(intervalId) });
+      const intervalId = setInterval(fetchFats, 600000); // Save intervalId
+      set({ intervalId, stopFetching: () => clearInterval(intervalId) });
     },
+
     stopFetching: () => {
-      set({ hasStarted: false, fetchingInProgress: false });
+      const { intervalId } = get();
+      if (intervalId) {
+        clearInterval(intervalId); // Clear the interval when stopping
+        set({ hasStarted: false, fetchingInProgress: false, intervalId: null });
+      }
     },
+
     forceUpdate: (token: string) => {
       get().startFetching(token);
     },

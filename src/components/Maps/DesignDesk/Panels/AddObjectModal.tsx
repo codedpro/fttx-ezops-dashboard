@@ -8,6 +8,7 @@ import ClickOutside from "@/components/ClickOutside";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/FormElements/Select";
 import { Input } from "@/components/FormElements/InputDark";
+import { useFTTHCitiesStore } from "@/store/FTTHCitiesStore";
 
 interface AddObjectModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface AddObjectModalProps {
     POP: string;
     FAT: string;
     City: string;
+    Plan_Type: string;
   }) => void;
 }
 
@@ -35,11 +37,16 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
 }) => {
   const [OLT, setOLT] = useState<string>("");
   const [POP, setPOP] = useState<string>("");
+  const [planType, setplanType] = useState<string>("");
   const [FAT, setFAT] = useState<string>("");
   const [City, setCity] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [loading, setLoading] = useState(false);
-
+  const { cities } = useFTTHCitiesStore((state) => ({
+    cities: state.cities,
+    isLoading: state.isLoading,
+    error: state.error,
+  }));
   useEffect(() => {
     const handleDarkModeChange = () => {
       const darkModeClass = document.documentElement.classList.contains("dark");
@@ -61,14 +68,14 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
   }, []);
 
   const handleSubmit = async () => {
-    if (!OLT || !POP || !FAT || !City) {
+    if (!OLT || !POP || !FAT || !City || !planType) {
       toast.error("All fields are required.");
       return;
     }
 
     try {
       setLoading(true);
-      onSubmit({ OLT, POP, FAT, City });
+      onSubmit({ OLT, POP, FAT, City, Plan_Type: planType });
     } catch (error) {
       toast.error("An error occurred while submitting the form.");
     } finally {
@@ -147,8 +154,22 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
               className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
             >
               <option value="">Select City</option>
-              <option value="City1">City1</option>
-              <option value="City2">City2</option>
+              {cities.map((city) => (
+                <option key={city.Name} value={city.Name}>
+                  {city.Name}
+                </option>
+              ))}
+            </Select>
+            <Select
+              name="planType"
+              value={planType}
+              onChange={(e) => setplanType(e.target.value)}
+              className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+            >
+              <option value="">Select Plan Type</option>
+              <option value="0">Planning</option>
+              <option value="1">Execution</option>
+              <option value="2">Approved</option>
             </Select>
           </div>
 

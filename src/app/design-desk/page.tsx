@@ -29,7 +29,26 @@ import { fetchLocationData } from "@/lib/fetchLocationData";
 import useSearchPlaces from "@/hooks/useSearchPlaces";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { cn } from "@/lib/utils";
-
+import { drawingLayers } from "@/data/drawingLayers";
+import AddNewRouteModal from "@/components/Maps/DesignDesk/Panels/AddNewRouteModal";
+import axios from "axios";
+import { useFTTHComponentsFatStore } from "@/store/FTTHComponentsFatStore";
+interface RouteData {
+  StartPointId: number;
+  StartPointType: string;
+  EndPointId: number;
+  EndPointType: string;
+  LineType: string;
+  Lines: {
+    Lat: number;
+    Long: number;
+  }[];
+}
+interface LineData {
+  coordinates: [number, number][];
+  chainId: number | null;
+  type: string | null;
+}
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,11 +59,14 @@ const DesignDesk: React.FC = () => {
     lng: 0,
     image: "",
   });
-  interface LineData {
-    coordinates: [number, number][];
-    chainId: number | null;
-    type: string | null;
-  }
+
+  const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
+  const [routeData, setRouteData] = useState<RouteData | null>(null);
+  const [formLineValues, setFormLineValues] = useState({
+    city: "",
+    planType: "",
+    isReverse: false,
+  });
 
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
     version: 8,
@@ -80,6 +102,9 @@ const DesignDesk: React.FC = () => {
   const searchParams = useSearchParams();
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
+  const { forceUpdate: forceUpdateComponentsOther } =
+    useFTTHComponentsOtherStore();
+  const { forceUpdate: forceUpdateComponentsFAT } = useFTTHComponentsFatStore();
 
   const selectedLayers = [
     "FTTHPreorderLayer",
@@ -189,10 +214,10 @@ const DesignDesk: React.FC = () => {
     handleFinishLineDraw,
     handleCancelLineDraw,
     linePoints,
-  } = useLineDrawing(ftthMapRef.current?.mapRef ?? { current: null }, [
-    "sfat-layer",
-    "mfat-layer",
-  ]);
+  } = useLineDrawing(
+    ftthMapRef.current?.mapRef ?? { current: null },
+    drawingLayers
+  );
 
   const {
     isEditing,
@@ -200,10 +225,10 @@ const DesignDesk: React.FC = () => {
     handleFinishEditing,
 
     handleCancelEditing,
-  } = useLineEditing(ftthMapRef.current?.mapRef ?? { current: null }, [
-    "sfat-layer",
-    "mfat-layer",
-  ]);
+  } = useLineEditing(
+    ftthMapRef.current?.mapRef ?? { current: null },
+    drawingLayers
+  );
 
   const handleAddObject = (
     object: string,
@@ -224,13 +249,14 @@ const DesignDesk: React.FC = () => {
     POP: string;
     FAT: string;
     City: string;
+    Plan_Type: string;
   }) => {
     fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewFATPoint`, {
       method: "POST",
       body: JSON.stringify({
         ...objectDetails,
         ...data,
-        Plan_Type: 0,
+        Plan_Type: +data.Plan_Type,
         Type: objectDetails.object,
         Long: objectDetails.lng,
         Name: "",
@@ -242,11 +268,11 @@ const DesignDesk: React.FC = () => {
     })
       .then((res) => {
         if (res.status === 200) {
-          console.log("A Request");
           toast.success("Object added successfully!");
 
           setTimeout(() => {
             finalizeObjectPosition();
+            forceUpdateComponentsFAT(userservice.getToken() ?? "");
             setIsModalOpen(false);
           }, 300);
         } else {
@@ -258,13 +284,17 @@ const DesignDesk: React.FC = () => {
       });
   };
 
-  const handleOtherModalSubmit = (data: { City: string; Name: string }) => {
+  const handleOtherModalSubmit = (data: {
+    City: string;
+    Name: string;
+    Plan_Type: string;
+  }) => {
     fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewComponentPoint`, {
       method: "POST",
       body: JSON.stringify({
         ...objectDetails,
         ...data,
-        Plan_Type: 0,
+        Plan_Type: +data.Plan_Type,
         Type: objectDetails.object,
         Long: objectDetails.lng,
       }),
@@ -279,7 +309,8 @@ const DesignDesk: React.FC = () => {
 
           setTimeout(() => {
             finalizeObjectPosition();
-            setIsModalOpen(false);
+            forceUpdateComponentsOther(userservice.getToken() ?? "");
+            setIsOtherModalOpen(false);
           }, 300);
         } else {
           toast.error("Failed to add object.");
@@ -342,17 +373,69 @@ const DesignDesk: React.FC = () => {
     objectLabel: string,
     clickedLatLng: { lat: number; lng: number }
   ) => {
-    alert("Object Added on Line" );
+    alert("Object Added on Line");
     console.log(clickedLatLng);
   };
   const { handleSearchPlaces } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
 
+  const handleFinishLineDrawing = async () => {
+    const newRoute = await handleFinishLineDraw();
+    if (newRoute) {
+      setRouteData(newRoute);
+      setIsRouteModalOpen(true);
+    }
+  };
+
+  const handleRouteModalSubmit = () => {
+    const payload = {
+      ...routeData,
+      City: formLineValues.city,
+      Plan_Type: formLineValues.planType,
+      IsReverse: formLineValues.isReverse,
+    };
+    console.log(payload);
+    axios
+      .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewRoute`, payload, {
+        headers: {
+          Authorization: `Bearer ${userservice.getToken()}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          toast.success("Route added successfully!");
+        } else {
+          toast.error("Failed to add route.");
+        }
+      })
+      .catch((error) => {
+        toast.error("Error adding route: " + error.message);
+      });
+
+    setIsRouteModalOpen(false);
+  };
+
   return (
     <DefaultLayout className="p-0 md:p-0">
-      <ConfirmationModal message="Are you sure you want to delete this line?" />
-
+      <ConfirmationModal message="Are you sure you want to delete this ?" />
+      <AddNewRouteModal
+        isOpen={isRouteModalOpen}
+        onClose={() => {
+          setIsRouteModalOpen(false);
+          setFormLineValues({
+            city: "",
+            planType: "",
+            isReverse: false,
+          });
+        }}
+        onSubmit={handleRouteModalSubmit}
+        formValues={formLineValues}
+        setFormValues={setFormLineValues}
+        startPointType={routeData?.StartPointType ?? ""}
+        endPointType={routeData?.EndPointType ?? ""}
+      />
       <AddObjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -396,7 +479,7 @@ const DesignDesk: React.FC = () => {
             setObjectLng={setObjectLng}
             onAddObject={handleAddObject}
             onStartLineDraw={handleStartDrawing}
-            onFinishLineDraw={handleFinishLineDraw}
+            onFinishLineDraw={handleFinishLineDrawing}
             onCancelLineDraw={handleCancelLineDraw}
             onAddKMZ={handleAddKMZ}
             onSelectKMZ={handleAddKMZ}

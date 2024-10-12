@@ -175,9 +175,13 @@ export const useLineDrawing = (
         return;
       }
 
-      const startPointId = firstClickedFeature?.properties?.FAT_ID || "Unknown";
+      const startPointId =
+        firstClickedFeature?.properties?.FAT_ID ||
+        firstClickedFeature.properties?.Component_ID;
       const startPointType = firstClickedFeature?.properties?.Type || "Unknown";
-      const endPointId = lastClickedFeature?.properties?.FAT_ID || "Unknown";
+      const endPointId =
+        lastClickedFeature?.properties?.FAT_ID ||
+        lastClickedFeature?.properties?.Component_ID;
       const endPointType = lastClickedFeature?.properties?.Type || "Unknown";
 
       const lines = linePoints.map((point) => ({
@@ -194,38 +198,9 @@ export const useLineDrawing = (
         Lines: lines,
       };
 
-      try {
-        console.log(JSON.stringify(newRoute));
-        const response = await fetch(
-          "https://your-endpoint.com/api/new-route",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newRoute),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Route saved successfully:", data);
-        } else {
-          console.error("Failed to save route:", response.statusText);
-          alert("Failed to save route.");
-        }
-      } catch (error) {
-        console.error("Error while saving route:", error);
-        alert("An error occurred while saving the route.");
-      }
-
-      console.log("Line drawing finished.");
-      console.log("Points:", linePoints);
-      console.log("First clicked feature:", firstClickedFeature);
-      console.log("Last clicked feature:", lastClickedFeature);
-
       removeDrawControl();
       setIsDrawing(false);
+      return newRoute;
     } else {
       alert(
         "You must connect both the first and last points to features to save the line."

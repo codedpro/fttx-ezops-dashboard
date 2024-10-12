@@ -210,7 +210,10 @@ export const Modal: React.FC<ModalProps> = ({
             {onEditLine &&
               onDeleteLine &&
               onAddObjectToLine &&
-              (data.Type === "Metro" || data.Type === "FAT") && (
+              (data.Type === "Metro" ||
+                data.Type === "FAT" ||
+                data.Type === "ODC" ||
+                data.Type === "Drop Cable") && (
                 <ActionButtons
                   handleEditLine={() => {
                     handleEditLine(lineData);
