@@ -70,12 +70,11 @@ export const useFTTHModemsStore = create<FTTHModemsState>((set, get) => ({
       }
     };
 
-    // Set up auto-fetching
     fetchModems();
     const intervalId = setInterval(() => {
-      set({ autoFetching: true }); // Mark as auto-fetching
+      set({ autoFetching: true });
       fetchModems();
-    }, 600000); // 10 minutes
+    }, 60000);
 
     set({
       stopFetching: () => {
