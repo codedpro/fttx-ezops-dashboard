@@ -38,6 +38,11 @@ import ModeModal from "@/components/Maps/DesignDesk/Panels/ModeModal";
 import { useFTTHPointsStore } from "@/store/FTTHPointsStore";
 import { RouteData } from "@/types/RouteData";
 import { LineData } from "@/types/LineData";
+import {
+  getBoundingBox,
+  getCenterPoint,
+  getZoomLevel,
+} from "@/utils/mapCalculations";
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +67,7 @@ const DesignDesk: React.FC = () => {
     useState<number>(0);
 
   const [objectDataToDelete, setObjectDataToDelete] =
-    useState<ObjectData | null>(null);
+    useState<ObjectData | null>();
 
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
     version: 8,
@@ -359,9 +364,23 @@ const DesignDesk: React.FC = () => {
     setZoomLocation({ lat, lng, zoom: 20 });
   };
   const handleFlyToLine = (points: { lat: number; lng: number }[]) => {
-    console.log(points);
-  };
+    if (points.length > 0) {
+      const { minLat, maxLat, minLng, maxLng } = getBoundingBox(points);
+      const { centerLat, centerLng } = getCenterPoint(
+        minLat,
+        maxLat,
+        minLng,
+        maxLng
+      );
+      const zoom = getZoomLevel(minLat, maxLat, minLng, maxLng);
 
+      setZoomLocation({
+        lat: centerLat,
+        lng: centerLng,
+        zoom: zoom,
+      });
+    }
+  };
   const handleStartDrawing = (lineType: string) => {
     startDrawing(lineType);
   };
@@ -373,8 +392,6 @@ const DesignDesk: React.FC = () => {
   const handleOnDeleteLine = (LineData: LineData) => {
     confirm(() => {
       const payload = LineData.chainId;
-
-      console.log("Deleting line with chainId:", payload);
 
       axios
         .post(
@@ -406,7 +423,6 @@ const DesignDesk: React.FC = () => {
     clickedLatLng: { lat: number; lng: number }
   ) => {
     alert("Object Added on Line");
-    console.log(clickedLatLng);
   };
   const { handleSearchPlaces } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
@@ -431,30 +447,31 @@ const DesignDesk: React.FC = () => {
 
   const handleOnDeleteObject = (ObjectData: ObjectData) => {
     setObjectDataToDelete(ObjectData);
-    handleModeModalSubmit(ObjectData.Chain_ID);
+    handleModeModalSubmit(ObjectData);
   };
-  const handleModeModalSubmit = (chainId: number) => {
+  const handleModeModalSubmit = (objectData: ObjectData) => {
     const fetchConnectedLines = async (token: string) => {
       try {
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHHowManyLinesConnected`,
-          chainId,
+          objectData.Chain_ID,
           {
             headers: {
-              Authorization: `Bearer ${userservice.getToken()}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
 
         const connectedLines = response.data;
+
         setConnectedLinesToComponent(connectedLines);
         if (connectedLines === 0) {
-          submitMode(0);
+          submitMode(0, objectData);
         } else if (connectedLines === 1) {
-          submitMode(2);
+          submitMode(2, objectData);
         } else if (connectedLines > 2) {
-          submitMode(2);
+          submitMode(2, objectData);
         } else if (connectedLines === 2) {
           setIsModeModalOpen(true);
         }
@@ -467,14 +484,16 @@ const DesignDesk: React.FC = () => {
     const token = userservice.getToken() ?? "";
     fetchConnectedLines(token);
   };
-  const submitMode = (mode: number) => {
-    if (!objectDataToDelete) return;
+  const submitMode = (mode: number, objectData?: ObjectData) => {
+    const dataToDelete = objectData || objectDataToDelete;
+
+    if (!dataToDelete) return;
 
     confirm(() => {
       const payload = {
-        id: Number(objectDataToDelete.ID),
-        type: objectDataToDelete.Type,
-        chain_ID: Number(objectDataToDelete.Chain_ID),
+        id: Number(dataToDelete.ID),
+        type: dataToDelete.Type,
+        chain_ID: Number(dataToDelete.Chain_ID),
         mode: mode,
       };
 
@@ -510,6 +529,7 @@ const DesignDesk: React.FC = () => {
         });
     });
   };
+
   const handleRouteModalSubmit = () => {
     const payload = {
       ...routeData,
@@ -520,7 +540,7 @@ const DesignDesk: React.FC = () => {
       Plan_Type: formLineValues.planType,
       IsReverse: formLineValues.isReverse,
     };
-    console.log(payload);
+
     axios
       .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewRoute`, payload, {
         headers: {
