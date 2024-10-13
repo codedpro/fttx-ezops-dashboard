@@ -277,6 +277,7 @@ export const Modal: React.FC<ModalProps> = ({
               )}
 
             {onEditObject &&
+              !lineData &&
               onDeleteObject &&
               (data.Type === "MFAT" ||
                 data.Type === "SFAT" ||
