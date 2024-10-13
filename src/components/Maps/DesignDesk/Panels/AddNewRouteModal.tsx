@@ -42,6 +42,7 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
   endPointName,
 }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isFormValid, setIsFormValid] = useState(false);
   const { cities } = useFTTHCitiesStore((state) => ({
     cities: state.cities,
     isLoading: state.isLoading,
@@ -67,6 +68,11 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
 
     return () => observer.disconnect();
   }, []);
+
+  // Check if all required fields are filled or predefined
+  useEffect(() => {
+    setIsFormValid(formValues.city !== "" && formValues.planType !== "");
+  }, [formValues]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -109,7 +115,6 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
                 onChange={handleChange}
                 className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
               >
-                <option value="NEKA">NEKA</option>
                 {cities.map((city) => (
                   <option key={city.Name} value={city.Name}>
                     {city.Name}
@@ -128,7 +133,6 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
                 onChange={handleChange}
                 className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
               >
-             {/*    <option value="">Select Plan Type</option> */}
                 <option value="0">Planning</option>
                 <option value="1">Execution</option>
                 <option value="2">Approved</option>
@@ -164,9 +168,21 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
             </button>
             <button
               onClick={onSubmit}
+              disabled={
+                !isFormValid &&
+                formValues.city === "" &&
+                formValues.planType === ""
+              }
               className={cn(
-                "bg-blue-500 text-sm px-4 py-2 text-white rounded-md hover:bg-blue-600 transition-colors",
-                { "dark:bg-primary dark:hover:bg-primary-dark": isDarkMode }
+                "bg-blue-500 text-sm px-4 py-2 text-white rounded-md transition-colors",
+                {
+                  "hover:bg-blue-600": isFormValid,
+                  "cursor-not-allowed opacity-50":
+                    !isFormValid &&
+                    formValues.city === "" &&
+                    formValues.planType === "",
+                  "dark:bg-primary dark:hover:bg-primary-dark": isDarkMode,
+                }
               )}
             >
               Submit

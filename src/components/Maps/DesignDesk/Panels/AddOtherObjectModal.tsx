@@ -29,9 +29,9 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
   image,
   onSubmit,
 }) => {
-  const [City, setCity] = useState<string>("");
+  const [City, setCity] = useState<string>("NEKA");
   const [name, setName] = useState<string>("");
-  const [planType, setplanType] = useState<string>("");
+  const [planType, setplanType] = useState<string>("0");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { cities } = useFTTHCitiesStore((state) => ({
     cities: state.cities,
@@ -139,7 +139,7 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
               onChange={(e) => setplanType(e.target.value)}
               className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
             >
-{/*               <option value="">Select Plan Type</option> */}
+              {/*               <option value="">Select Plan Type</option> */}
               <option value="0">Planning</option>
               <option value="1">Execution</option>
               <option value="2">Approved</option>

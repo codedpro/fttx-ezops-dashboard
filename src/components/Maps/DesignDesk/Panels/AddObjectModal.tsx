@@ -37,9 +37,9 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
 }) => {
   const [OLT, setOLT] = useState<string>("");
   const [POP, setPOP] = useState<string>("");
-  const [planType, setplanType] = useState<string>("");
+  const [planType, setplanType] = useState<string>("0");
   const [FAT, setFAT] = useState<string>("");
-  const [City, setCity] = useState<string>("");
+  const [City, setCity] = useState<string>("NEKA");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [loading, setLoading] = useState(false);
   const { cities } = useFTTHCitiesStore((state) => ({

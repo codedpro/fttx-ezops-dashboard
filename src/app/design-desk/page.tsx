@@ -37,6 +37,7 @@ import { useEditObjectHook } from "@/hooks/useEditObjectHook";
 import { ObjectData } from "@/types/ObjectData";
 import { OBJECTS } from "@/data/designdeskMenu";
 import ModeModal from "@/components/Maps/DesignDesk/Panels/ModeModal";
+import { useFTTHPointsStore } from "@/store/FTTHPointsStore";
 interface RouteData {
   StartPointId: number;
   StartPointType: string;
@@ -69,8 +70,8 @@ const DesignDesk: React.FC = () => {
   const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
   const [routeData, setRouteData] = useState<RouteData | null>(null);
   const [formLineValues, setFormLineValues] = useState({
-    city: "",
-    planType: "",
+    city: "NEKA",
+    planType: "0",
     isReverse: false,
   });
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
@@ -117,7 +118,7 @@ const DesignDesk: React.FC = () => {
   const { forceUpdate: forceUpdateComponentsOther } =
     useFTTHComponentsOtherStore();
   const { forceUpdate: forceUpdateComponentsFAT } = useFTTHComponentsFatStore();
-
+  const { forceUpdate: forceUpdatePoints } = useFTTHPointsStore();
   const selectedLayers = [
     "FTTHPreorderLayer",
     "ModemLayer",
@@ -384,8 +385,8 @@ const DesignDesk: React.FC = () => {
   const handleOnEditLine = (LineData: LineData) => {
     startEditingLine(LineData);
   };
+
   const handleOnDeleteLine = (LineData: LineData) => {
-    console.log(LineData);
     confirm(() => {
       const payload = LineData.chainId;
 
@@ -404,6 +405,7 @@ const DesignDesk: React.FC = () => {
         )
         .then((response) => {
           if (response.status === 200) {
+            forceUpdatePoints(userservice.getToken() ?? "");
             toast.success("Line deleted successfully!");
           } else {
             toast.error("Failed to delete line.");
@@ -476,7 +478,10 @@ const DesignDesk: React.FC = () => {
         .then((response) => {
           if (response.status === 200) {
             toast.success("Object deleted successfully!");
-            forceUpdateComponentsOther(userservice.getToken() ?? "");
+            const token = userservice.getToken() ?? "";
+            forceUpdateComponentsOther(token);
+            forceUpdateComponentsFAT(token);
+            forceUpdatePoints(token);
           } else {
             toast.error("Failed to delete object.");
           }
@@ -513,6 +518,7 @@ const DesignDesk: React.FC = () => {
       })
       .then((response) => {
         if (response.status === 200) {
+          forceUpdatePoints(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
         } else {
           toast.error("Failed to add route.");
@@ -530,72 +536,76 @@ const DesignDesk: React.FC = () => {
 
   return (
     <DefaultLayout className="p-0 md:p-0">
-      <ModeModal
-        isOpen={isModeModalOpen}
-        onClose={() => {
-          setIsModeModalOpen(false);
-          setObjectDataToDelete(null);
-          setModeValue(0);
-        }}
-        chainId={objectDataToDelete?.Chain_ID ?? 0}
-        onSubmit={handleModeModalSubmit}
-      />
-      <ConfirmationModal message="Are you sure you want to delete this ?" />
-      <AddNewRouteModal
-        isOpen={isRouteModalOpen}
-        onClose={() => {
-          setIsRouteModalOpen(false);
-          setFormLineValues({
-            city: "",
-            planType: "",
-            isReverse: false,
-          });
-        }}
-        onSubmit={handleRouteModalSubmit}
-        formValues={formLineValues}
-        setFormValues={setFormLineValues}
-        startPointType={routeData?.StartPointType ?? ""}
-        endPointType={routeData?.EndPointType ?? ""}
-        endPointName={routeData?.StartPointName ?? ""}
-        startPointName={routeData?.EndPointName ?? ""}
-      />
-      <AddObjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        object={objectDetails.object}
-        lat={objectDetails.lat}
-        lng={objectDetails.lng}
-        image={objectDetails.image}
-        onSubmit={handleModalSubmit}
-      />
-      <AddOtherObjectModal
-        isOpen={isOtherModalOpen}
-        onClose={() => setIsOtherModalOpen(false)}
-        object={objectDetails.object}
-        lat={objectDetails.lat}
-        lng={objectDetails.lng}
-        image={objectDetails.image}
-        onSubmit={handleOtherModalSubmit}
-      />
-      <ToastContainer
-        theme={"dark"}
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        toastClassName={cn("custom-toast dark-toast")}
-      />
+      <div className="z-999">
+        {" "}
+        <ModeModal
+          isOpen={isModeModalOpen}
+          onClose={() => {
+            setIsModeModalOpen(false);
+            setObjectDataToDelete(null);
+            setModeValue(0);
+          }}
+          chainId={objectDataToDelete?.Chain_ID ?? 0}
+          onSubmit={handleModeModalSubmit}
+        />
+        <ConfirmationModal message="Are you sure you want to delete this ?" />
+        <AddNewRouteModal
+          isOpen={isRouteModalOpen}
+          onClose={() => {
+            setIsRouteModalOpen(false);
+            setFormLineValues({
+              city: "",
+              planType: "",
+              isReverse: false,
+            });
+          }}
+          onSubmit={handleRouteModalSubmit}
+          formValues={formLineValues}
+          setFormValues={setFormLineValues}
+          startPointType={routeData?.StartPointType ?? ""}
+          endPointType={routeData?.EndPointType ?? ""}
+          endPointName={routeData?.StartPointName ?? ""}
+          startPointName={routeData?.EndPointName ?? ""}
+        />
+        <AddObjectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          object={objectDetails.object}
+          lat={objectDetails.lat}
+          lng={objectDetails.lng}
+          image={objectDetails.image}
+          onSubmit={handleModalSubmit}
+        />
+        <AddOtherObjectModal
+          isOpen={isOtherModalOpen}
+          onClose={() => setIsOtherModalOpen(false)}
+          object={objectDetails.object}
+          lat={objectDetails.lat}
+          lng={objectDetails.lng}
+          image={objectDetails.image}
+          onSubmit={handleOtherModalSubmit}
+        />
+        <ToastContainer
+          theme={"dark"}
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          toastClassName={cn("custom-toast dark-toast")}
+        />
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center w-full h-[80vh] dark:bg-gray-800 dark:text-white">
           <div className="text-2xl font-bold">Loading Map...</div>
         </div>
       ) : (
-        <div className="w-full h-[80vh] relative overflow-hidden">
+        <div className="w-full h-[80vh] relative overflow-hidden z-20">
           <MenuPanel
             isEditing={isEditing}
             isEditingObject={isEditingObject}

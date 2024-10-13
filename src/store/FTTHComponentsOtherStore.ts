@@ -6,7 +6,7 @@ interface FTTHOtherComponentsState {
   error: string | null;
   isLoading: boolean;
   fetchingInProgress: boolean;
-  autoFetching: boolean; // New flag to distinguish auto-fetching from manual updates
+  autoFetching: boolean;
   startFetching: (token: string) => void;
   stopFetching: () => void;
   forceUpdate: (token: string) => void;
@@ -19,7 +19,7 @@ export const useFTTHComponentsOtherStore = create<FTTHOtherComponentsState>(
     error: null,
     isLoading: false,
     fetchingInProgress: false,
-    autoFetching: false, // New flag to track auto-fetching
+    autoFetching: false,
     hasStarted: false,
 
     startFetching: (token: string) => {
