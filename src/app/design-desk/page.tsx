@@ -76,6 +76,8 @@ const DesignDesk: React.FC = () => {
   });
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
   const [modeValue, setModeValue] = useState<number>(0);
+  const [connectedLinestocomponent, setConnectedLinesToComponent] =
+    useState<number>(0);
 
   const [objectDataToDelete, setObjectDataToDelete] =
     useState<ObjectData | null>(null);
@@ -447,9 +449,43 @@ const DesignDesk: React.FC = () => {
 
   const handleOnDeleteObject = (ObjectData: ObjectData) => {
     setObjectDataToDelete(ObjectData);
-    setIsModeModalOpen(true);
+    handleModeModalSubmit(ObjectData.Chain_ID);
   };
-  const handleModeModalSubmit = (mode: number) => {
+  const handleModeModalSubmit = (chainId: number) => {
+    const fetchConnectedLines = async (token: string) => {
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHHowManyLinesConnected`,
+          chainId,
+          {
+            headers: {
+              Authorization: `Bearer ${userservice.getToken()}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const connectedLines = response.data;
+        setConnectedLinesToComponent(connectedLines);
+        if (connectedLines === 0) {
+          submitMode(0);
+        } else if (connectedLines === 1) {
+          submitMode(2);
+        } else if (connectedLines > 2) {
+          submitMode(2);
+        } else if (connectedLines === 2) {
+          setIsModeModalOpen(true);
+        }
+      } catch (error) {
+        setConnectedLinesToComponent(0);
+        console.error("Error fetching connected lines: ", error);
+      }
+    };
+
+    const token = userservice.getToken() ?? "";
+    fetchConnectedLines(token);
+  };
+  const submitMode = (mode: number) => {
     if (!objectDataToDelete) return;
 
     confirm(() => {
@@ -488,12 +524,10 @@ const DesignDesk: React.FC = () => {
         .finally(() => {
           setObjectDataToDelete(null);
           setModeValue(0);
+          setIsModeModalOpen(false);
         });
     });
-
-    setIsModeModalOpen(false);
   };
-
   const handleRouteModalSubmit = () => {
     const payload = {
       ...routeData,
@@ -541,14 +575,14 @@ const DesignDesk: React.FC = () => {
             setObjectDataToDelete(null);
             setModeValue(0);
           }}
-          chainId={objectDataToDelete?.Chain_ID ?? 0}
-          onSubmit={handleModeModalSubmit}
+          onSubmit={submitMode}
         />
         <ConfirmationModal message="Are you sure you want to delete this ?" />
         <AddNewRouteModal
           isOpen={isRouteModalOpen}
           onClose={() => {
             setIsRouteModalOpen(false);
+            handleCancelLineDraw();
             setFormLineValues({
               city: "",
               planType: "",
@@ -565,7 +599,10 @@ const DesignDesk: React.FC = () => {
         />
         <AddObjectModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            cancelObjectAdding();
+          }}
           object={objectDetails.object}
           lat={objectDetails.lat}
           lng={objectDetails.lng}
@@ -574,7 +611,10 @@ const DesignDesk: React.FC = () => {
         />
         <AddOtherObjectModal
           isOpen={isOtherModalOpen}
-          onClose={() => setIsOtherModalOpen(false)}
+          onClose={() => {
+            setIsOtherModalOpen(false);
+            cancelObjectAdding();
+          }}
           object={objectDetails.object}
           lat={objectDetails.lat}
           lng={objectDetails.lng}

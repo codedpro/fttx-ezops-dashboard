@@ -1,65 +1,36 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { UserService } from "@/services/userService";
+import React, { useEffect, useState } from "react";
+import { FiX } from "react-icons/fi";
+import ClickOutside from "@/components/ClickOutside";
+import { cn } from "@/lib/utils";
 
 interface ModeModalProps {
   isOpen: boolean;
-  chainId: number;
   onClose: () => void;
   onSubmit: (mode: number) => void;
 }
 
-const ModeModal: React.FC<ModeModalProps> = ({
-  isOpen,
-  chainId,
-  onClose,
-  onSubmit,
-}) => {
-  const [connectedLines, setConnectedLines] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const userservice = new UserService();
-  useEffect(() => {
-    if (isOpen && chainId) {
-        console.log(chainId)
-      axios
-        .post(
-          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHHowManyLinesConnected`,
-
-          chainId,
-
-          {
-            headers: {
-              Authorization: `Bearer ${userservice.getToken()}`,
-              "Content-Type": "application/json",
-            },
-          }
-        )
-        .then((response) => {
-          const numLines = response.data;
-          setConnectedLines(numLines);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching connected lines:", error);
-          setLoading(false);
-        });
-    }
-  }, [isOpen, chainId]);
+const ModeModal: React.FC<ModeModalProps> = ({ isOpen, onClose, onSubmit }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    if (connectedLines !== null) {
-      if (connectedLines === 0) {
-        onSubmit(0);
-        onClose();
-      } else if (connectedLines === 1) {
-        onSubmit(2);
-        onClose();
-      } else if (connectedLines > 2) {
-        onSubmit(2);
-        onClose();
-      }
-    }
-  }, [connectedLines, onSubmit, onClose]);
+    const handleDarkModeChange = () => {
+      const darkModeClass = document.documentElement.classList.contains("dark");
+      setIsDarkMode(darkModeClass);
+    };
+
+    handleDarkModeChange();
+
+    const observer = new MutationObserver(() => {
+      handleDarkModeChange();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleMergeOrDelete = (mode: number) => {
     onSubmit(mode);
@@ -68,49 +39,42 @@ const ModeModal: React.FC<ModeModalProps> = ({
 
   if (!isOpen) return null;
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg">
-          <h2 className="text-lg font-semibold dark:text-white">Loading...</h2>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">
-          {connectedLines === 2
-            ? "There are 2 lines connected. Do you want to merge or delete all lines?"
-            : "Choose Mode"}
-        </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 transition-opacity duration-300">
+      <ClickOutside onClick={onClose} className="w-full max-w-md">
+        <div
+          className={cn(
+            "relative bg-white dark:bg-dark-2 p-6 rounded-lg w-full shadow-2xl transition-transform duration-300 transform scale-100",
+            { "dark:text-white": isDarkMode }
+          )}
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-500 dark:text-white hover:text-gray-800 dark:hover:text-gray-300 transition-colors"
+          >
+            <FiX size={24} />
+          </button>
 
-        {connectedLines === 2 && (
-          <div className="flex justify-end space-x-2">
+          <h2 className="text-center  font-semibold mb-6 dark:text-white mt-6">
+            There are 2 lines connected to your component
+          </h2>
+
+          <div className="flex justify-end space-x-4">
             <button
               onClick={() => handleMergeOrDelete(1)}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
             >
               Merge Lines
             </button>
             <button
               onClick={() => handleMergeOrDelete(2)}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
             >
               Delete All Lines
             </button>
           </div>
-        )}
-
-        <button
-          onClick={onClose}
-          className="px-4 py-2 mt-4 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
-          Close
-        </button>
-      </div>
+        </div>
+      </ClickOutside>
     </div>
   );
 };
