@@ -1,7 +1,13 @@
 import { useState, useEffect, MutableRefObject, useCallback } from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import mapboxgl, { MapMouseEvent } from "mapbox-gl";
-import { LineString, Feature } from "geojson";
+import {
+  LineString,
+  Feature,
+  Geometry,
+  FeatureCollection,
+  Position,
+} from "geojson";
 
 export const useLineDrawing = (
   mapRef: MutableRefObject<mapboxgl.Map | null>,
@@ -55,11 +61,6 @@ export const useLineDrawing = (
       }
     }
   };
-  interface LineData {
-    coordinates: [number, number][];
-    chainId: number | null;
-    type: string | null;
-  }
 
   const snapToFeature = useCallback(
     (point: { lat: number; lng: number }, featureCoords: [number, number]) => {
@@ -147,25 +148,45 @@ export const useLineDrawing = (
     []
   );
 
+  const isLineString = (geometry: Geometry): geometry is LineString => {
+    return geometry.type === "LineString";
+  };
+
   const handleFinishLineDraw = useCallback(async () => {
     if (
-      linePoints.length > 1 &&
       isConnectedToFeature &&
       firstClickedFeature &&
       lastClickedFeature &&
       initialFirstFeatureCoords &&
       initialLastFeatureCoords
     ) {
-      const firstPointMatches = checkCoordinatesMatch(
-        linePoints[0],
+      const allFeatures = draw.getAll().features;
+      const lineFeature = allFeatures.find(
+        (feature): feature is Feature<LineString> =>
+          feature.geometry.type === "LineString"
+      );
+
+      if (!lineFeature) {
+        alert("No line drawn.");
+        return;
+      }
+
+      const latestCoordinates = lineFeature.geometry.coordinates;
+
+      const startPointMatches = checkCoordinatesMatch(
+        { lat: latestCoordinates[0][1], lng: latestCoordinates[0][0] },
         initialFirstFeatureCoords
       );
+      const lastCoordIndex = latestCoordinates.length - 1;
       const lastPointMatches = checkCoordinatesMatch(
-        linePoints[linePoints.length - 1],
+        {
+          lat: latestCoordinates[lastCoordIndex][1],
+          lng: latestCoordinates[lastCoordIndex][0],
+        },
         initialLastFeatureCoords
       );
 
-      if (!firstPointMatches) {
+      if (!startPointMatches) {
         alert("The first point does not match the selected feature.");
         return;
       }
@@ -174,7 +195,6 @@ export const useLineDrawing = (
         alert("The last point does not match the selected feature.");
         return;
       }
-
       const startPointId =
         firstClickedFeature?.properties?.FAT_ID ||
         firstClickedFeature.properties?.Component_ID;
@@ -185,9 +205,15 @@ export const useLineDrawing = (
       const endPointType = lastClickedFeature?.properties?.Type || "Unknown";
       const startPointName = firstClickedFeature?.properties?.Name || "Unknown";
       const endPointName = lastClickedFeature?.properties?.Name || "Unknown";
-      const lines = linePoints.map((point) => ({
-        Lat: point.lat,
-        Long: point.lng,
+
+      if (startPointId === endPointId) {
+        alert("The first and last features must not be the same.");
+        return;
+      }
+
+      const lines = latestCoordinates.map((coord: Position) => ({
+        Lat: coord[1],
+        Long: coord[0],
       }));
 
       const newRoute = {
@@ -210,7 +236,6 @@ export const useLineDrawing = (
       );
     }
   }, [
-    linePoints,
     isConnectedToFeature,
     firstClickedFeature,
     lastClickedFeature,
@@ -218,6 +243,7 @@ export const useLineDrawing = (
     initialLastFeatureCoords,
     checkCoordinatesMatch,
     removeDrawControl,
+    lineType,
   ]);
 
   const handleCancelLineDraw = useCallback(() => {

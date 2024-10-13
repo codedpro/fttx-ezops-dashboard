@@ -24,8 +24,6 @@ import { UserService } from "@/services/userService";
 import AddOtherObjectModal from "@/components/Maps/DesignDesk/Panels/AddOtherObjectModal";
 import { useLineDrawing } from "@/hooks/useLineDrawing";
 import { useLineEditing } from "@/hooks/useLineEditing";
-import PlacesSearchInput from "@/components/Maps/DesignDesk/Panels/PlacesSearchInput";
-import { fetchLocationData } from "@/lib/fetchLocationData";
 import useSearchPlaces from "@/hooks/useSearchPlaces";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { cn } from "@/lib/utils";
@@ -38,24 +36,8 @@ import { ObjectData } from "@/types/ObjectData";
 import { OBJECTS } from "@/data/designdeskMenu";
 import ModeModal from "@/components/Maps/DesignDesk/Panels/ModeModal";
 import { useFTTHPointsStore } from "@/store/FTTHPointsStore";
-interface RouteData {
-  StartPointId: number;
-  StartPointType: string;
-  StartPointName: string;
-  EndPointId: number;
-  EndPointType: string;
-  EndPointName: string;
-  LineType: string;
-  Lines: {
-    Lat: number;
-    Long: number;
-  }[];
-}
-interface LineData {
-  coordinates: [number, number][];
-  chainId: number | null;
-  type: string | null;
-}
+import { RouteData } from "@/types/RouteData";
+import { LineData } from "@/types/LineData";
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
