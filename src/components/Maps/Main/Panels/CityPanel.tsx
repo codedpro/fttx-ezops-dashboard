@@ -44,19 +44,15 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick, onSearch }) => {
   return (
     <>
       <div className="reletive">
-        {/* Flex container for the search button and city panel */}
         <div className="absolute top-4 right-4 flex items-start space-x-4 z-50">
-          {/* Search Icon Button placed to the left of the City Panel */}
           <button
             onClick={toggleSearchMinimized}
-            className={`p-2 rounded-full mt-4 transition duration-200 backdrop-blur-lg bg-white/30 dark:bg-gray-600/30 
-              hover:bg-white/40 dark:hover:bg-gray-600/40 text-4xl shadow-md 
-              ${isSearchMinimized ? "" : "text-primary hover:text-primary/85"}`}
+            className={`p-2 rounded-full mt-4 transition duration-200 bg-white bg-opacity-50 dark:bg-[#1F2937]  dark:bg-opacity-60 backdrop-blur-lg  text-4xl shadow-md 
+              ${isSearchMinimized ? "text-black dark:text-gray-200 hover:text-black/85 dark:text-gray-200/85 " : "text-primary hover:text-primary/85"}`}
           >
             <IoMdSearch size={22} />
           </button>
 
-          {/* Keeping the original CityPanel unchanged */}
           <div
             className={`z-30 m-2 p-2 bg-white bg-opacity-50 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all ${
               isMinimized
