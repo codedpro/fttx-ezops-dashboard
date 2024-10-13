@@ -136,11 +136,11 @@ const DesignDesk: React.FC = () => {
 
   const defaultVisibility = {
     FTTHPreorderLayer: false,
-    ModemLayer: true,
-    MFATLayer: false,
-    SFATLayer: false,
-    HHLayer: false,
-    OLTLayer: false,
+    ModemLayer: false,
+    MFATLayer: true,
+    SFATLayer: true,
+    HHLayer: true,
+    OLTLayer: true,
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,
