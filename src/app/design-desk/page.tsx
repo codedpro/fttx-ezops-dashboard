@@ -246,7 +246,6 @@ const DesignDesk: React.FC = () => {
     isEditing,
     startEditingLine,
     handleFinishEditing,
-
     handleCancelEditing,
   } = useLineEditing(
     ftthMapRef.current?.mapRef ?? { current: null },
@@ -386,6 +385,7 @@ const DesignDesk: React.FC = () => {
     startEditingLine(LineData);
   };
   const handleOnDeleteLine = (LineData: LineData) => {
+    console.log(LineData);
     confirm(() => {
       const payload = LineData.chainId;
 

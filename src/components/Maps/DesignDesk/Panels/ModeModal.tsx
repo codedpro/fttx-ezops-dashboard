@@ -20,6 +20,7 @@ const ModeModal: React.FC<ModeModalProps> = ({
   const userservice = new UserService();
   useEffect(() => {
     if (isOpen && chainId) {
+        console.log(chainId)
       axios
         .post(
           `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHHowManyLinesConnected`,

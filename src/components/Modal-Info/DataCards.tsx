@@ -53,9 +53,9 @@ export const DataCards: React.FC<DataCardsProps> = ({ data }) => {
               key !== "icon" &&
               key !== "LayerID" &&
               key !== "iconSize" &&
-              key !== "Component_ID" &&
+      /*         key !== "Component_ID" &&
               key !== "Chain_ID" &&
-              key !== "FAT_ID" &&
+              key !== "FAT_ID" && */
               key !== "Long" &&
               key !== "clickedLatLng"
           )
