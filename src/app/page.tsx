@@ -40,7 +40,7 @@ const Dashboard = async () => {
   ];
   const colors = ["#feca00", "#ADBCF2"];
   const labels = ["Online", "Offline"];
-  const labels_Paid_to_modems = [ "Delivered","Payment"];
+  const labels_Paid_to_modems = ["Delivered", "Payment"];
   const totalClosed = dashboardData?.uT_Closed || 0;
   const totalRunning = dashboardData?.uT_Open || 0;
 

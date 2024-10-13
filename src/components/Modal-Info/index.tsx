@@ -25,6 +25,8 @@ interface ModalProps {
   clickedLatLng?: { lat: number; lng: number } | null;
   onEditObject?: (ObjectData: ObjectData) => void;
   onDeleteObject?: (ObjectData: ObjectData) => void;
+  onEditDetailObject?: (ObjectData: ObjectData) => void;
+  onEditDetailLine?: (lineData: LineData) => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -38,6 +40,8 @@ export const Modal: React.FC<ModalProps> = ({
   clickedLatLng,
   onEditObject,
   onDeleteObject,
+  onEditDetailLine,
+  onEditDetailObject,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -144,6 +148,20 @@ export const Modal: React.FC<ModalProps> = ({
       type,
     });
   };
+  const handleEditDetailLine = (feature: any) => {
+    if (!onEditDetailLine) {
+      return;
+    }
+    const coordinates = feature.geometry?.coordinates || [];
+    const chainId = feature.properties?.Chain_ID || null;
+    const type = feature.properties?.Type || null;
+
+    onEditDetailLine({
+      coordinates,
+      chainId,
+      type,
+    });
+  };
 
   const handleDeleteObject = (feature: any) => {
     if (!onDeleteObject) {
@@ -157,6 +175,27 @@ export const Modal: React.FC<ModalProps> = ({
     const chain_ID = feature.Chain_ID;
 
     onDeleteObject({
+      Lat: lat,
+      Long: lng,
+      Type: type,
+      ID: id,
+      Name: name,
+      Chain_ID: chain_ID,
+    });
+  };
+
+  const handleEditDetailObject = (feature: any) => {
+    if (!onEditDetailObject) {
+      return;
+    }
+    const lat = feature.Lat;
+    const lng = feature.Long;
+    const type = feature.Type;
+    const id = feature.FAT_ID || feature.Component_ID;
+    const name = feature.Name;
+    const chain_ID = feature.Chain_ID;
+
+    onEditDetailObject({
       Lat: lat,
       Long: lng,
       Type: type,
@@ -257,6 +296,7 @@ export const Modal: React.FC<ModalProps> = ({
               onDeleteLine &&
               lineData &&
               onAddObjectToLine &&
+              onEditDetailLine &&
               (data.Type === "Metro" ||
                 data.Type === "FAT" ||
                 data.Type === "ODC" ||
@@ -273,12 +313,17 @@ export const Modal: React.FC<ModalProps> = ({
                     handleDeleteLine(lineData);
                     onClose();
                   }}
+                  handleEditDetailLine={() => {
+                    handleEditDetailLine(lineData);
+                    onClose();
+                  }}
                 />
               )}
 
             {onEditObject &&
               !lineData &&
               onDeleteObject &&
+              onEditDetailObject &&
               (data.Type === "MFAT" ||
                 data.Type === "SFAT" ||
                 data.Type === "HH" ||
@@ -291,6 +336,10 @@ export const Modal: React.FC<ModalProps> = ({
                   }}
                   handleDeleteObject={() => {
                     handleDeleteObject(data);
+                    onClose();
+                  }}
+                  handleEditDetailObject={() => {
+                    handleEditDetailObject(data);
                     onClose();
                   }}
                 />

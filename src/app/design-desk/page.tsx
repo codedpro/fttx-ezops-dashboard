@@ -46,6 +46,9 @@ import {
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFATDetailOpen, setIsFATDetailOpen] = useState(false);
+  const [isOtherDetailOpen, setIsOtherDetailOpen] = useState(false);
+  const [isLineDetailOpen, setIsLineDetailOpen] = useState(false);
   const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
   const [objectDetails, setObjectDetails] = useState({
     object: "",
@@ -61,6 +64,12 @@ const DesignDesk: React.FC = () => {
     planType: "0",
     isReverse: false,
   });
+  const [fatDetailData, setFatDetailData] = useState<ObjectData | null>(null);
+  const [otherDetailData, setOtherDetailData] = useState<ObjectData | null>(
+    null
+  );
+  const [lineDetailData, setLineDetailsData] = useState<LineData | null>(null);
+
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
   const [modeValue, setModeValue] = useState<number>(0);
   const [connectedLinestocomponent, setConnectedLinesToComponent] =
@@ -451,6 +460,22 @@ const DesignDesk: React.FC = () => {
     setObjectDataToDelete(ObjectData);
     handleModeModalSubmit(ObjectData);
   };
+  const handleOnEditDetailObject = (ObjectData: ObjectData) => {
+    if (!ObjectData) return;
+    if (
+      ObjectData.Type === "MFAT" ||
+      ObjectData.Type === "SFAT" ||
+      ObjectData.Type === "FAT"
+    ) {
+      setIsFATDetailOpen(true);
+    } else {
+      setIsOtherDetailOpen(true);
+    }
+  };
+  const handleOnEditDetailLine = (lineData: LineData) => {
+    if (!lineData) return;
+    setIsLineDetailOpen(true);
+  };
   const handleModeModalSubmit = (objectData: ObjectData) => {
     const fetchConnectedLines = async (token: string) => {
       try {
@@ -475,7 +500,8 @@ const DesignDesk: React.FC = () => {
         } else if (connectedLines > 2) {
           submitMode(2, objectData);
         } else if (connectedLines === 2) {
-          setIsModeModalOpen(true);
+          //    setIsModeModalOpen(true);
+          submitMode(2, objectData);
         }
       } catch (error) {
         setConnectedLinesToComponent(0);
@@ -582,6 +608,24 @@ const DesignDesk: React.FC = () => {
           onSubmit={submitMode}
         />
         <ConfirmationModal message="Are you sure you want to delete this ?" />
+        {/*       <FatDetailModal
+          isOpen={isFATDetailOpen}
+          onClose={() => setIsFATDetailOpen(false)}
+          objectData={fatDetailData}
+          onSubmit={handleModalSubmit}
+        />
+        <LineDetailModal
+          isOpen={isLineDetailOpen}
+          onClose={() => setIsLineDetailOpen(false)}
+          lineData={lineDetailData}
+          onSubmit={handleModalSubmit}
+        />
+        <OtherDetailModal
+          isOpen={isOtherDetailOpen}
+          onClose={() => setIsOtherDetailOpen(false)}
+          otherData={otherDetailData}
+          onSubmit={handleModalSubmit}
+        /> */}
         <AddNewRouteModal
           isOpen={isRouteModalOpen}
           onClose={() => {
@@ -710,6 +754,8 @@ const DesignDesk: React.FC = () => {
               onAddObjectToLines={handleOnAddObjectToLine}
               onEditObject={handleOnEditObject}
               onDeleteObject={handleOnDeleteObject}
+              onEditDetailLine={handleOnEditDetailLine}
+              onEditDetailObject={handleOnEditDetailObject}
             />
           </div>
         </div>

@@ -145,6 +145,7 @@ export const useSuggestFATLine = (
 
       if (data.routes && data.routes.length > 0 && !isCanceled.current) {
         const path = data.routes[0];
+        // const path = data
         const color = generateUniqueColor();
         const pathId = generateUniqueId();
 

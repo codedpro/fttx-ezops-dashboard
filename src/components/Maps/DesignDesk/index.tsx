@@ -18,13 +18,10 @@ import {
 } from "@/utils/mapLayers";
 import { Modal } from "@/components/Modal-Info";
 import { ObjectData } from "@/types/ObjectData";
+import { LineData } from "@/types/LineData";
 
 mapboxgl.accessToken = "dummy-token";
-interface LineData {
-  coordinates: [number, number][];
-  chainId: number | null;
-  type: string | null;
-}
+
 interface FTTHMapProps {
   layers: Array<{
     id: string;
@@ -50,6 +47,8 @@ interface FTTHMapProps {
     objectLabel: string,
     clickedLatLng: { lat: number; lng: number }
   ) => void;
+  onEditDetailObject: (ObjectData: ObjectData) => void;
+  onEditDetailLine: (lineData: LineData) => void;
 }
 
 const DesignDeskMap = forwardRef<
@@ -67,6 +66,8 @@ const DesignDeskMap = forwardRef<
       onAddObjectToLines,
       onEditObject,
       onDeleteObject,
+      onEditDetailLine,
+      onEditDetailObject,
     },
     ref
   ) => {
@@ -305,6 +306,8 @@ const DesignDeskMap = forwardRef<
             clickedLatLng={clickedLatLng}
             onEditObject={onEditObject}
             onDeleteObject={onDeleteObject}
+            onEditDetailLine={onEditDetailLine}
+            onEditDetailObject={onEditDetailObject}
           />
         )}
       </>
