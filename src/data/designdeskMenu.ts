@@ -2,6 +2,7 @@ export const OBJECTS = [
   { label: "HH", image: "/images/map/HandHole.png" },
   { label: "MFAT", image: "/images/map/MFAT.png" },
   { label: "SFAT", image: "/images/map/SFAT.png" },
+  { label: "FAT", image: "/images/map/SFAT.png" },
   { label: "ODC", image: "/images/map/ODC.png" },
   { label: "TC", image: "/images/map/TC.png" },
 ];

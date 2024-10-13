@@ -129,6 +129,8 @@ const DesignDesk: React.FC = () => {
     MFATLayer: true,
     SFATLayer: true,
     HHLayer: true,
+    TCLayer: true,
+    ODCLayer: true,
     OLTLayer: true,
     ODCLineLayer: true,
     FATLineLayer: true,
@@ -249,7 +251,7 @@ const DesignDesk: React.FC = () => {
     selectedObjectImage: string
   ) => {
     setObjectDetails({ object, lat, lng, image: selectedObjectImage });
-    if (object === "MFAT" || object === "SFAT") {
+    if (object === "MFAT" || object === "SFAT" || object === "FAT") {
       setIsModalOpen(true);
     } else {
       setIsOtherModalOpen(true);
