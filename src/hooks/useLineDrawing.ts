@@ -8,6 +8,7 @@ import {
   FeatureCollection,
   Position,
 } from "geojson";
+import { DrawEvent } from "../../mapbox-gl-draw";
 
 export const useLineDrawing = (
   mapRef: MutableRefObject<mapboxgl.Map | null>,
@@ -148,10 +149,6 @@ export const useLineDrawing = (
     []
   );
 
-  const isLineString = (geometry: Geometry): geometry is LineString => {
-    return geometry.type === "LineString";
-  };
-
   const handleFinishLineDraw = useCallback(async () => {
     if (
       isConnectedToFeature &&
@@ -190,11 +187,11 @@ export const useLineDrawing = (
         alert("The first point does not match the selected feature.");
         return;
       }
-
       if (!lastPointMatches) {
         alert("The last point does not match the selected feature.");
         return;
       }
+
       const startPointId =
         firstClickedFeature?.properties?.FAT_ID ||
         firstClickedFeature.properties?.Component_ID;
@@ -271,6 +268,36 @@ export const useLineDrawing = (
     },
     [addDrawControlAndStartDrawing]
   );
+
+  useEffect(() => {
+    const handleDrawDelete = (e: DrawEvent) => {
+      console.log("Deleted");
+      const deletedLineStrings = e.features.filter(
+        (feature: Feature<Geometry>) => feature.geometry.type === "LineString"
+      );
+
+      if (deletedLineStrings.length > 0) {
+        const remainingFeatures = draw.getAll().features;
+        const remainingLineStrings = remainingFeatures.filter(
+          (feature: Feature<Geometry>) => feature.geometry.type === "LineString"
+        );
+        if (remainingLineStrings.length === 0) {
+          handleCancelLineDraw();
+          startDrawing(lineType);
+        }
+      }
+    };
+
+    if (isDrawing && mapRef.current) {
+      mapRef.current.on("draw.delete", handleDrawDelete);
+    }
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("draw.delete", handleDrawDelete);
+      }
+    };
+  }, [isDrawing, draw, mapRef]);
 
   useEffect(() => {
     if (isDrawing) {

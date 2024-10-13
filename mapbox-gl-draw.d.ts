@@ -1,3 +1,4 @@
+// Assuming this is in a global declaration file like global.d.ts
 import * as mapboxgl from 'mapbox-gl';
 
 declare module 'mapbox-gl' {
