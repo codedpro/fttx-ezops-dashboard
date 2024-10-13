@@ -438,8 +438,6 @@ const DesignDesk: React.FC = () => {
 
   const handleOnEditObject = (ObjectData: ObjectData) => {
     const object = OBJECTS.find((o) => o.label === ObjectData.Type);
-    console.log(ObjectData);
-    console.log(object);
 
     if (ObjectData && object) {
       startEditingObject(object?.image ?? "/images/map/odc.png", ObjectData);
@@ -461,8 +459,6 @@ const DesignDesk: React.FC = () => {
         chain_ID: Number(objectDataToDelete.Chain_ID),
         mode: mode,
       };
-
-      console.log("Deleting object with payload:", payload);
 
       axios
         .post(
