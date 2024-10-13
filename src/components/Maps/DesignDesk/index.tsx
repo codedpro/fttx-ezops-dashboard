@@ -89,8 +89,8 @@ const DesignDeskMap = forwardRef<
           mapRef.current = new mapboxgl.Map({
             container: mapContainerRef.current,
             style: mapStyle,
-            center: [53.29974681542001, 36.655031726978095],
-            zoom: 12.5,
+            center: [53.29974681542001, 36.652031726978095],
+            zoom: 13.5,
             maxZoom: 19,
           });
 
