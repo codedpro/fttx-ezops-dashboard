@@ -151,10 +151,10 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
                     isReverse: !prev.isReverse,
                   }))
                 }
-                className="w-5 h-5 rounded-full mt-1 appearance-none checked:bg-blue-600 border-2 border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors dark:bg-dark-3 dark:border-dark-3 dark:checked:bg-primary"
+                className="w-5 h-5 rounded-full mt-1 appearance-none  border-2 border-gray-400 focus:outline-none focus:ring-2  transition-colors dark:bg-dark-3 dark:border-dark-3 checked:bg-primary"
               />{" "}
               <Label htmlFor="isReverse" className="block   text-darkgray-8">
-                Reverse Route
+                Reverse Line
               </Label>
             </LabelInputContainer>
           </div>
@@ -174,15 +174,14 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
                 formValues.planType === ""
               }
               className={cn(
-                "bg-blue-500 text-sm px-4 py-2 text-white rounded-md transition-colors",
+                " text-sm px-4 py-2 text-white rounded-md transition-colors",
                 {
-                  "hover:bg-blue-600": isFormValid,
                   "cursor-not-allowed opacity-50":
                     !isFormValid &&
                     formValues.city === "" &&
                     formValues.planType === "",
-                  "dark:bg-primary dark:hover:bg-primary-dark": isDarkMode,
-                }
+                },
+                "bg-primary hover:bg-primary-dark"
               )}
             >
               Submit

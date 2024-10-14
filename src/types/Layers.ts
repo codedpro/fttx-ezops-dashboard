@@ -1,6 +1,7 @@
 export type LayerKeys =
   | "MFATLayer"
   | "SFATLayer"
+  | "FATLayer"
   | "FATLineLayer"
   | "MetroLineLayer"
   | "ODCLineLayer"

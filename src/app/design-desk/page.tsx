@@ -43,6 +43,9 @@ import {
   getCenterPoint,
   getZoomLevel,
 } from "@/utils/mapCalculations";
+import FatDetailModal from "@/components/Maps/DesignDesk/Panels/FatDetailModal";
+import LineDetailModal from "@/components/Maps/DesignDesk/Panels/LineDetailModal";
+import OtherDetailModal from "@/components/Maps/DesignDesk/Panels/OtherDetailModal";
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -122,6 +125,7 @@ const DesignDesk: React.FC = () => {
     "ModemLayer",
     "MFATLayer",
     "SFATLayer",
+    "FATLayer",
     "HHLayer",
     "OLTLayer",
     "ODCLayer",
@@ -137,6 +141,7 @@ const DesignDesk: React.FC = () => {
     ModemLayer: false,
     MFATLayer: true,
     SFATLayer: true,
+    FATLayer: true,
     HHLayer: true,
     TCLayer: true,
     ODCLayer: true,
@@ -307,6 +312,12 @@ const DesignDesk: React.FC = () => {
       });
   };
 
+  const handleFATDetailSubmit = (ObjectData: ObjectData) => {};
+
+  const handleOtherDetailSubmit = (ObjectData: ObjectData) => {};
+
+  const handleLineDetailSubmit = (lineData: LineData) => {};
+
   const handleOtherModalSubmit = (data: {
     City: string;
     Name: string;
@@ -467,13 +478,16 @@ const DesignDesk: React.FC = () => {
       ObjectData.Type === "SFAT" ||
       ObjectData.Type === "FAT"
     ) {
+      setFatDetailData(ObjectData);
       setIsFATDetailOpen(true);
     } else {
+      setOtherDetailData(ObjectData);
       setIsOtherDetailOpen(true);
     }
   };
   const handleOnEditDetailLine = (lineData: LineData) => {
     if (!lineData) return;
+    setLineDetailsData(lineData);
     setIsLineDetailOpen(true);
   };
   const handleModeModalSubmit = (objectData: ObjectData) => {
@@ -608,24 +622,24 @@ const DesignDesk: React.FC = () => {
           onSubmit={submitMode}
         />
         <ConfirmationModal message="Are you sure you want to delete this ?" />
-        {/*       <FatDetailModal
+        <FatDetailModal
           isOpen={isFATDetailOpen}
           onClose={() => setIsFATDetailOpen(false)}
           objectData={fatDetailData}
-          onSubmit={handleModalSubmit}
+          onSubmit={handleFATDetailSubmit}
         />
         <LineDetailModal
           isOpen={isLineDetailOpen}
           onClose={() => setIsLineDetailOpen(false)}
           lineData={lineDetailData}
-          onSubmit={handleModalSubmit}
+          onSubmit={handleLineDetailSubmit}
         />
         <OtherDetailModal
           isOpen={isOtherDetailOpen}
           onClose={() => setIsOtherDetailOpen(false)}
           otherData={otherDetailData}
-          onSubmit={handleModalSubmit}
-        /> */}
+          onSubmit={handleOtherDetailSubmit}
+        />
         <AddNewRouteModal
           isOpen={isRouteModalOpen}
           onClose={() => {

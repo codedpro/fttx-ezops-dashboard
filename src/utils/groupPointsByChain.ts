@@ -17,7 +17,6 @@ export const groupPointsByChainAndCreateLine = (
     const coordinates = chainPoints
       .sort((a, b) => a.Order - b.Order)
       .map((point) => [point.Long, point.Lat]);
-
     return {
       type: "Feature",
       geometry: {
@@ -27,6 +26,7 @@ export const groupPointsByChainAndCreateLine = (
       properties: {
         Chain_ID: chainPoints[0].Chain_ID,
         Type: chainPoints[0].Type,
+        City: chainPoints[0].City,
       },
     };
   });

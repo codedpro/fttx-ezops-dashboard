@@ -17,6 +17,7 @@ import { useFTTHComplainLayer } from "@/components/Maps/Main/Layers/FTTHComplain
 import { useTCLayer } from "@/components/Maps/Main/Layers/TCLayer";
 import { useODCLayer } from "@/components/Maps/Main/Layers/ODCLayer";
 import { useIranFTTXAreaLayer } from "@/components/Maps/IranFTTX/Layers/IranFTTXAreastsx";
+import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
 
 interface LayerConfig {
   id: string;
@@ -68,6 +69,14 @@ export const useLayerManager = (
       type: "point",
       visible: layerVisibility.SFATLayer,
       toggle: () => toggleLayerVisibility("SFATLayer"),
+    },
+    FATLayer: {
+      ...useFATLayer(),
+      label: "FAT",
+      icon: "/images/map/FAT.png",
+      type: "point",
+      visible: layerVisibility.FATLayer,
+      toggle: () => toggleLayerVisibility("FATLayer"),
     },
     FATLineLayer: {
       ...useFATLineLayer(),
