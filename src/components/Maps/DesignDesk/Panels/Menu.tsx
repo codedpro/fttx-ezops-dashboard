@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import {
   FaPlus,
   FaDrawPolygon,
@@ -54,6 +54,7 @@ interface MenuPanelProps {
   onCancelObjectEditing: () => void;
   onFinishLineEditing: () => void;
   onCancelEditing: () => void;
+  onResetMenuPanel: Dispatch<SetStateAction<() => void>>;
 }
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -83,6 +84,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onCancelObjectEditing,
   onFinishLineEditing,
   onCancelEditing,
+  onResetMenuPanel,
 }) => {
   const [currentMenu, setCurrentMenu] = useState<
     | "main"
@@ -149,6 +151,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
       setCurrentMenu("main");
     }
   };
+  useEffect(() => {
+    onResetMenuPanel(() => handleCancel);
+  }, [onResetMenuPanel]);
 
   const renderMainMenu = () => (
     <>
@@ -229,8 +234,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         icon={<FaCheck />}
         onClick={() => {
           onFinishLineEditing();
-          handleCancel();
-          onCancelEditing();
+          /*     handleCancel();
+          onCancelEditing(); */
         }}
       />
       <ActionButton
@@ -444,7 +449,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
             icon={<FaCheck />}
             onClick={() => {
               onFinishLineDraw();
-              handleCancel();
+              /*               handleCancel(); */
             }}
           />
         </div>

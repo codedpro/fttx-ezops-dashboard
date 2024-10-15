@@ -69,7 +69,9 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Check if all required fields are filled or predefined
+  useEffect(() => {
+    
+  });
   useEffect(() => {
     setIsFormValid(formValues.city !== "" && formValues.planType !== "");
   }, [formValues]);

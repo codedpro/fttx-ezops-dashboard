@@ -74,6 +74,8 @@ const DesignDesk: React.FC = () => {
   const [lineDetailData, setLineDetailsData] = useState<LineData | null>(null);
 
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
+  const [resetMenuPanel, setResetMenuPanel] = useState<() => void>(() => {});
+
   const [modeValue, setModeValue] = useState<number>(0);
   const [connectedLinestocomponent, setConnectedLinesToComponent] =
     useState<number>(0);
@@ -243,6 +245,8 @@ const DesignDesk: React.FC = () => {
     handleFinishLineDraw,
     handleCancelLineDraw,
     linePoints,
+    removeDrawControl,
+    setIsDrawing,
   } = useLineDrawing(
     ftthMapRef.current?.mapRef ?? { current: null },
     drawingLayers
@@ -452,6 +456,7 @@ const DesignDesk: React.FC = () => {
 
   const handleFinishLineDrawing = async () => {
     const newRoute = await handleFinishLineDraw();
+
     if (newRoute) {
       setRouteData(newRoute);
       setIsRouteModalOpen(true);
@@ -582,7 +587,7 @@ const DesignDesk: React.FC = () => {
       Plan_Type: formLineValues.planType,
       IsReverse: formLineValues.isReverse,
     };
-
+    console.log(payload);
     axios
       .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewRoute`, payload, {
         headers: {
@@ -594,6 +599,12 @@ const DesignDesk: React.FC = () => {
         if (response.status === 200) {
           forceUpdatePoints(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
+          handleCancelLineDraw();
+          removeDrawControl();
+          setIsDrawing(false);
+          if (resetMenuPanel) {
+            resetMenuPanel();
+          }
         } else {
           toast.error("Failed to add route.");
         }
@@ -644,7 +655,6 @@ const DesignDesk: React.FC = () => {
           isOpen={isRouteModalOpen}
           onClose={() => {
             setIsRouteModalOpen(false);
-            handleCancelLineDraw();
             setFormLineValues({
               city: "",
               planType: "",
@@ -656,8 +666,8 @@ const DesignDesk: React.FC = () => {
           setFormValues={setFormLineValues}
           startPointType={routeData?.StartPointType ?? ""}
           endPointType={routeData?.EndPointType ?? ""}
-          endPointName={routeData?.StartPointName ?? ""}
-          startPointName={routeData?.EndPointName ?? ""}
+          endPointName={routeData?.EndPointName ?? ""}
+          startPointName={routeData?.StartPointName ?? ""}
         />
         <AddObjectModal
           isOpen={isModalOpen}
@@ -731,6 +741,7 @@ const DesignDesk: React.FC = () => {
             onFinishObjectEditing={handleSubmitObjectEditing}
             onCancelObjectEditing={cancelObjectEditing}
             EditingObjectLabel={objectLabel}
+            onResetMenuPanel={setResetMenuPanel}
           />
 
           <CityPanel

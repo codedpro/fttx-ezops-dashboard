@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { useState, useRef } from "react";
 import ClickOutside from "@/components/ClickOutside";
 
@@ -16,7 +15,7 @@ export const useConfirmation = () => {
   };
 
   const ConfirmationModal = ({ message }: { message: string }) => {
-    const exceptionRef = useRef<HTMLDivElement>(null); // Use exceptionRef to avoid closing on internal clicks
+    const exceptionRef = useRef<HTMLDivElement>(null);
 
     if (!isOpen) return null;
 

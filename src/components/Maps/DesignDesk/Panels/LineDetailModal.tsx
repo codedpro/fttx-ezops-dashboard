@@ -175,8 +175,6 @@ const LineDetailModal: React.FC<LineDetailModalProps> = ({
               <option value="1">Execution</option>
               <option value="2">Approved</option>
             </Select>
-
-            {/* Reverse Line Option */}
             <div className="flex items-center">
               <input
                 type="checkbox"
