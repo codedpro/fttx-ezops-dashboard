@@ -46,6 +46,7 @@ import {
 import FatDetailModal from "@/components/Maps/DesignDesk/Panels/FatDetailModal";
 import LineDetailModal from "@/components/Maps/DesignDesk/Panels/LineDetailModal";
 import OtherDetailModal from "@/components/Maps/DesignDesk/Panels/OtherDetailModal";
+import { ConnectedLines } from "@/types/connectedLines";
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,8 +78,15 @@ const DesignDesk: React.FC = () => {
   const [resetMenuPanel, setResetMenuPanel] = useState<() => void>(() => {});
 
   const [modeValue, setModeValue] = useState<number>(0);
+
   const [connectedLinestocomponent, setConnectedLinesToComponent] =
-    useState<number>(0);
+    useState<ConnectedLines>({
+      count: 0,
+      firstComponentChainID: 0,
+      firstComponentName: "",
+      secondComponentChainID: 0,
+      secondComponentName: "",
+    });
 
   const [objectDataToDelete, setObjectDataToDelete] =
     useState<ObjectData | null>();
@@ -244,7 +252,7 @@ const DesignDesk: React.FC = () => {
     startDrawing,
     handleFinishLineDraw,
     handleCancelLineDraw,
-    linePoints,
+
     removeDrawControl,
     setIsDrawing,
   } = useLineDrawing(
@@ -508,22 +516,27 @@ const DesignDesk: React.FC = () => {
             },
           }
         );
+        const data = response.data;
+        const connectedLines = data.count;
+        setConnectedLinesToComponent(data);
 
-        const connectedLines = response.data;
-
-        setConnectedLinesToComponent(connectedLines);
         if (connectedLines === 0) {
           submitMode(0, objectData);
         } else if (connectedLines === 1) {
           submitMode(2, objectData);
         } else if (connectedLines > 2) {
-          submitMode(2, objectData);
+          toast.error(
+            "You can't delete " +
+              objectData.Name +
+              " because it has " +
+              connectedLines +
+              " lines connected to it"
+          );
         } else if (connectedLines === 2) {
-          //    setIsModeModalOpen(true);
-          submitMode(2, objectData);
+          setIsModeModalOpen(true);
+          console.log("its here");
         }
       } catch (error) {
-        setConnectedLinesToComponent(0);
         console.error("Error fetching connected lines: ", error);
       }
     };
@@ -531,43 +544,79 @@ const DesignDesk: React.FC = () => {
     const token = userservice.getToken() ?? "";
     fetchConnectedLines(token);
   };
-  const submitMode = (mode: number, objectData?: ObjectData) => {
-    const dataToDelete = objectData || objectDataToDelete;
 
-    if (!dataToDelete) return;
+  const submitMode = (
+    mode: number,
+    objectData?: ObjectData,
+    chainOrder?: number[]
+  ) => {
+    const dataToProcess = objectData || objectDataToDelete;
+
+    if (!dataToProcess) return;
 
     confirm(() => {
-      const payload = {
-        id: Number(dataToDelete.ID),
-        type: dataToDelete.Type,
-        chain_ID: Number(dataToDelete.Chain_ID),
-        mode: mode,
-      };
+      let endpoint: string;
+      let payload: any;
+
+      if (chainOrder && chainOrder.length >= 2) {
+        // Prepare payload for merging lines
+        payload = {
+          chain_ID: dataToProcess.Chain_ID,
+          name:
+            chainOrder[0] === connectedLinestocomponent.firstComponentChainID
+              ? connectedLinestocomponent.firstComponentName +
+                "_TO_" +
+                connectedLinestocomponent.secondComponentName
+              : connectedLinestocomponent.secondComponentName +
+                "_TO_" +
+                connectedLinestocomponent.firstComponentName,
+          start_Chain_ID: chainOrder[0],
+          end_Chain_ID: chainOrder[1],
+        };
+        endpoint = "/FTTHMergeLines";
+      } else {
+        // Prepare payload for deleting a component
+        payload = {
+          id: Number(dataToProcess.ID),
+          type: dataToProcess.Type,
+          chain_ID: Number(dataToProcess.Chain_ID),
+          mode: mode,
+        };
+        endpoint = "/FTTHDeleteComponent";
+      }
 
       axios
-        .post(
-          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDeleteComponent`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${userservice.getToken()}`,
-              "Content-Type": "application/json",
-            },
-          }
-        )
+        .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}${endpoint}`, payload, {
+          headers: {
+            Authorization: `Bearer ${userservice.getToken()}`,
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => {
           if (response.status === 200) {
-            toast.success("Object deleted successfully!");
+            if (endpoint === "/FTTHDeleteComponent") {
+              toast.success("Object deleted successfully!");
+            } else if (endpoint === "/FTTHMergeLines") {
+              toast.success("Lines merged successfully!");
+            }
             const token = userservice.getToken() ?? "";
             forceUpdateComponentsOther(token);
             forceUpdateComponentsFAT(token);
             forceUpdatePoints(token);
           } else {
-            toast.error("Failed to delete object.");
+            if (endpoint === "/FTTHDeleteComponent") {
+              toast.error("Failed to delete object.");
+            } else if (endpoint === "/FTTHMergeLines") {
+              toast.error("Failed to merge lines.");
+            }
           }
         })
         .catch((error) => {
-          toast.error("Error deleting object: " + error.message);
+          if (endpoint === "/FTTHDeleteComponent") {
+            toast.error("Error deleting object: " + error.message);
+          } else if (endpoint === "/FTTHMergeLines") {
+            toast.error("Error merging lines: " + error.message);
+          }
         })
         .finally(() => {
           setObjectDataToDelete(null);
@@ -631,6 +680,7 @@ const DesignDesk: React.FC = () => {
             setModeValue(0);
           }}
           onSubmit={submitMode}
+          ConnectedLinesToComponent={connectedLinestocomponent}
         />
         <ConfirmationModal message="Are you sure you want to delete this ?" />
         <FatDetailModal
@@ -733,7 +783,6 @@ const DesignDesk: React.FC = () => {
             objectLng={objectLng}
             editObjectLat={editObjectLat}
             editObjectLng={editObjectLng}
-            linePoints={linePoints}
             setEditObjectLat={setEditObjectLat}
             setEditObjectLng={setEditObjectLng}
             onCancelEditing={handleCancelEditing}

@@ -144,14 +144,8 @@ export const useLineDrawing = (
           ],
         });
 
-        setLinePoints((prev) => {
-          const newLinePoints = [...prev];
-          newLinePoints[vertexIndex] = {
-            lat: snappedCoords[1],
-            lng: snappedCoords[0],
-          };
-          return newLinePoints;
-        });
+        // Synchronize linePoints with Mapbox Draw
+        syncLinePointsWithDraw();
 
         if (vertexIndex === 0) {
           setFirstClickedFeature(closestFatFeature);
@@ -178,13 +172,37 @@ export const useLineDrawing = (
     }
   };
 
+  const syncLinePointsWithDraw = useCallback(() => {
+    const currentFeature = draw
+      .getAll()
+      .features.find((feature) => feature.geometry.type === "LineString") as
+      | Feature<LineString>
+      | undefined;
+
+    if (currentFeature) {
+      const newLinePoints = currentFeature.geometry.coordinates.map(
+        (coord) => ({
+          lng: coord[0],
+          lat: coord[1],
+        })
+      );
+      setLinePoints(newLinePoints);
+    } else {
+      setLinePoints([]);
+    }
+  }, [draw]);
+
   const handleDrawUpdate = useCallback(
     (e: any) => {
       try {
-        if (!e.features || e.features.length === 0 || linePoints.length === 0) {
+        if (!e.features || e.features.length === 0) {
           return;
         }
         saveState();
+
+        // Synchronize linePoints with Mapbox Draw
+        syncLinePointsWithDraw();
+
         const updatedFeature = e.features[0] as Feature<LineString>;
         updatedFeature.geometry.coordinates.forEach((coord, index) => {
           snapVertexToFatFeature(
@@ -197,7 +215,7 @@ export const useLineDrawing = (
         console.error("Error during draw update:", error);
       }
     },
-    [snapVertexToFatFeature, saveState, linePoints]
+    [snapVertexToFatFeature, saveState, syncLinePointsWithDraw]
   );
 
   const snapToFeature = useCallback(
@@ -288,6 +306,9 @@ export const useLineDrawing = (
   );
 
   const handleFinishLineDraw = useCallback(async () => {
+    // Synchronize linePoints with Mapbox Draw
+    syncLinePointsWithDraw();
+
     if (
       firstClickedFeature &&
       lastClickedFeature &&
@@ -379,6 +400,7 @@ export const useLineDrawing = (
     checkCoordinatesMatch,
     removeDrawControl,
     lineType,
+    syncLinePointsWithDraw, // Added dependency
   ]);
 
   useEffect(() => {
@@ -427,6 +449,7 @@ export const useLineDrawing = (
         return;
       }
       saveState();
+
       const deletedLineStrings = e.features.filter(
         (feature: Feature<Geometry>) => feature.geometry.type === "LineString"
       );
@@ -436,9 +459,13 @@ export const useLineDrawing = (
         const remainingLineStrings = remainingFeatures.filter(
           (feature: Feature<Geometry>) => feature.geometry.type === "LineString"
         );
+
         if (remainingLineStrings.length === 0) {
           handleCancelLineDraw();
           startDrawing(lineType);
+        } else {
+          // Synchronize linePoints with Mapbox Draw
+          syncLinePointsWithDraw();
         }
       }
     } catch (error) {
@@ -446,23 +473,38 @@ export const useLineDrawing = (
     }
   };
 
+  const handleDrawCreate = useCallback(
+    (e: any) => {
+      saveState();
+      // Synchronize linePoints with Mapbox Draw
+      syncLinePointsWithDraw();
+    },
+    [saveState, syncLinePointsWithDraw]
+  );
+
   useEffect(() => {
     if (isDrawing && mapRef.current) {
       mapRef.current.on("draw.delete", handleDrawDelete);
-
       mapRef.current.on("draw.update", handleDrawUpdate);
-
-      mapRef.current.on("draw.create", saveState);
+      mapRef.current.on("draw.create", handleDrawCreate);
     }
 
     return () => {
       if (mapRef.current) {
         mapRef.current.off("draw.delete", handleDrawDelete);
         mapRef.current.off("draw.update", handleDrawUpdate);
-        mapRef.current.off("draw.create", saveState);
+        mapRef.current.off("draw.create", handleDrawCreate);
       }
     };
-  }, [isDrawing, draw, mapRef, handleDrawUpdate, saveState]);
+  }, [
+    isDrawing,
+    draw,
+    mapRef,
+    handleDrawUpdate,
+    saveState,
+    handleDrawDelete,
+    handleDrawCreate,
+  ]);
 
   useEffect(() => {
     if (isDrawing) {
@@ -496,6 +538,9 @@ export const useLineDrawing = (
           ...prev,
           { lng: coordinates[0], lat: coordinates[1] },
         ]);
+
+        // Synchronize linePoints with Mapbox Draw
+        syncLinePointsWithDraw();
       }
     };
 
@@ -516,6 +561,7 @@ export const useLineDrawing = (
     firstClickedFeature,
     lastClickedFeature,
     saveState,
+    syncLinePointsWithDraw, // Added dependency
   ]);
 
   const undo = useCallback(() => {
@@ -538,21 +584,8 @@ export const useLineDrawing = (
 
         draw.set(previousFeatures);
 
-        const lineFeature = previousFeatures.features.find(
-          (f) => f.geometry.type === "LineString"
-        ) as Feature<LineString> | undefined;
-
-        if (lineFeature) {
-          const newLinePoints = lineFeature.geometry.coordinates.map(
-            (coord) => ({
-              lng: coord[0],
-              lat: coord[1],
-            })
-          );
-          setLinePoints(newLinePoints);
-        } else {
-          setLinePoints([]);
-        }
+        // Synchronize linePoints with Mapbox Draw
+        syncLinePointsWithDraw();
       } else if (undoStack.length === 1) {
         const currentFeatures = undoStack[0];
         setUndoStack([]);
@@ -570,7 +603,7 @@ export const useLineDrawing = (
       setIsUndoRedoRunning(false);
       console.log("Undo operation finished.");
     }
-  }, [undoStack, redoStack, draw, isUndoRedoRunning]);
+  }, [undoStack, redoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
   const redo = useCallback(() => {
     if (isUndoRedoRunning) {
@@ -589,21 +622,8 @@ export const useLineDrawing = (
 
         draw.set(nextFeatures);
 
-        const lineFeature = nextFeatures.features.find(
-          (f) => f.geometry.type === "LineString"
-        ) as Feature<LineString> | undefined;
-
-        if (lineFeature) {
-          const newLinePoints = lineFeature.geometry.coordinates.map(
-            (coord) => ({
-              lng: coord[0],
-              lat: coord[1],
-            })
-          );
-          setLinePoints(newLinePoints);
-        } else {
-          setLinePoints([]);
-        }
+        // Synchronize linePoints with Mapbox Draw
+        syncLinePointsWithDraw();
       } else {
         console.log("No more redo steps available.");
       }
@@ -613,7 +633,7 @@ export const useLineDrawing = (
       setIsUndoRedoRunning(false);
       console.log("Redo operation finished.");
     }
-  }, [redoStack, undoStack, draw, isUndoRedoRunning]);
+  }, [redoStack, undoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
   useEffect(() => {
     const map = mapRef.current;

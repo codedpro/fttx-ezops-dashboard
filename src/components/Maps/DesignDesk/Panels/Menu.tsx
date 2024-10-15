@@ -46,7 +46,7 @@ interface MenuPanelProps {
   setEditObjectLng: (lng: number) => void;
   editObjectLat: number | null;
   editObjectLng: number | null;
-  linePoints: { lat: number; lng: number }[];
+
   isEditing: boolean;
   isEditingObject: boolean;
   EditingObjectLabel: string;
@@ -76,7 +76,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   setEditObjectLng,
   editObjectLat,
   editObjectLng,
-  linePoints,
+
   isEditing,
   isEditingObject,
   EditingObjectLabel,
@@ -430,15 +430,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
             }
             onClick={() => {}}
           />
-          <ActionButton
-            label="Fly to"
-            icon={<FaMapMarkedAlt />}
-            onClick={() => {
-              if (linePoints.length > 0) {
-                onFlyToLine(linePoints);
-              }
-            }}
-          />
+         
           <ActionButton
             label="Cancel"
             icon={<FaTimes />}
