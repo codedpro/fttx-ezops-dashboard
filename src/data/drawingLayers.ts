@@ -4,5 +4,6 @@ export const drawingLayers = [
   "hh-layer",
   "odc-layer",
   "tc-layer",
-  
+  "cp-layer",
+  "olt-layer",
 ];

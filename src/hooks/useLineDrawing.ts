@@ -360,7 +360,10 @@ export const useLineDrawing = (
       const startPointType = firstClickedFeature?.properties?.Type || "Unknown";
       const startPointName = firstClickedFeature?.properties?.Name || "Unknown";
 
-      let endPointId = lastClickedFeature?.properties?.FAT_ID || 0;
+      let endPointId =
+        lastClickedFeature?.properties?.FAT_ID ||
+        lastClickedFeature?.properties?.Component_ID ||
+        0;
       let endPointType = lastClickedFeature?.properties?.Type || "CP";
       let endPointName = lastClickedFeature?.properties?.Name || "";
 

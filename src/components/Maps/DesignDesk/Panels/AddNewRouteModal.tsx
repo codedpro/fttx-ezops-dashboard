@@ -67,14 +67,14 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
 
   const handleAddCP = () => {
     setShowAddCheckpointModal(false);
-    onSubmit({ formValues, AddCP: true }); // Pass form data with AddCP=true
+    onSubmit({ formValues, AddCP: true });
   };
 
   const handleSubmit = () => {
     if (endPointId === 0) {
-      setShowAddCheckpointModal(true); // Show checkpoint confirmation modal
+      setShowAddCheckpointModal(true);
     } else {
-      onSubmit({ formValues, AddCP: false }); // Pass form data with AddCP=false
+      onSubmit({ formValues, AddCP: false });
     }
   };
 

@@ -365,7 +365,7 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((err) => {
-        toast.error("Error adding object: " +  err.message);
+        toast.error("Error adding object: " + err.message);
       });
   };
 
@@ -653,11 +653,13 @@ const DesignDesk: React.FC = () => {
       .then((response) => {
         if (response.status === 200) {
           forceUpdatePoints(userservice.getToken() ?? "");
+          forceUpdateComponentsOther(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
 
           handleCancelLineDraw();
           removeDrawControl();
           setIsDrawing(false);
+          setRouteData(null);
 
           if (resetMenuPanel) {
             resetMenuPanel();
@@ -667,7 +669,7 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
         toast.error("Error adding route: " + error.response.data);
       });
   };
@@ -713,18 +715,25 @@ const DesignDesk: React.FC = () => {
           onClose={() => {
             setIsRouteModalOpen(false);
             setFormLineValues({
-              city: "",
-              planType: "",
+              city: "NEKA",
+              planType: "0",
               isReverse: false,
             });
           }}
-          onSubmit={handleRouteModalSubmit}
+          onSubmit={() => {
+            handleRouteModalSubmit;
+            setFormLineValues({
+              city: "NEKA",
+              planType: "0",
+              isReverse: false,
+            });
+          }}
           formValues={formLineValues}
           setFormValues={setFormLineValues}
           startPointType={routeData?.StartPointType ?? ""}
           endPointType={routeData?.EndPointType ?? ""}
           endPointName={routeData?.EndPointName ?? ""}
-          endPointId={routeData?.EndPointId ?? 0}
+          endPointId={routeData?.EndPointId ?? 1}
           startPointName={routeData?.StartPointName ?? ""}
         />
         <AddObjectModal
