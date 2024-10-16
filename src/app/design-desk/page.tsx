@@ -631,7 +631,6 @@ const DesignDesk: React.FC = () => {
     formValues: { city: string; planType: string; isReverse: boolean };
     AddCP: boolean;
   }) => {
-    console.log("asd");
     const payload = {
       ...routeData,
       Name: data.formValues.isReverse
@@ -641,8 +640,6 @@ const DesignDesk: React.FC = () => {
       Plan_Type: data.formValues.planType,
       IsReverse: data.formValues.isReverse,
     };
-
-    console.log("Payload:", payload);
 
     axios
       .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewRoute`, payload, {
@@ -655,6 +652,7 @@ const DesignDesk: React.FC = () => {
         if (response.status === 200) {
           forceUpdatePoints(userservice.getToken() ?? "");
           forceUpdateComponentsOther(userservice.getToken() ?? "");
+          forceUpdateComponentsFAT(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
           handleCancelLineDraw();
           removeDrawControl();

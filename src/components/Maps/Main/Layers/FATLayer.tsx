@@ -56,6 +56,6 @@ export const useFATLayer = () => {
     loading,
     visible: true,
     type: "point" as const,
-    icons: { FATIcon: "/images/map/SFAT.png" },
+    icons: { FATIcon: "/images/map/FAT.png" },
   };
 };
