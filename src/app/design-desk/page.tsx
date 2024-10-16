@@ -322,7 +322,7 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((err) => {
-        toast.error("Error adding object:" + err);
+        toast.error("Error adding object: " + err.message);
       });
   };
 
@@ -365,7 +365,7 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((err) => {
-        toast.error("Error adding object:" + err);
+        toast.error("Error adding object: " +  err.message);
       });
   };
 
@@ -449,7 +449,7 @@ const DesignDesk: React.FC = () => {
           }
         })
         .catch((error) => {
-          toast.error("Error deleting line: " + error.message);
+          toast.error("Error deleting line: " + error.response.data);
         });
     });
   };
@@ -614,9 +614,9 @@ const DesignDesk: React.FC = () => {
         })
         .catch((error) => {
           if (endpoint === "/FTTHDeleteComponent") {
-            toast.error("Error deleting object: " + error.message);
+            toast.error("Error deleting object: " + error.response.data);
           } else if (endpoint === "/FTTHMergeLines") {
-            toast.error("Error merging lines: " + error.message);
+            toast.error("Error merging lines: " + error.response.data);
           }
         })
         .finally(() => {
@@ -667,7 +667,8 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((error) => {
-        toast.error("Error adding route: " + error.message);
+        console.log(error)
+        toast.error("Error adding route: " + error.response.data);
       });
   };
   const handleSubmitObjectEditing = () => {

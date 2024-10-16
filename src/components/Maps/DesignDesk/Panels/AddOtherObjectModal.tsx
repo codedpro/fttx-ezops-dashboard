@@ -68,7 +68,7 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
     try {
       onSubmit({ City, Name: name, Plan_Type: planType });
     } catch (error) {
-      toast.error("An error occurred while submitting the form.");
+      toast.error("An error occurred while submitting the form." + error);
     }
   };
 

@@ -93,7 +93,7 @@ const OtherDetailModal: React.FC<OtherDetailModalProps> = ({
 
       onSubmit(updatedData);
     } catch (error) {
-      toast.error("An error occurred while submitting the form.");
+      toast.error("An error occurred while submitting the form. " + error);
     }
   };
 

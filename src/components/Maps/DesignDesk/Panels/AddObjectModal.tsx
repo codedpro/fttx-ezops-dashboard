@@ -77,7 +77,7 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
       setLoading(true);
       onSubmit({ OLT, POP, FAT, City, Plan_Type: planType });
     } catch (error) {
-      toast.error("An error occurred while submitting the form.");
+      toast.error("An error occurred : " + error);
     } finally {
       setLoading(false);
     }

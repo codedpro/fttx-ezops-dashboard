@@ -42,8 +42,6 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
   endPointName,
   endPointId,
 }) => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isFormValid, setIsFormValid] = useState(false);
   const [showAddCheckpointModal, setShowAddCheckpointModal] = useState(false); // State for CP confirmation modal
   const { cities } = useFTTHCitiesStore((state) => ({
     cities: state.cities,
@@ -52,28 +50,13 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
   }));
 
   useEffect(() => {
-    const handleDarkModeChange = () => {
-      const darkModeClass = document.documentElement.classList.contains("dark");
-      setIsDarkMode(darkModeClass);
-    };
-
-    handleDarkModeChange();
-
-    const observer = new MutationObserver(() => {
-      handleDarkModeChange();
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    setIsFormValid(formValues.city !== "" && formValues.planType !== "");
-  }, [formValues]);
+    // Ensure initial values are set correctly on component mount
+    setFormValues((prev) => ({
+      ...prev,
+      city: formValues.city || cities[0]?.Name || "", // Default to first city if formValues.city is empty
+      planType: formValues.planType || "0", // Default to "Planning" if planType is empty
+    }));
+  }, [isOpen, cities, formValues.city, formValues.planType, setFormValues]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -111,7 +94,7 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
         <div
           className={cn(
             "relative bg-white p-6 rounded-lg w-full max-w-lg dark:bg-dark-2 shadow-2xl transition-transform duration-300 transform scale-100",
-            { "dark:text-white": isDarkMode }
+            { "dark:text-white": true }
           )}
         >
           <button
@@ -121,9 +104,11 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
             <FiX size={24} />
           </button>
           <h2 className="text-center text-lg font-bold mb-6 dark:text-white">
-            {formValues.isReverse
-              ? `${endPointName} to ${startPointName}`
-              : `${startPointName} to ${endPointName}`}
+            {endPointId != 0
+              ? formValues.isReverse
+                ? `${endPointName} to ${startPointName}`
+                : `${startPointName} to ${endPointName}`
+              : `${startPointName} to CheckPoint`}
           </h2>
 
           <div className="space-y-4">
@@ -133,7 +118,7 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
               </Label>
               <Select
                 name="city"
-                value={formValues.city}
+                value={formValues.city} // Properly bind the city value to formValues
                 onChange={handleChange}
                 className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
               >
@@ -151,7 +136,7 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
               </Label>
               <Select
                 name="planType"
-                value={formValues.planType}
+                value={formValues.planType} // Properly bind the planType value to formValues
                 onChange={handleChange}
                 className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
               >
@@ -192,14 +177,9 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
               Cancel
             </button>
             <button
-              onClick={handleSubmit}
-              disabled={!isFormValid}
+              onClick={handleSubmit} // Submit without validation check
               className={cn(
-                " text-sm px-4 py-2 text-white rounded-md transition-colors",
-                {
-                  "cursor-not-allowed opacity-50": !isFormValid,
-                },
-                "bg-primary hover:bg-primary-dark"
+                "text-sm px-4 py-2 text-white rounded-md transition-colors bg-primary hover:bg-primary-dark"
               )}
             >
               Submit
