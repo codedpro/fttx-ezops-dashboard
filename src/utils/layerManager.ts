@@ -18,6 +18,7 @@ import { useTCLayer } from "@/components/Maps/Main/Layers/TCLayer";
 import { useODCLayer } from "@/components/Maps/Main/Layers/ODCLayer";
 import { useIranFTTXAreaLayer } from "@/components/Maps/IranFTTX/Layers/IranFTTXAreastsx";
 import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
+import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
 
 interface LayerConfig {
   id: string;
@@ -27,13 +28,14 @@ interface LayerConfig {
   visible: boolean;
   source: mapboxgl.GeoJSONSourceSpecification | null;
   toggle: () => void;
+  loading?: boolean;
 }
 
 export const useLayerManager = (
   selectedLayers: LayerKeys[],
   defaultVisibility: Partial<Record<LayerKeys, boolean>>
 ) => {
-  const [layerVisibility, setLayerVisibility] = useState<
+    const [layerVisibility, setLayerVisibility] = useState<
     Record<LayerKeys, boolean>
   >(() =>
     Object.keys(defaultVisibility).reduce(
@@ -102,6 +104,7 @@ export const useLayerManager = (
       visible: layerVisibility.ODCLineLayer,
       toggle: () => toggleLayerVisibility("ODCLineLayer"),
     },
+
     DropCableLineLayer: {
       ...useDropCableLineLayer(),
       label: "Drop Cable",
@@ -186,6 +189,14 @@ export const useLayerManager = (
       visible: layerVisibility.ODCLayer,
       toggle: () => toggleLayerVisibility("ODCLayer"),
     },
+    CPLayer: {
+      ...useCPLayer(),
+      label: "CP",
+      icon: "/images/map/CP.png",
+      type: "point",
+      visible: layerVisibility.CPLayer,
+      toggle: () => toggleLayerVisibility("CPLayer"),
+    },
     TCLayer: {
       ...useTCLayer(),
       label: "TC",
@@ -204,9 +215,18 @@ export const useLayerManager = (
     },
   };
 
-  const activeLayers: LayerConfig[] = selectedLayers.map((layerName) => ({
-    ...layers[layerName],
-  }));
+  const activeLayers: LayerConfig[] = selectedLayers
+  .map((layerName) => {
+    const layer = layers[layerName];
+    // If `loading` exists, check both loading and source
+    if (layer.loading !== undefined) {
+      return !layer.loading && layer.source !== null ? layer : null;
+    }
+    // If `loading` doesn't exist, return the layer as is
+    return layer;
+  })
+  .filter((layer): layer is LayerConfig => layer !== null); // Filter out any null layers
+
 
   return { activeLayers };
 };

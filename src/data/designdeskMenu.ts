@@ -5,6 +5,7 @@ export const OBJECTS = [
   { label: "FAT", image: "/images/map/FAT.png" },
   { label: "ODC", image: "/images/map/ODC.png" },
   { label: "TC", image: "/images/map/TC.png" },
+  { label: "CP", image: "/images/map/CP.png" },
 ];
 
 export const LINES = [

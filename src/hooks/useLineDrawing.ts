@@ -60,7 +60,6 @@ export const useLineDrawing = (
     }
   };
 
-
   const removeDrawControl = () => {
     try {
       if (mapRef?.current && draw) {
@@ -315,15 +314,9 @@ export const useLineDrawing = (
   );
 
   const handleFinishLineDraw = useCallback(async () => {
-    // Synchronize linePoints with Mapbox Draw
     syncLinePointsWithDraw();
 
-    if (
-      firstClickedFeature &&
-      lastClickedFeature &&
-      initialFirstFeatureCoords &&
-      initialLastFeatureCoords
-    ) {
+    if (firstClickedFeature && initialFirstFeatureCoords) {
       const allFeatures = draw.getAll().features;
       const lineFeature = allFeatures.find(
         (feature): feature is Feature<LineString> =>
@@ -343,33 +336,40 @@ export const useLineDrawing = (
       );
 
       const lastCoordIndex = latestCoordinates.length - 1;
-      const lastPointMatches = checkCoordinatesMatch(
-        {
-          lat: latestCoordinates[lastCoordIndex][1],
-          lng: latestCoordinates[lastCoordIndex][0],
-        },
-        initialLastFeatureCoords
-      );
+
+      let lastPointMatches = false;
+      if (lastClickedFeature && initialLastFeatureCoords) {
+        lastPointMatches = checkCoordinatesMatch(
+          {
+            lat: latestCoordinates[lastCoordIndex][1],
+            lng: latestCoordinates[lastCoordIndex][0],
+          },
+          initialLastFeatureCoords
+        );
+      }
 
       if (!startPointMatches) {
         alert("The first point does not match the selected feature.");
         return;
       }
-      if (!lastPointMatches) {
-        alert("The last point does not match the selected feature.");
-        return;
-      }
 
+      // Handle the case where lastClickedFeature is missing
       const startPointId =
         firstClickedFeature?.properties?.FAT_ID ||
-        firstClickedFeature.properties?.Component_ID;
+        firstClickedFeature?.properties?.Component_ID;
       const startPointType = firstClickedFeature?.properties?.Type || "Unknown";
-      const endPointId =
-        lastClickedFeature?.properties?.FAT_ID ||
-        lastClickedFeature?.properties?.Component_ID;
-      const endPointType = lastClickedFeature?.properties?.Type || "Unknown";
       const startPointName = firstClickedFeature?.properties?.Name || "Unknown";
-      const endPointName = lastClickedFeature?.properties?.Name || "Unknown";
+
+      let endPointId = lastClickedFeature?.properties?.FAT_ID || 0;
+      let endPointType = lastClickedFeature?.properties?.Type || "CP";
+      let endPointName = lastClickedFeature?.properties?.Name || "";
+
+      if (!lastClickedFeature) {
+        // If no last feature, set the last point in the coordinates as the endpoint
+        endPointId = 0; // Default ID
+        endPointType = "CP"; // Default type
+        endPointName = ""; // Empty name
+      }
 
       if (startPointId === endPointId) {
         alert("The first and last features must not be the same.");
@@ -397,9 +397,7 @@ export const useLineDrawing = (
 
       return newRoute;
     } else {
-      alert(
-        "You must connect both the first and last points to features to save the line."
-      );
+      alert("You must connect the first point to a feature to save the line.");
     }
   }, [
     firstClickedFeature,

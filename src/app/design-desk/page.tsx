@@ -140,6 +140,7 @@ const DesignDesk: React.FC = () => {
     "OLTLayer",
     "ODCLayer",
     "TCLayer",
+    "CPLayer",
     "ODCLineLayer",
     "FATLineLayer",
     "MetroLineLayer",
@@ -160,6 +161,7 @@ const DesignDesk: React.FC = () => {
     FATLineLayer: true,
     MetroLineLayer: true,
     DropCableLineLayer: true,
+    CPLayer: true,
   };
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
   const { confirm, ConfirmationModal } = useConfirmation();
@@ -575,7 +577,6 @@ const DesignDesk: React.FC = () => {
         };
         endpoint = "/FTTHMergeLines";
       } else {
-        // Prepare payload for deleting a component
         payload = {
           id: Number(dataToProcess.ID),
           type: dataToProcess.Type,
@@ -626,17 +627,22 @@ const DesignDesk: React.FC = () => {
     });
   };
 
-  const handleRouteModalSubmit = () => {
+  const handleRouteModalSubmit = (data: {
+    formValues: { city: string; planType: string; isReverse: boolean };
+    AddCP: boolean;
+  }) => {
     const payload = {
       ...routeData,
-      Name: formLineValues.isReverse
+      Name: data.formValues.isReverse
         ? routeData?.EndPointName + "_To_" + routeData?.StartPointName
         : routeData?.StartPointName + "_To_" + routeData?.EndPointName,
-      City: formLineValues.city,
-      Plan_Type: formLineValues.planType,
-      IsReverse: formLineValues.isReverse,
+      City: data.formValues.city,
+      Plan_Type: data.formValues.planType,
+      IsReverse: data.formValues.isReverse,
     };
-    console.log(payload);
+
+    console.log("Payload:", payload);
+
     axios
       .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewRoute`, payload, {
         headers: {
@@ -648,9 +654,11 @@ const DesignDesk: React.FC = () => {
         if (response.status === 200) {
           forceUpdatePoints(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
+
           handleCancelLineDraw();
           removeDrawControl();
           setIsDrawing(false);
+
           if (resetMenuPanel) {
             resetMenuPanel();
           }
@@ -661,8 +669,6 @@ const DesignDesk: React.FC = () => {
       .catch((error) => {
         toast.error("Error adding route: " + error.message);
       });
-
-    setIsRouteModalOpen(false);
   };
   const handleSubmitObjectEditing = () => {
     finilizeObjectEditPosition();
@@ -717,6 +723,7 @@ const DesignDesk: React.FC = () => {
           startPointType={routeData?.StartPointType ?? ""}
           endPointType={routeData?.EndPointType ?? ""}
           endPointName={routeData?.EndPointName ?? ""}
+          endPointId={routeData?.EndPointId ?? 0}
           startPointName={routeData?.StartPointName ?? ""}
         />
         <AddObjectModal

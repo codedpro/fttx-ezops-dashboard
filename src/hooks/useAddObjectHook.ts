@@ -71,7 +71,7 @@ export const useAddObjectHook = (
             featureId
           ) as mapboxgl.GeoJSONSource;
 
-          const iconSize = objectIcon.includes("ODC") ? 0.15 : 0.6;
+          const iconSize = objectIcon.includes("ODC") ? 0.15 : 0.8;
 
           map.addLayer({
             id: featureId,

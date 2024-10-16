@@ -15,5 +15,6 @@ export type LayerKeys =
   | "HHLayer"
   | "FTTHComplain"
   | "ODCLayer"
+  | "CPLayer"
   | "TCLayer"
   | "IranFTTXAreasFill";
