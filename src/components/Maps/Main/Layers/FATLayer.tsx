@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export const useFATLayer = () => {
   const fats = useFTTHComponentsFatStore((state) => state.fats);
   const [source, setSource] = useState<GeoJSONSourceSpecification | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fatData = fats.filter((fat) => fat.Type === "FAT");
@@ -43,12 +44,16 @@ export const useFATLayer = () => {
         type: "geojson",
         data: geoJsonData,
       });
+      setLoading(false);
+    } else {
+      setLoading(true);
     }
   }, [fats]);
 
   return {
     id: "fat-layer",
     source,
+    loading,
     visible: true,
     type: "point" as const,
     icons: { FATIcon: "/images/map/SFAT.png" },

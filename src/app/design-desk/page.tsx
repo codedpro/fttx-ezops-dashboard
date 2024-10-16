@@ -631,6 +631,7 @@ const DesignDesk: React.FC = () => {
     formValues: { city: string; planType: string; isReverse: boolean };
     AddCP: boolean;
   }) => {
+    console.log("asd");
     const payload = {
       ...routeData,
       Name: data.formValues.isReverse
@@ -655,11 +656,16 @@ const DesignDesk: React.FC = () => {
           forceUpdatePoints(userservice.getToken() ?? "");
           forceUpdateComponentsOther(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
-
           handleCancelLineDraw();
           removeDrawControl();
           setIsDrawing(false);
           setRouteData(null);
+          setIsModalOpen(false);
+          setFormLineValues({
+            city: "NEKA",
+            planType: "0",
+            isReverse: false,
+          });
 
           if (resetMenuPanel) {
             resetMenuPanel();
@@ -669,10 +675,13 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Error adding route: " + error.response.data);
       });
   };
+
+  useEffect(() => {
+    console.log(isModalOpen);
+  }, [isModalOpen]);
   const handleSubmitObjectEditing = () => {
     finilizeObjectEditPosition();
   };
@@ -720,14 +729,7 @@ const DesignDesk: React.FC = () => {
               isReverse: false,
             });
           }}
-          onSubmit={() => {
-            handleRouteModalSubmit;
-            setFormLineValues({
-              city: "NEKA",
-              planType: "0",
-              isReverse: false,
-            });
-          }}
+          onSubmit={handleRouteModalSubmit}
           formValues={formLineValues}
           setFormValues={setFormLineValues}
           startPointType={routeData?.StartPointType ?? ""}
