@@ -10,6 +10,7 @@ import {
   Point,
 } from "geojson";
 import { DrawEvent } from "../../mapbox-gl-draw";
+import { throttle } from "lodash";
 
 export const useLineDrawing = (
   mapRef: MutableRefObject<mapboxgl.Map | null>,
@@ -34,7 +35,7 @@ export const useLineDrawing = (
   >(null);
 
   const snappingDistance = 0.001;
-
+  const MAX_STACK_SIZE = 20;
   const [undoStack, setUndoStack] = useState<FeatureCollection[]>([]);
   const [redoStack, setRedoStack] = useState<FeatureCollection[]>([]);
   const [isUndoRedoRunning, setIsUndoRedoRunning] = useState(false);
@@ -52,7 +53,11 @@ export const useLineDrawing = (
     try {
       if (mapRef?.current && draw && !mapRef.current.hasControl(draw)) {
         mapRef.current.addControl(draw);
-        mapRef.current.getCanvas().style.cursor = "crosshair";
+
+        if (mapRef.current.getCanvas().style.cursor !== "crosshair") {
+          mapRef.current.getCanvas().style.cursor = "crosshair";
+        }
+
         draw.changeMode("draw_line_string");
       }
     } catch (error) {
@@ -108,7 +113,13 @@ export const useLineDrawing = (
 
   const saveState = useCallback(() => {
     const currentFeatures = draw.getAll();
-    setUndoStack((prevUndoStack) => [...prevUndoStack, currentFeatures]);
+    setUndoStack((prevUndoStack) => {
+      const newStack = [...prevUndoStack, currentFeatures];
+      if (newStack.length > MAX_STACK_SIZE) {
+        newStack.shift();
+      }
+      return newStack;
+    });
     setRedoStack([]);
   }, [draw]);
 
@@ -118,7 +129,6 @@ export const useLineDrawing = (
     featureId: string,
     shouldForceSnap: boolean = false
   ) => {
-    // First sync any existing points with Draw before snapping
     syncLinePointsWithDraw();
 
     const feature = draw.getAll().features.find((f) => f.id === featureId);
@@ -126,7 +136,6 @@ export const useLineDrawing = (
     if (feature && feature.geometry.type === "LineString") {
       const updatedCoords = [...(feature.geometry as LineString).coordinates];
 
-      // Perform snapping logic only after syncing
       if (vertexIndex === 0) {
         const closestFatFeature = getClosestFatFeature(coords);
         if (closestFatFeature) {
@@ -158,25 +167,32 @@ export const useLineDrawing = (
     }
   };
 
-  const syncLinePointsWithDraw = useCallback(() => {
-    const currentFeature = draw
-      .getAll()
-      .features.find((feature) => feature.geometry.type === "LineString") as
-      | Feature<LineString>
-      | undefined;
+  const syncLinePointsWithDraw = useCallback(
+    throttle(() => {
+      const currentFeature = draw
+        .getAll()
+        .features.find((feature) => feature.geometry.type === "LineString") as
+        | Feature<LineString>
+        | undefined;
 
-    if (currentFeature) {
-      const newLinePoints = currentFeature.geometry.coordinates.map(
-        (coord) => ({
-          lng: coord[0],
-          lat: coord[1],
-        })
-      );
-      setLinePoints(newLinePoints);
-    } else {
-      setLinePoints([]);
-    }
-  }, [draw]);
+      if (currentFeature) {
+        const newLinePoints = currentFeature.geometry.coordinates.map(
+          (coord) => ({
+            lng: coord[0],
+            lat: coord[1],
+          })
+        );
+        setLinePoints((prev) => {
+          const hasChanged =
+            JSON.stringify(prev) !== JSON.stringify(newLinePoints);
+          return hasChanged ? newLinePoints : prev;
+        });
+      } else {
+        setLinePoints((prev) => (prev.length > 0 ? [] : prev));
+      }
+    }, 200),
+    [draw]
+  );
 
   const handleDrawUpdate = useCallback(
     (e: any) => {
@@ -190,22 +206,20 @@ export const useLineDrawing = (
         const coords = updatedFeature.geometry.coordinates;
         console.log(coords.length);
         if (coords.length >= 1) {
-          // Snap the first point to the nearest FAT feature and force it
           console.log("Snapping it");
           snapVertexToFatFeature(
             coords[0] as [number, number],
             0,
             updatedFeature.id as string,
-            true // Force snapping for the first point
+            true
           );
 
-          // Snap the last point to the nearest FAT feature and force it
           if (coords.length > 1) {
             snapVertexToFatFeature(
               coords[coords.length - 1] as [number, number],
               coords.length - 1,
               updatedFeature.id as string,
-              true // Force snapping for the last point
+              true
             );
           }
 
@@ -353,7 +367,6 @@ export const useLineDrawing = (
         return;
       }
 
-      // Handle the case where lastClickedFeature is missing
       const startPointId =
         firstClickedFeature?.properties?.FAT_ID ||
         firstClickedFeature?.properties?.Component_ID;
@@ -368,10 +381,9 @@ export const useLineDrawing = (
       let endPointName = lastClickedFeature?.properties?.Name || "";
 
       if (!lastClickedFeature) {
-        // If no last feature, set the last point in the coordinates as the endpoint
-        endPointId = 0; // Default ID
-        endPointType = "CP"; // Default type
-        endPointName = ""; // Empty name
+        endPointId = 0;
+        endPointType = "CP";
+        endPointName = "";
       }
 
       if (startPointId === endPointId) {
@@ -410,7 +422,7 @@ export const useLineDrawing = (
     checkCoordinatesMatch,
     removeDrawControl,
     lineType,
-    syncLinePointsWithDraw, // Added dependency
+    syncLinePointsWithDraw,
   ]);
 
   useEffect(() => {
@@ -474,7 +486,6 @@ export const useLineDrawing = (
           handleCancelLineDraw();
           startDrawing(lineType);
         } else {
-          // Synchronize linePoints with Mapbox Draw
           syncLinePointsWithDraw();
         }
       }
@@ -487,10 +498,8 @@ export const useLineDrawing = (
       try {
         if (!e.features || e.features.length === 0) return;
 
-        saveState(); // Save the state for undo/redo functionality
         const createdFeature = e.features[0] as Feature<LineString>;
 
-        // Ensure the geometry is a LineString
         if (createdFeature.geometry.type !== "LineString") {
           console.warn("Created feature is not a LineString.");
           return;
@@ -498,7 +507,6 @@ export const useLineDrawing = (
 
         const coords = createdFeature.geometry.coordinates;
 
-        // Ensure coords[0] and coords[coords.length - 1] are valid 2-element arrays
         if (
           Array.isArray(coords) &&
           coords.length > 1 &&
@@ -507,12 +515,9 @@ export const useLineDrawing = (
           coords[0].length >= 2 &&
           coords[coords.length - 1].length >= 2
         ) {
-          // Create a new coordinates array to avoid directly mutating the original one
           const newCoords = [...coords];
 
-          // Snap first and last coordinates, if applicable
           if (firstClickedFeature && lastClickedFeature) {
-            // Ensure firstClickedFeature and lastClickedFeature have coordinates
             if (
               firstClickedFeature.geometry.type === "Point" &&
               lastClickedFeature.geometry.type === "Point"
@@ -526,27 +531,22 @@ export const useLineDrawing = (
                 number,
               ];
 
-              // Replace only the first and last coordinates while keeping the rest intact
               newCoords[0] = firstCoords;
               newCoords[newCoords.length - 1] = lastCoords;
 
-              // Update the feature's geometry with the new coordinates
               const updatedFeature: Feature<LineString> = {
                 ...createdFeature,
                 geometry: {
                   type: "LineString",
-                  coordinates: newCoords, // Use updated coordinates with snapping
+                  coordinates: newCoords,
                 },
               };
 
               if (createdFeature.id && typeof createdFeature.id === "string") {
-                // Remove the old feature
                 draw.delete(createdFeature.id);
 
-                // Add the updated feature
                 draw.add(updatedFeature);
 
-                // Optionally, select the feature
                 draw.changeMode("simple_select", {
                   featureIds: [String(createdFeature.id)],
                 });
@@ -555,7 +555,6 @@ export const useLineDrawing = (
               }
             }
           } else {
-            // Proceed with snapping logic if first/last features are not available
             snapVertexToFatFeature(
               newCoords[0] as [number, number],
               0,
@@ -570,7 +569,6 @@ export const useLineDrawing = (
             );
           }
 
-          // Always sync line points after creating or modifying features
           syncLinePointsWithDraw();
         } else {
           console.warn("Coordinates are not valid for snapping.");
@@ -636,7 +634,7 @@ export const useLineDrawing = (
       });
 
       if (clickedFeatures && clickedFeatures.length > 0) {
-        handleFeatureClick(clickedFeatures[0]); // Ensure it's correctly set
+        handleFeatureClick(clickedFeatures[0]);
       } else if (firstClickedFeature && !lastClickedFeature) {
         saveState();
         const coordinates: [number, number] = [e.lngLat.lng, e.lngLat.lat];
@@ -664,77 +662,61 @@ export const useLineDrawing = (
     firstClickedFeature,
     lastClickedFeature,
     saveState,
-    syncLinePointsWithDraw, // Added dependency
+    syncLinePointsWithDraw,
   ]);
 
   const undo = useCallback(() => {
-    if (isUndoRedoRunning) {
-      console.log("Undo operation is already running, skipping this attempt.");
+    if (isUndoRedoRunning || undoStack.length === 0) {
+      console.log("No undo steps available or operation is running.");
       return;
     }
 
     setIsUndoRedoRunning(true);
-    console.log("Undo operation started.");
 
     try {
-      if (undoStack.length > 1) {
-        // Pop the last state from undoStack
-        const currentFeatures = undoStack[undoStack.length - 1];
-        const previousFeatures = undoStack[undoStack.length - 2];
+      const currentFeatures = undoStack.pop();
+      const previousFeatures = undoStack[undoStack.length - 1] || null;
 
-        setUndoStack((prevUndoStack) => prevUndoStack.slice(0, -1));
-        setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
-
+      if (previousFeatures) {
+        if (currentFeatures) {
+          setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
+        }
         draw.set(previousFeatures);
-
-        // Synchronize linePoints with Mapbox Draw
         syncLinePointsWithDraw();
-      } else if (undoStack.length === 1) {
-        const currentFeatures = undoStack[0];
-        setUndoStack([]);
-
-        setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
-
+      } else {
+        if (currentFeatures) {
+          setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
+        }
         draw.deleteAll();
         setLinePoints([]);
-      } else {
-        console.log("No more undo steps available.");
       }
     } catch (error) {
       console.error("Error during undo operation:", error);
     } finally {
       setIsUndoRedoRunning(false);
-      console.log("Undo operation finished.");
     }
   }, [undoStack, redoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
   const redo = useCallback(() => {
-    if (isUndoRedoRunning) {
-      console.log("Redo operation is already running, skipping this attempt.");
+    if (isUndoRedoRunning || redoStack.length === 0) {
+      console.log("No redo steps available or operation is running.");
       return;
     }
 
     setIsUndoRedoRunning(true);
 
     try {
-      if (redoStack.length > 0) {
-        const nextFeatures = redoStack[redoStack.length - 1];
+      const nextFeatures = redoStack.pop();
 
-        setRedoStack((prevRedoStack) => prevRedoStack.slice(0, -1));
+      if (nextFeatures) {
         setUndoStack((prevUndoStack) => [...prevUndoStack, draw.getAll()]);
-
         draw.set(nextFeatures);
-
-        // Synchronize linePoints with Mapbox Draw
         syncLinePointsWithDraw();
-      } else {
-        console.log("No more redo steps available.");
       }
     } catch (error) {
       console.error("Error during redo operation:", error);
     } finally {
       setIsUndoRedoRunning(false);
-      console.log("Redo operation finished.");
     }
   }, [redoStack, undoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
