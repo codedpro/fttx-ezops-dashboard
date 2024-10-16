@@ -328,6 +328,8 @@ export const Modal: React.FC<ModalProps> = ({
                 data.Type === "SFAT" ||
                 data.Type === "HH" ||
                 data.Type === "TC" ||
+                data.Type === "FAT" ||
+                data.Type === "CP" ||
                 data.Type === "ODC") && (
                 <ActionButtonsObject
                   handleEditObject={() => {

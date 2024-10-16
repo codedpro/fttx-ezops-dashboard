@@ -17,7 +17,8 @@ export const dynamicZoom = (mapRef: any, layers: LayerType[]) => {
       type === "point" &&
       id !== "OLTLayer" &&
       id !== "olt-layer" &&
-      id !== "odc-layer"
+      id !== "odc-layer" &&
+      id !== "cp-layer"
     ) {
       const baseSize = 20;
       const newSize = baseSize * sizeMultiplier;

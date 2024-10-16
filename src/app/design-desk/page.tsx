@@ -156,12 +156,12 @@ const DesignDesk: React.FC = () => {
     HHLayer: true,
     TCLayer: true,
     ODCLayer: true,
+    CPLayer: true,
     OLTLayer: true,
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,
     DropCableLineLayer: true,
-    CPLayer: true,
   };
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
   const { confirm, ConfirmationModal } = useConfirmation();
