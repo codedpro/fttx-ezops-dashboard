@@ -99,7 +99,7 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   return (
     <>
-      <div className="hidden dark:flex transition-width duration-300 ease-in-out">
+      <div className="hidden dark:flex z-0 transition-width duration-300 ease-in-out">
         <Sidebar
           collapsed={collapsed}
           toggled={sidebarOpen}

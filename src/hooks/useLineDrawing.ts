@@ -37,7 +37,7 @@ export const useLineDrawing = (
     [number, number] | null
   >(null);
 
-  const snappingDistance = 0.001;
+  const snappingDistance = 0.01;
   const MAX_STACK_SIZE = 2000;
   const [undoStack, setUndoStack] = useState<FeatureCollection[]>([]);
   const [redoStack, setRedoStack] = useState<FeatureCollection[]>([]);
@@ -133,7 +133,6 @@ export const useLineDrawing = (
     shouldForceSnap: boolean = false
   ) => {
     syncLinePointsWithDraw();
-
     const feature = draw.getAll().features.find((f) => f.id === featureId);
 
     if (feature && feature.geometry.type === "LineString") {
@@ -218,6 +217,7 @@ export const useLineDrawing = (
 
         const updatedFeature = e.features[0] as Feature<LineString>;
         const coords = updatedFeature.geometry.coordinates;
+
         if (coords.length >= 1) {
           snapVertexToFatFeature(
             coords[0] as [number, number],
@@ -271,6 +271,7 @@ export const useLineDrawing = (
         { lat: coordinates[1], lng: coordinates[0] },
         coordinates
       );
+
       const updatedLinePoints = [
         ...prev,
         { lng: snappedPoint.lng, lat: snappedPoint.lat },
@@ -278,10 +279,12 @@ export const useLineDrawing = (
 
       const currentFeature = draw.getAll().features[0];
       if (currentFeature?.id && currentFeature.geometry.type === "LineString") {
+        // Map the updated points to the feature's coordinates
         const newCoordinates = updatedLinePoints.map(
           (point) => [point.lng, point.lat] as [number, number]
         );
 
+        // Create the updated feature with the new coordinates
         const updatedFeature: Feature<LineString> = {
           ...currentFeature,
           geometry: { type: "LineString", coordinates: newCoordinates },
@@ -289,7 +292,10 @@ export const useLineDrawing = (
           properties: currentFeature.properties || {},
         };
 
+        // Update the feature on the map
         draw.set({ type: "FeatureCollection", features: [updatedFeature] });
+
+        // Change the mode back to simple select with the updated feature
         draw.changeMode("simple_select", {
           featureIds: [String(currentFeature.id)],
         });
@@ -298,28 +304,30 @@ export const useLineDrawing = (
       return updatedLinePoints;
     });
 
+    // Update the clicked feature state
     if (firstClickedFeature) {
       setLastClickedFeature(feature);
       setInitialLastFeatureCoords(coordinates);
     }
+
+    // Set that the point is connected to a feature
     setIsConnectedToFeature(true);
   };
 
-  // In handleFeatureClick, ensure the line continuation is triggered for LineString features
+  // Handle feature click
   const handleFeatureClick = useCallback(
     (clickedFeature: Feature) => {
       const geometry = clickedFeature.geometry;
 
       if (geometry.type === "Point") {
-        // Handle clicking on a point feature
         const coordinates = geometry.coordinates as [number, number];
-        console.log("Feature clicked (Point):", clickedFeature);
 
         if (!firstClickedFeature) {
           setFirstClickedFeature(clickedFeature);
           setInitialFirstFeatureCoords(coordinates);
           setLinePoints([{ lng: coordinates[0], lat: coordinates[1] }]);
         } else {
+          // Additional clicks add points to the existing feature
           addPointAtFeature(coordinates, clickedFeature);
         }
       } else {
@@ -342,90 +350,124 @@ export const useLineDrawing = (
   const handleFinishLineDraw = useCallback(async () => {
     syncLinePointsWithDraw();
 
-    if (firstClickedFeature && initialFirstFeatureCoords) {
-      const allFeatures = draw.getAll().features;
-      const lineFeature = allFeatures.find(
-        (feature): feature is Feature<LineString> =>
-          feature.geometry.type === "LineString"
+    const allFeatures = draw.getAll().features;
+    const lineFeature = allFeatures.find(
+      (feature): feature is Feature<LineString> =>
+        feature.geometry.type === "LineString"
+    );
+
+    if (!lineFeature) {
+      alert("No line drawn.");
+      return;
+    }
+
+    let latestCoordinates = lineFeature.geometry.coordinates;
+
+    if (lineFeature.id) {
+      await snapVertexToFatFeature(
+        latestCoordinates[0].slice(0, 2) as [number, number],
+        0,
+        String(lineFeature.id!),
+        true
       );
 
-      if (!lineFeature) {
-        alert("No line drawn.");
-        return;
-      }
+      latestCoordinates = [...lineFeature.geometry.coordinates];
+    }
 
-      const latestCoordinates = lineFeature.geometry.coordinates;
+    const lastCoordIndex = latestCoordinates.length - 1;
 
-      const startPointMatches = checkCoordinatesMatch(
+    if (lineFeature.id) {
+      await snapVertexToFatFeature(
+        latestCoordinates[lastCoordIndex].slice(0, 2) as [number, number],
+        lastCoordIndex,
+        String(lineFeature.id!),
+        true
+      );
+
+      // Re-fetch updated coordinates after snapping the last point
+      latestCoordinates = [...lineFeature.geometry.coordinates];
+    }
+
+    // Declare startPointMatches and lastPointMatches before using them
+    let startPointMatches = false;
+    let lastPointMatches = false;
+
+    // Now perform the matching checks
+    if (initialFirstFeatureCoords) {
+      startPointMatches = checkCoordinatesMatch(
         { lat: latestCoordinates[0][1], lng: latestCoordinates[0][0] },
         initialFirstFeatureCoords
       );
-
-      const lastCoordIndex = latestCoordinates.length - 1;
-
-      let lastPointMatches = false;
-      if (lastClickedFeature && initialLastFeatureCoords) {
-        lastPointMatches = checkCoordinatesMatch(
-          {
-            lat: latestCoordinates[lastCoordIndex][1],
-            lng: latestCoordinates[lastCoordIndex][0],
-          },
-          initialLastFeatureCoords
-        );
-      }
-
-      if (!startPointMatches) {
-        alert("The first point does not match the selected feature.");
-        return;
-      }
-
-      const startPointId =
-        firstClickedFeature?.properties?.FAT_ID ||
-        firstClickedFeature?.properties?.Component_ID;
-      const startPointType = firstClickedFeature?.properties?.Type || "Unknown";
-      const startPointName = firstClickedFeature?.properties?.Name || "Unknown";
-
-      let endPointId =
-        lastClickedFeature?.properties?.FAT_ID ||
-        lastClickedFeature?.properties?.Component_ID ||
-        0;
-      let endPointType = lastClickedFeature?.properties?.Type || "CP";
-      let endPointName = lastClickedFeature?.properties?.Name || "";
-
-      if (!lastClickedFeature) {
-        endPointId = 0;
-        endPointType = "CP";
-        endPointName = "";
-      }
-
-      if (startPointId === endPointId) {
-        alert("The first and last features must not be the same.");
-        return;
-      }
-
-      const lines = latestCoordinates.map((coord: Position) => ({
-        Lat: coord[1],
-        Long: coord[0],
-      }));
-
-      const newRoute = {
-        StartPointId: startPointId,
-        StartPointType: startPointType,
-        EndPointId: endPointId,
-        EndPointType: endPointType,
-        StartPointName: startPointName,
-        EndPointName: endPointName,
-        LineType: lineType,
-        Lines: lines,
-      };
-
-      setUndoStack([]);
-      setRedoStack([]);
-
-      return newRoute;
-    } else {
-      alert("You must connect the first point to a feature to save the line.");
     }
+
+    if (lastClickedFeature && initialLastFeatureCoords) {
+      lastPointMatches = checkCoordinatesMatch(
+        {
+          lat: latestCoordinates[lastCoordIndex][1],
+          lng: latestCoordinates[lastCoordIndex][0],
+        },
+        initialLastFeatureCoords
+      );
+    }
+
+    // Ensure the points match after snapping
+    if (!startPointMatches) {
+      alert("The first point does not match the selected feature.");
+      return;
+    }
+
+    if (!lastPointMatches) {
+      alert("The last point does not match the selected feature.");
+      return;
+    }
+
+    // Retrieve information for the start and end points
+    const startPointId =
+      firstClickedFeature?.properties?.FAT_ID ||
+      firstClickedFeature?.properties?.Component_ID;
+    const startPointType = firstClickedFeature?.properties?.Type || "Unknown";
+    const startPointName = firstClickedFeature?.properties?.Name || "Unknown";
+
+    let endPointId =
+      lastClickedFeature?.properties?.FAT_ID ||
+      lastClickedFeature?.properties?.Component_ID ||
+      0;
+    let endPointType = lastClickedFeature?.properties?.Type || "CP";
+    let endPointName = lastClickedFeature?.properties?.Name || "";
+
+    if (!lastClickedFeature) {
+      endPointId = 0;
+      endPointType = "CP";
+      endPointName = "";
+    }
+
+    // Ensure the start and end points are different
+    if (startPointId === endPointId) {
+      alert("The first and last features must not be the same.");
+      return;
+    }
+
+    // Construct the lines array from the updated coordinates
+    const lines = latestCoordinates.map((coord: Position) => ({
+      Lat: coord[1],
+      Long: coord[0],
+    }));
+
+    const newRoute = {
+      StartPointId: startPointId,
+      StartPointType: startPointType,
+      EndPointId: endPointId,
+      EndPointType: endPointType,
+      StartPointName: startPointName,
+      EndPointName: endPointName,
+      LineType: lineType,
+      Lines: lines,
+    };
+
+    setUndoStack([]);
+    setRedoStack([]);
+
+    return newRoute;
   }, [
     firstClickedFeature,
     lastClickedFeature,
@@ -527,7 +569,7 @@ export const useLineDrawing = (
           coords[0].length >= 2 &&
           coords[coords.length - 1].length >= 2
         ) {
-          const newCoords = [...coords];
+          let newCoords = [...coords];
 
           if (firstClickedFeature && lastClickedFeature) {
             if (
@@ -543,6 +585,7 @@ export const useLineDrawing = (
                 number,
               ];
 
+              // Snap the first point to the closest FAT feature
               newCoords[0] = firstCoords;
               newCoords[newCoords.length - 1] = lastCoords;
 
@@ -556,9 +599,7 @@ export const useLineDrawing = (
 
               if (createdFeature.id && typeof createdFeature.id === "string") {
                 draw.delete(createdFeature.id);
-
                 draw.add(updatedFeature);
-
                 draw.changeMode("simple_select", {
                   featureIds: [String(updatedFeature.id)],
                 });
@@ -574,6 +615,10 @@ export const useLineDrawing = (
                 String(createdFeature.id),
                 true
               );
+
+              newCoords = [...createdFeature.geometry.coordinates];
+
+              // Snap the last vertex
               snapVertexToFatFeature(
                 newCoords[newCoords.length - 1] as [number, number],
                 newCoords.length - 1,
@@ -583,6 +628,7 @@ export const useLineDrawing = (
             }
           }
 
+          // Sync the drawn line with the updated coordinates
           syncLinePointsWithDraw();
         } else {
           console.warn("Coordinates are not valid for snapping.");
@@ -634,7 +680,7 @@ export const useLineDrawing = (
   }, [isDrawing]);
 
   useEffect(() => {
-    const handleMapClick = (e: MapMouseEvent) => {
+    const handleMapClick = async (e: MapMouseEvent) => {
       if (
         !isDrawing ||
         !mapRef.current ||
@@ -650,13 +696,36 @@ export const useLineDrawing = (
       if (clickedFeatures && clickedFeatures.length > 0) {
         handleFeatureClick(clickedFeatures[0]);
       } else if (firstClickedFeature && !lastClickedFeature) {
+        const clickedCoords: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+
+        let snappedCoords = clickedCoords;
+
+        await snapVertexToFatFeature(
+          clickedCoords,
+          0,
+          String(firstClickedFeature.id),
+          false
+        );
+
+        if (
+          firstClickedFeature.geometry.type === "Point" ||
+          firstClickedFeature.geometry.type === "LineString" ||
+          firstClickedFeature.geometry.type === "Polygon"
+        ) {
+          snappedCoords = firstClickedFeature.geometry.coordinates as [
+            number,
+            number,
+          ];
+        }
+
         saveState();
-        syncLinePointsWithDraw();
-        /*     const coordinates: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+
         setLinePoints((prev) => [
           ...prev,
-          { lng: coordinates[0], lat: coordinates[1] },
-        ]); */
+          { lng: snappedCoords[0], lat: snappedCoords[1] },
+        ]);
+
+        syncLinePointsWithDraw();
       }
     };
 
@@ -895,6 +964,41 @@ export const useLineDrawing = (
       alert("Error fetching the suggested line. Please try again.");
     }
   }, [firstClickedFeature, lastClickedFeature, draw, saveState]);
+
+  useEffect(() => {
+    const snapFirstFeature = async () => {
+      if (
+        firstClickedFeature &&
+        firstClickedFeature.geometry.type === "Point"
+      ) {
+        const allFeatures = draw.getAll().features;
+        const lineFeature = allFeatures.find(
+          (feature): feature is Feature<LineString> =>
+            feature.geometry.type === "LineString"
+        );
+
+        if (!lineFeature) {
+          alert("No line drawn.");
+          return;
+        }
+
+        let latestCoordinates = lineFeature.geometry.coordinates;
+
+        if (lineFeature.id) {
+          await snapVertexToFatFeature(
+            latestCoordinates[0].slice(0, 2) as [number, number],
+            0,
+            String(lineFeature.id!),
+            true
+          );
+
+          latestCoordinates = [...lineFeature.geometry.coordinates];
+        }
+      }
+    };
+
+    snapFirstFeature();
+  }, [firstClickedFeature?.geometry.type]);
 
   return {
     isDrawing,

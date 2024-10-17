@@ -248,12 +248,13 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       id="modal-overlay"
       ref={overlayRef}
-      className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center"
+      className="fixed inset-0 z-999999 bg-black bg-opacity-70 flex justify-center items-center"
       style={{ backdropFilter: "blur(10px)" }}
     >
       <div
         ref={modalRef}
-        className="bg-white bg-opacity-50 dark:bg-[#1F2937] dark:bg-opacity-50 backdrop-blur-lg rounded-lg shadow-lg w-3/4 max-w-lg p-6 relative"
+        className="bg-white bg-opacity-50 custom-scrollbar dark:bg-[#1F2937] dark:bg-opacity-50 backdrop-blur-lg rounded-lg shadow-lg w-3/4 max-w-lg p-6 relative overflow-y-auto"
+        style={{ maxHeight: "80vh" }}
       >
         <button
           onClick={handleClose}

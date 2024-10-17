@@ -47,10 +47,12 @@ import FatDetailModal from "@/components/Maps/DesignDesk/Panels/FatDetailModal";
 import LineDetailModal from "@/components/Maps/DesignDesk/Panels/LineDetailModal";
 import OtherDetailModal from "@/components/Maps/DesignDesk/Panels/OtherDetailModal";
 import { ConnectedLines } from "@/types/connectedLines";
+import AddObjectToLineModal from "@/components/Maps/DesignDesk/Panels/AddObjectToLineModal";
 const DesignDesk: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFATDetailOpen, setIsFATDetailOpen] = useState(false);
+  const [isObjectAddToLineOpen, setIsObjectAddToLineOpen] = useState(false);
   const [isOtherDetailOpen, setIsOtherDetailOpen] = useState(false);
   const [isLineDetailOpen, setIsLineDetailOpen] = useState(false);
   const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
@@ -59,6 +61,17 @@ const DesignDesk: React.FC = () => {
     lat: 0,
     lng: 0,
     image: "",
+  });
+  const [addobjectToLineDetails, setAddObjectToLineDetails] = useState<{
+    object: string;
+    lat: number;
+    lng: number;
+    chainId: number | null;
+  }>({
+    object: "",
+    lat: 0,
+    lng: 0,
+    chainId: null,
   });
 
   const [isRouteModalOpen, setIsRouteModalOpen] = useState(false);
@@ -289,6 +302,54 @@ const DesignDesk: React.FC = () => {
     }
   };
 
+  const handleAddObjectToLineSubmit = async (data: {
+    OLT?: string;
+    POP?: string;
+    FAT?: string;
+    Name?: string;
+    City: string;
+    Plan_Type: string;
+    chainId: number | null;
+    lat: number;
+    lng: number;
+    object: string;
+  }) => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHSeperateLines`,
+        {
+          ...data,
+          Type: data.object,
+          Line_Chain_ID: data.chainId,
+          Long: data.lng,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userservice.getToken()}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("Object added successfully!");
+
+        setTimeout(() => {
+          forceUpdateComponentsFAT(userservice.getToken() ?? "");
+          forceUpdateComponentsOther(userservice.getToken() ?? "");
+          forceUpdatePoints(userservice.getToken() ?? "");
+          setIsObjectAddToLineOpen(false);
+        }, 300);
+      } else {
+        toast.error("Failed to add object." + response.data.message);
+      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(
+        "Error adding object: " + (error.response?.data || error.message)
+      );
+    }
+  };
   const handleModalSubmit = async (data: {
     OLT: string;
     POP: string;
@@ -465,8 +526,16 @@ const DesignDesk: React.FC = () => {
     objectLabel: string,
     clickedLatLng: { lat: number; lng: number }
   ) => {
-    alert("Object Added on Line");
+    console.log("We are here");
+    setAddObjectToLineDetails({
+      object: objectLabel,
+      lat: clickedLatLng.lat,
+      lng: clickedLatLng.lng,
+      chainId: lineData.chainId,
+    });
+    setIsObjectAddToLineOpen(true);
   };
+
   const { handleSearchPlaces } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
@@ -695,7 +764,7 @@ const DesignDesk: React.FC = () => {
   };
 
   return (
-    <DefaultLayout className="p-0 md:p-0">
+    <DefaultLayout className="p-0 md:p-0 z-0">
       <div className="z-999">
         {" "}
         <ModeModal
@@ -757,6 +826,20 @@ const DesignDesk: React.FC = () => {
           lng={objectDetails.lng}
           image={objectDetails.image}
           onSubmit={handleModalSubmit}
+        />
+        <AddObjectToLineModal
+          isOpen={isObjectAddToLineOpen}
+          onClose={() => {
+            setIsObjectAddToLineOpen(false);
+            setAddObjectToLineDetails({
+              object: "",
+              lat: 0,
+              lng: 0,
+              chainId: null,
+            });
+          }}
+          objectDetails={addobjectToLineDetails}
+          onSubmit={handleAddObjectToLineSubmit}
         />
         <AddOtherObjectModal
           isOpen={isOtherModalOpen}
@@ -845,7 +928,7 @@ const DesignDesk: React.FC = () => {
             onStyleChange={handleStyleChange}
             selectedStyleId={selectedStyleId}
           />
-          <div className="z-20 w-full">
+          <div className="z-50 w-full">
             <DesignDeskMap
               isDrawing={isDrawing || isEditing}
               ref={ftthMapRef}

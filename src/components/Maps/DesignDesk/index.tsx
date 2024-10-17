@@ -297,6 +297,7 @@ const DesignDeskMap = forwardRef<
         <div ref={mapContainerRef} className="w-full h-screen" />
         {modalData && !isDrawing && (
           <Modal
+          
             data={modalData}
             lineData={modalLineData}
             onClose={() => setModalData(null)}
