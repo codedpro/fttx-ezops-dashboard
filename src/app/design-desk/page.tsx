@@ -283,6 +283,9 @@ const DesignDesk: React.FC = () => {
     startEditingLine,
     handleFinishEditing,
     handleCancelEditing,
+    setIsEditing,
+    suggestLine: suggestLineEditing,
+    liveMeters: liveMetersEditing,
   } = useLineEditing(
     ftthMapRef.current?.mapRef ?? { current: null },
     drawingLayers
@@ -540,6 +543,39 @@ const DesignDesk: React.FC = () => {
     ftthMapRef.current?.mapRef ?? { current: null }
   );
 
+  const handleFinishLineEditing = async () => {
+    const editedRoute = await handleFinishEditing();
+    const payload = {
+      ...editedRoute,
+    };
+
+    axios
+      .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditRoute`, payload, {
+        headers: {
+          Authorization: `Bearer ${userservice.getToken()}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          forceUpdatePoints(userservice.getToken() ?? "");
+          forceUpdateComponentsOther(userservice.getToken() ?? "");
+          forceUpdateComponentsFAT(userservice.getToken() ?? "");
+          toast.success("Route added successfully!");
+          handleCancelEditing;
+          setIsEditing(false);
+
+          if (resetMenuPanel) {
+            resetMenuPanel();
+          }
+        } else {
+          toast.error("Failed to add route.");
+        }
+      })
+      .catch((error) => {
+      toast.error("Error adding route: " + error?.response?.data || error.message);
+      });
+  };
   const handleFinishLineDrawing = async () => {
     const newRoute = await handleFinishLineDraw();
 
@@ -896,13 +932,15 @@ const DesignDesk: React.FC = () => {
             setEditObjectLat={setEditObjectLat}
             setEditObjectLng={setEditObjectLng}
             onCancelEditing={handleCancelEditing}
-            onFinishLineEditing={handleFinishEditing}
+            onFinishLineEditing={handleFinishLineEditing}
             onFinishObjectEditing={handleSubmitObjectEditing}
             onCancelObjectEditing={cancelObjectEditing}
             EditingObjectLabel={objectLabel}
             onResetMenuPanel={setResetMenuPanel}
             liveMeters={liveMeters}
             handleSuggestLine={suggestLine}
+            handleSuggestLineEditing={suggestLineEditing}
+            liveMetersEditing={liveMetersEditing}
           />
 
           <CityPanel

@@ -1,8 +1,10 @@
 import { useState, MutableRefObject, useCallback, useEffect } from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import mapboxgl from "mapbox-gl";
-import { LineString, Feature, Geometry, Point } from "geojson";
-
+import { LineString, Feature, Geometry, Point, Position } from "geojson";
+import { throttle } from "lodash";
+import { distance } from "@turf/turf";
+import axios from "axios";
 declare module "mapbox-gl" {
   export interface Map {
     on(
@@ -28,7 +30,9 @@ export const useLineEditing = (
   mapRef: MutableRefObject<mapboxgl.Map | null>,
   fatLayerIds: string[]
 ) => {
+  const [liveMeters, setLiveMeters] = useState<string>("0");
   const [isEditing, setIsEditing] = useState(false);
+  const [lineType, setLineType] = useState<string | null>(null);
   const [startFatFeature, setStartFatFeature] = useState<Feature<Point> | null>(
     null
   );
@@ -36,7 +40,7 @@ export const useLineEditing = (
     null
   );
 
-  const snappingDistance = 0.0001;
+  const snappingDistance = 0.01;
 
   const draw = useState(
     () =>
@@ -62,7 +66,35 @@ export const useLineEditing = (
   const isPoint = (geometry: Geometry): geometry is Point => {
     return geometry.type === "Point";
   };
+  const syncLinePointsWithDraw = useCallback(
+    throttle(() => {
+      const currentFeature = draw
+        .getAll()
+        .features.find((feature) => feature.geometry.type === "LineString") as
+        | Feature<LineString>
+        | undefined;
 
+      if (currentFeature) {
+        const newLinePoints = currentFeature.geometry.coordinates.map(
+          (coord) => ({
+            lng: coord[0],
+            lat: coord[1],
+          })
+        );
+
+        if (newLinePoints.length > 1) {
+          let totalDistance = 0;
+          for (let i = 1; i < newLinePoints.length; i++) {
+            const from = [newLinePoints[i - 1].lng, newLinePoints[i - 1].lat];
+            const to = [newLinePoints[i].lng, newLinePoints[i].lat];
+            totalDistance += distance(from, to, { units: "meters" });
+          }
+          setLiveMeters(totalDistance.toFixed(2));
+        }
+      }
+    }, 50),
+    [draw]
+  );
   const getClosestFatFeature = (
     point: [number, number]
   ): Feature<Point> | null => {
@@ -147,12 +179,13 @@ export const useLineEditing = (
           updatedFeature.id as string
         );
       });
+      syncLinePointsWithDraw();
     },
+
     [snapVertexToFatFeature]
   );
 
   const handleFinishEditing = useCallback(() => {
-    console.log(startFatFeature, endFatFeature);
     if (startFatFeature && endFatFeature) {
       const feature = draw.getAll().features[0] as Feature<LineString>;
 
@@ -161,17 +194,45 @@ export const useLineEditing = (
         feature.geometry &&
         feature.geometry.type === "LineString"
       ) {
-        const updatedLine = {
-          coordinates: feature.geometry.coordinates,
-          chainId: feature.id,
+        const latestCoordinates = feature.geometry.coordinates;
+
+        const startPointId =
+          startFatFeature.properties?.FAT_ID ||
+          startFatFeature.properties?.Component_ID;
+        const startPointType = startFatFeature.properties?.Type || "Unknown";
+        const startPointName = startFatFeature.properties?.Name || "Unknown";
+
+        const endPointId =
+          endFatFeature.properties?.FAT_ID ||
+          endFatFeature.properties?.Component_ID;
+        const endPointType = endFatFeature.properties?.Type || "Unknown";
+        const endPointName = endFatFeature.properties?.Name || "Unknown";
+
+        if (startPointId === endPointId) {
+          alert("The first and last features must not be the same.");
+          return;
+        }
+
+        const lines = latestCoordinates.map((coord: Position) => ({
+          Lat: coord[1],
+          Long: coord[0],
+        }));
+
+        const chainId = feature.id;
+
+        const newRoute = {
+          startPointId: startPointId,
+          startPointType: startPointType,
+          endPointId: endPointId,
+          endPointType: endPointType,
+          StartPointName: startPointName,
+          EndPointName: endPointName,
+          lineType: lineType,
+          lines: lines,
+          chain_Id: chainId,
         };
 
-        console.log("Updated line coordinates:", updatedLine.coordinates);
-        console.log("Chain ID:", updatedLine.chainId);
-        console.log("Start FAT Feature:", startFatFeature);
-        console.log("End FAT Feature:", endFatFeature);
-
-        setIsEditing(false);
+        return newRoute;
       } else {
         console.error("Feature or geometry is missing.");
       }
@@ -181,13 +242,18 @@ export const useLineEditing = (
       );
     }
   }, [startFatFeature, endFatFeature, removeDrawControl, draw]);
+
   const startEditingLine = useCallback(
-    (lineData: { coordinates: [number, number][]; chainId: number | null }) => {
+    (lineData: {
+      coordinates: [number, number][];
+      chainId: number | null;
+      type: string | null;
+    }) => {
       if (lineData?.coordinates?.length && lineData.chainId !== null) {
         setIsEditing(true);
         setStartFatFeature(null);
         setEndFatFeature(null);
-
+        setLineType(lineData?.type);
         addDrawControl();
 
         const lineFeature: Feature<LineString> = {
@@ -201,6 +267,7 @@ export const useLineEditing = (
         draw.changeMode("direct_select", {
           featureId: String(lineData.chainId),
         });
+        syncLinePointsWithDraw();
       } else {
         console.error("Invalid LineData: Missing coordinates or chainId");
       }
@@ -221,16 +288,87 @@ export const useLineEditing = (
   }, [mapRef, isEditing, handleDrawUpdate]);
 
   const handleCancelEditing = useCallback(() => {
+    draw.deleteAll();
     removeDrawControl();
     setIsEditing(false);
     setStartFatFeature(null);
     setEndFatFeature(null);
-  }, [removeDrawControl]);
+  }, [removeDrawControl, draw]);
+
+  const suggestLine = useCallback(async () => {
+    if (!startFatFeature || !endFatFeature) {
+      alert("Please draw a line connecting two features.2");
+      return;
+    }
+
+    const currentFeature = draw.getAll().features[0] as Feature<LineString>;
+    const coords = currentFeature?.geometry.coordinates;
+
+    syncLinePointsWithDraw();
+    if (!coords || coords.length < 2) {
+      alert("Not enough points to suggest a line.");
+      return;
+    }
+
+    try {
+      const firstCoords = (startFatFeature.geometry as Point).coordinates as [
+        number,
+        number,
+      ];
+      const lastCoords = (endFatFeature.geometry as Point).coordinates as [
+        number,
+        number,
+      ];
+
+      const waypoints = [
+        `${firstCoords[0]},${firstCoords[1]}`,
+        ...coords.map((point) => `${point[0]},${point[1]}`),
+        `${lastCoords[0]},${lastCoords[1]}`,
+      ].join(";");
+
+      const response = await axios.get(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${waypoints}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`
+      );
+
+      if (response.data.routes && response.data.routes.length > 0) {
+        const suggestedRoute = response.data.routes[0].geometry.coordinates;
+
+        const updatedSuggestedRoute = [
+          firstCoords,
+          ...suggestedRoute,
+          lastCoords,
+        ];
+
+        const updatedFeature: Feature<LineString> = {
+          ...currentFeature,
+          geometry: {
+            type: "LineString",
+            coordinates: updatedSuggestedRoute,
+          },
+        };
+
+        draw.set({
+          type: "FeatureCollection",
+          features: [updatedFeature],
+        });
+
+        syncLinePointsWithDraw();
+      } else {
+        alert("Could not find a route.");
+      }
+    } catch (error) {
+      console.error("Error fetching route from Mapbox Directions API:", error);
+      alert("Error fetching the suggested line. Please try again.");
+    }
+  }, [draw]);
 
   return {
     isEditing,
     startEditingLine,
     handleFinishEditing,
     handleCancelEditing,
+    setIsEditing,
+    liveMeters,
+    suggestLine,
   };
 };

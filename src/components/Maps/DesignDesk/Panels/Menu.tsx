@@ -57,7 +57,9 @@ interface MenuPanelProps {
   onCancelEditing: () => void;
   onResetMenuPanel: Dispatch<SetStateAction<() => void>>;
   liveMeters: string;
+  liveMetersEditing: string;
   handleSuggestLine: () => void;
+  handleSuggestLineEditing: () => void;
 }
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -88,7 +90,9 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onCancelEditing,
   onResetMenuPanel,
   liveMeters,
+  liveMetersEditing,
   handleSuggestLine,
+  handleSuggestLineEditing,
 }) => {
   const [currentMenu, setCurrentMenu] = useState<
     | "main"
@@ -234,12 +238,20 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   const renderEditMenu = () => (
     <>
       <ActionButton
+        label={liveMetersEditing + " meters"}
+        icon={<FaRoad />}
+        onClick={() => null}
+      />
+      <ActionButton
+        label={"Suggest Line"}
+        icon={<FaWalking />}
+        onClick={handleSuggestLineEditing}
+      />
+      <ActionButton
         label="Done"
         icon={<FaCheck />}
         onClick={() => {
           onFinishLineEditing();
-          /*     handleCancel();
-          onCancelEditing(); */
         }}
       />
       <ActionButton
