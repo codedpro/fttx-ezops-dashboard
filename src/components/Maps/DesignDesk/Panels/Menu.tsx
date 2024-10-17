@@ -9,6 +9,8 @@ import {
   FaUndo,
   FaTimes,
   FaMapMarkedAlt,
+  FaRoad,
+  FaWalking,
 } from "react-icons/fa";
 
 import { OBJECTS, LINES, KMZ_FILES, DRAFTS } from "@/data/designdeskMenu";
@@ -46,7 +48,6 @@ interface MenuPanelProps {
   setEditObjectLng: (lng: number) => void;
   editObjectLat: number | null;
   editObjectLng: number | null;
-
   isEditing: boolean;
   isEditingObject: boolean;
   EditingObjectLabel: string;
@@ -55,6 +56,8 @@ interface MenuPanelProps {
   onFinishLineEditing: () => void;
   onCancelEditing: () => void;
   onResetMenuPanel: Dispatch<SetStateAction<() => void>>;
+  liveMeters: string;
+  handleSuggestLine: () => void;
 }
 
 const MenuPanel: React.FC<MenuPanelProps> = ({
@@ -76,7 +79,6 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   setEditObjectLng,
   editObjectLat,
   editObjectLng,
-
   isEditing,
   isEditingObject,
   EditingObjectLabel,
@@ -85,6 +87,8 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
   onFinishLineEditing,
   onCancelEditing,
   onResetMenuPanel,
+  liveMeters,
+  handleSuggestLine,
 }) => {
   const [currentMenu, setCurrentMenu] = useState<
     | "main"
@@ -430,7 +434,16 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
             }
             onClick={() => {}}
           />
-         
+          <ActionButton
+            label={liveMeters + " meters"}
+            icon={<FaRoad />}
+            onClick={() => null}
+          />
+          <ActionButton
+            label={"Suggest Line"}
+            icon={<FaWalking />}
+            onClick={handleSuggestLine}
+          />
           <ActionButton
             label="Cancel"
             icon={<FaTimes />}

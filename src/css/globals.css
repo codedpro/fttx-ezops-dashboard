@@ -101,8 +101,12 @@
     transform: rotate(360deg);
   }
 }
-.apexcharts-datalabel-label, .apexcharts-datalabel-value {
-    fill: #ffffff !important; /* Force text to be white */
-    color: #ffffff !important; /* Force text color */
-  }
-  
+.apexcharts-datalabel-label,
+.apexcharts-datalabel-value {
+  fill: #ffffff !important; /* Force text to be white */
+  color: #ffffff !important; /* Force text color */
+}
+
+.custom-toast {
+  z-index: 9999;
+}

@@ -11,6 +11,8 @@ import {
 } from "geojson";
 import { DrawEvent } from "../../mapbox-gl-draw";
 import { throttle } from "lodash";
+import { distance } from "@turf/turf";
+import axios from "axios";
 
 export const useLineDrawing = (
   mapRef: MutableRefObject<mapboxgl.Map | null>,
@@ -20,6 +22,7 @@ export const useLineDrawing = (
   const [linePoints, setLinePoints] = useState<{ lat: number; lng: number }[]>(
     []
   );
+  const [liveMeters, setLiveMeters] = useState<string>("0");
   const [lineType, setLineType] = useState<string>("Unknown");
   const [isConnectedToFeature, setIsConnectedToFeature] = useState(false);
   const [firstClickedFeature, setFirstClickedFeature] =
@@ -35,7 +38,7 @@ export const useLineDrawing = (
   >(null);
 
   const snappingDistance = 0.001;
-  const MAX_STACK_SIZE = 20;
+  const MAX_STACK_SIZE = 2000;
   const [undoStack, setUndoStack] = useState<FeatureCollection[]>([]);
   const [redoStack, setRedoStack] = useState<FeatureCollection[]>([]);
   const [isUndoRedoRunning, setIsUndoRedoRunning] = useState(false);
@@ -182,15 +185,26 @@ export const useLineDrawing = (
             lat: coord[1],
           })
         );
+
         setLinePoints((prev) => {
           const hasChanged =
             JSON.stringify(prev) !== JSON.stringify(newLinePoints);
           return hasChanged ? newLinePoints : prev;
         });
+
+        if (newLinePoints.length > 1) {
+          let totalDistance = 0;
+          for (let i = 1; i < newLinePoints.length; i++) {
+            const from = [newLinePoints[i - 1].lng, newLinePoints[i - 1].lat];
+            const to = [newLinePoints[i].lng, newLinePoints[i].lat];
+            totalDistance += distance(from, to, { units: "meters" });
+          }
+          setLiveMeters(totalDistance.toFixed(2));
+        }
       } else {
         setLinePoints((prev) => (prev.length > 0 ? [] : prev));
       }
-    }, 200),
+    }, 50),
     [draw]
   );
 
@@ -204,9 +218,7 @@ export const useLineDrawing = (
 
         const updatedFeature = e.features[0] as Feature<LineString>;
         const coords = updatedFeature.geometry.coordinates;
-        console.log(coords.length);
         if (coords.length >= 1) {
-          console.log("Snapping it");
           snapVertexToFatFeature(
             coords[0] as [number, number],
             0,
@@ -293,15 +305,15 @@ export const useLineDrawing = (
     setIsConnectedToFeature(true);
   };
 
+  // In handleFeatureClick, ensure the line continuation is triggered for LineString features
   const handleFeatureClick = useCallback(
     (clickedFeature: Feature) => {
       const geometry = clickedFeature.geometry;
 
       if (geometry.type === "Point") {
+        // Handle clicking on a point feature
         const coordinates = geometry.coordinates as [number, number];
-        console.log("Feature clicked:", clickedFeature);
-        console.log("First clicked feature:", firstClickedFeature);
-        console.log("Last clicked feature:", lastClickedFeature);
+        console.log("Feature clicked (Point):", clickedFeature);
 
         if (!firstClickedFeature) {
           setFirstClickedFeature(clickedFeature);
@@ -311,10 +323,10 @@ export const useLineDrawing = (
           addPointAtFeature(coordinates, clickedFeature);
         }
       } else {
-        console.warn("Clicked feature is not a Point.");
+        console.warn("Clicked feature is neither a Point nor a LineString.");
       }
     },
-    [firstClickedFeature, lastClickedFeature, addPointAtFeature]
+    [firstClickedFeature, addPointAtFeature]
   );
 
   const checkCoordinatesMatch = useCallback(
@@ -548,25 +560,27 @@ export const useLineDrawing = (
                 draw.add(updatedFeature);
 
                 draw.changeMode("simple_select", {
-                  featureIds: [String(createdFeature.id)],
+                  featureIds: [String(updatedFeature.id)],
                 });
               } else {
                 console.warn("Created feature has no valid ID.");
               }
             }
           } else {
-            snapVertexToFatFeature(
-              newCoords[0] as [number, number],
-              0,
-              createdFeature.id as string,
-              true
-            );
-            snapVertexToFatFeature(
-              newCoords[newCoords.length - 1] as [number, number],
-              newCoords.length - 1,
-              createdFeature.id as string,
-              true
-            );
+            if (createdFeature.id) {
+              snapVertexToFatFeature(
+                newCoords[0] as [number, number],
+                0,
+                String(createdFeature.id),
+                true
+              );
+              snapVertexToFatFeature(
+                newCoords[newCoords.length - 1] as [number, number],
+                newCoords.length - 1,
+                String(createdFeature.id),
+                true
+              );
+            }
           }
 
           syncLinePointsWithDraw();
@@ -637,11 +651,12 @@ export const useLineDrawing = (
         handleFeatureClick(clickedFeatures[0]);
       } else if (firstClickedFeature && !lastClickedFeature) {
         saveState();
-        const coordinates: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+        syncLinePointsWithDraw();
+        /*     const coordinates: [number, number] = [e.lngLat.lng, e.lngLat.lat];
         setLinePoints((prev) => [
           ...prev,
           { lng: coordinates[0], lat: coordinates[1] },
-        ]);
+        ]); */
       }
     };
 
@@ -664,6 +679,41 @@ export const useLineDrawing = (
     saveState,
     syncLinePointsWithDraw,
   ]);
+  const submitLineToMapboxDraw = (features: FeatureCollection) => {
+    try {
+      // Ensure that there are features to submit
+      if (features.features.length > 0) {
+        features.features.forEach((feature) => {
+          if (feature.geometry.type === "LineString") {
+            // Submit the feature to Mapbox Draw and get the new feature's ID
+            const featureIds = draw.add({
+              type: "Feature",
+              geometry: feature.geometry,
+              properties: feature.properties, // Keep the properties unchanged
+            });
+
+            // Ensure that featureIds is not empty and contains valid IDs
+            if (featureIds.length > 0) {
+              const newFeatureId = featureIds[0]; // Access the first feature ID
+
+              // Optional: Unselect the current drawing mode after submission
+              draw.changeMode("simple_select", {
+                featureIds: [newFeatureId], // Use the ID to select the new feature
+              });
+            }
+
+            // Deselect the feature to exit selection mode
+            draw.changeMode("simple_select");
+          }
+        });
+
+        // Optionally, quit the drawing mode after submission
+        draw.changeMode("simple_select");
+      }
+    } catch (error) {
+      console.error("Error submitting features to Mapbox Draw:", error);
+    }
+  };
 
   const undo = useCallback(() => {
     if (isUndoRedoRunning || undoStack.length === 0) {
@@ -671,18 +721,22 @@ export const useLineDrawing = (
       return;
     }
 
+    syncLinePointsWithDraw();
     setIsUndoRedoRunning(true);
 
     try {
-      const currentFeatures = undoStack.pop();
-      const previousFeatures = undoStack[undoStack.length - 1] || null;
+      const currentFeatures = draw.getAll();
 
-      if (previousFeatures) {
-        if (currentFeatures) {
-          setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
-        }
-        draw.set(previousFeatures);
-        syncLinePointsWithDraw();
+      if (currentFeatures.features.length > 0) {
+        submitLineToMapboxDraw(currentFeatures);
+      }
+
+      const previousFeatures = undoStack.pop();
+      const lastFeatures = undoStack[undoStack.length - 1] || null;
+
+      if (lastFeatures) {
+        setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
+        draw.set(lastFeatures);
       } else {
         if (currentFeatures) {
           setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
@@ -690,12 +744,25 @@ export const useLineDrawing = (
         draw.deleteAll();
         setLinePoints([]);
       }
+
+      const remainingFeatures = draw.getAll().features;
+      if (remainingFeatures.length > 0) {
+        const lastFeatureId = remainingFeatures[0].id;
+        if (lastFeatureId) {
+          draw.changeMode("direct_select", {
+            featureId: String(lastFeatureId),
+          });
+        }
+      } else {
+        draw.changeMode("draw_line_string");
+      }
     } catch (error) {
       console.error("Error during undo operation:", error);
     } finally {
       setIsUndoRedoRunning(false);
+      syncLinePointsWithDraw();
     }
-  }, [undoStack, redoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
+  }, [undoStack, redoStack, draw, isUndoRedoRunning]);
 
   const redo = useCallback(() => {
     if (isUndoRedoRunning || redoStack.length === 0) {
@@ -704,7 +771,7 @@ export const useLineDrawing = (
     }
 
     setIsUndoRedoRunning(true);
-
+    syncLinePointsWithDraw();
     try {
       const nextFeatures = redoStack.pop();
 
@@ -717,6 +784,7 @@ export const useLineDrawing = (
       console.error("Error during redo operation:", error);
     } finally {
       setIsUndoRedoRunning(false);
+      syncLinePointsWithDraw();
     }
   }, [redoStack, undoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
@@ -762,35 +830,83 @@ export const useLineDrawing = (
     };
   }, [isDrawing, undo, redo]);
 
-  const handleContinueLine = (selectedFeature: Feature<LineString>) => {
-    const existingCoordinates = selectedFeature.geometry.coordinates;
-    const newLinePoints = existingCoordinates.map((coord) => ({
-      lng: coord[0],
-      lat: coord[1],
-    }));
-    setLinePoints(newLinePoints);
-    setIsDrawing(true);
-
-    if (draw && mapRef.current) {
-      draw.add(selectedFeature);
-      if (selectedFeature.id) {
-        draw.changeMode("direct_select", {
-          featureId: String(selectedFeature.id),
-        });
-      }
+  const suggestLine = useCallback(async () => {
+    if (!firstClickedFeature || !lastClickedFeature) {
+      alert("Please draw a line connecting two features.");
+      return;
     }
-  };
+
+    const currentFeature = draw.getAll().features[0] as Feature<LineString>;
+    const coords = currentFeature?.geometry.coordinates;
+    saveState();
+    syncLinePointsWithDraw();
+    if (!coords || coords.length < 2) {
+      alert("Not enough points to suggest a line.");
+      return;
+    }
+
+    try {
+      const firstCoords = (firstClickedFeature.geometry as Point)
+        .coordinates as [number, number];
+      const lastCoords = (lastClickedFeature.geometry as Point).coordinates as [
+        number,
+        number,
+      ];
+
+      const waypoints = [
+        `${firstCoords[0]},${firstCoords[1]}`,
+        ...coords.map((point) => `${point[0]},${point[1]}`),
+        `${lastCoords[0]},${lastCoords[1]}`,
+      ].join(";");
+
+      const response = await axios.get(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${waypoints}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`
+      );
+
+      if (response.data.routes && response.data.routes.length > 0) {
+        const suggestedRoute = response.data.routes[0].geometry.coordinates;
+
+        const updatedSuggestedRoute = [
+          firstCoords,
+          ...suggestedRoute,
+          lastCoords,
+        ];
+
+        const updatedFeature: Feature<LineString> = {
+          ...currentFeature,
+          geometry: {
+            type: "LineString",
+            coordinates: updatedSuggestedRoute,
+          },
+        };
+
+        draw.set({
+          type: "FeatureCollection",
+          features: [updatedFeature],
+        });
+
+        saveState();
+        syncLinePointsWithDraw();
+      } else {
+        alert("Could not find a route.");
+      }
+    } catch (error) {
+      console.error("Error fetching route from Mapbox Directions API:", error);
+      alert("Error fetching the suggested line. Please try again.");
+    }
+  }, [firstClickedFeature, lastClickedFeature, draw, saveState]);
 
   return {
     isDrawing,
     startDrawing,
     handleFinishLineDraw,
     handleCancelLineDraw,
-    handleContinueLine,
     linePoints,
     removeDrawControl,
     setIsDrawing,
     undo,
     redo,
+    liveMeters,
+    suggestLine,
   };
 };

@@ -1,8 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import { cn } from "@/lib/utils";
@@ -61,14 +60,14 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
 
   const handleSubmit = async () => {
     if (!City || !name || !planType) {
-      toast.error("All fields are required.");
+      alert("All fields are required.");
       return;
     }
 
     try {
       onSubmit({ City, Name: name, Plan_Type: planType });
     } catch (error) {
-      toast.error("An error occurred while submitting the form." + error);
+      alert("An error occurred while submitting the form." + error);
     }
   };
 
@@ -165,22 +164,6 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
           </div>
         </div>
       </ClickOutside>
-
-      <ToastContainer
-        theme={isDarkMode ? "dark" : "light"}
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        toastClassName={cn("custom-toast", {
-          "dark-toast": isDarkMode,
-        })}
-      />
     </div>
   );
 };

@@ -254,8 +254,11 @@ const DesignDesk: React.FC = () => {
     startDrawing,
     handleFinishLineDraw,
     handleCancelLineDraw,
-
+    undo,
+    redo,
+    liveMeters,
     removeDrawControl,
+    suggestLine,
     setIsDrawing,
   } = useLineDrawing(
     ftthMapRef.current?.mapRef ?? { current: null },
@@ -286,44 +289,48 @@ const DesignDesk: React.FC = () => {
     }
   };
 
-  const handleModalSubmit = (data: {
+  const handleModalSubmit = async (data: {
     OLT: string;
     POP: string;
     FAT: string;
     City: string;
     Plan_Type: string;
   }) => {
-    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewFATPoint`, {
-      method: "POST",
-      body: JSON.stringify({
-        ...objectDetails,
-        ...data,
-        Plan_Type: +data.Plan_Type,
-        Type: objectDetails.object,
-        Long: objectDetails.lng,
-        Name: "",
-      }),
-      headers: {
-        Authorization: `Bearer ${userservice.getToken()}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          toast.success("Object added successfully!");
-
-          setTimeout(() => {
-            finalizeObjectPosition();
-            forceUpdateComponentsFAT(userservice.getToken() ?? "");
-            setIsModalOpen(false);
-          }, 300);
-        } else {
-          toast.error("Failed to add object.");
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewFATPoint`,
+        {
+          ...objectDetails,
+          ...data,
+          Plan_Type: +data.Plan_Type,
+          Type: objectDetails.object,
+          Long: objectDetails.lng,
+          Name: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userservice.getToken()}`,
+            "Content-Type": "application/json",
+          },
         }
-      })
-      .catch((err) => {
-        toast.error("Error adding object: " + err.message);
-      });
+      );
+
+      if (response.status === 200) {
+        toast.success("Object added successfully!");
+
+        setTimeout(() => {
+          finalizeObjectPosition();
+          forceUpdateComponentsFAT(userservice.getToken() ?? "");
+          setIsModalOpen(false);
+        }, 300);
+      } else {
+        toast.error("Failed to add object." + response.data.message);
+      }
+    } catch (error: any) {
+      toast.error(
+        "Error adding object: " + (error.response?.data || error.message)
+      );
+    }
   };
 
   const handleFATDetailSubmit = (ObjectData: ObjectData) => {};
@@ -449,7 +456,7 @@ const DesignDesk: React.FC = () => {
           }
         })
         .catch((error) => {
-          toast.error("Error deleting line: " + error.response.data);
+          toast.error("Error deleting line: " + error);
         });
     });
   };
@@ -659,6 +666,7 @@ const DesignDesk: React.FC = () => {
           setIsDrawing(false);
           setRouteData(null);
           setIsModalOpen(false);
+          setIsRouteModalOpen(false);
           setFormLineValues({
             city: "NEKA",
             planType: "0",
@@ -673,7 +681,9 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((error) => {
-        toast.error("Error adding route: " + error.response.data);
+        toast.error(
+          "Error adding route: " + error?.response?.data || error.message
+        );
       });
   };
 
@@ -761,7 +771,7 @@ const DesignDesk: React.FC = () => {
           onSubmit={handleOtherModalSubmit}
         />
         <ToastContainer
-          theme={"dark"}
+          theme="dark"
           position="top-right"
           autoClose={5000}
           hideProgressBar={false}
@@ -808,6 +818,8 @@ const DesignDesk: React.FC = () => {
             onCancelObjectEditing={cancelObjectEditing}
             EditingObjectLabel={objectLabel}
             onResetMenuPanel={setResetMenuPanel}
+            liveMeters={liveMeters}
+            handleSuggestLine={suggestLine}
           />
 
           <CityPanel
