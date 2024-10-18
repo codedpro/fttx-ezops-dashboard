@@ -5,6 +5,7 @@ import { fetchFTTHDashboard, fetchFTTHDailyChartData } from "@/lib/actions";
 import { cookies } from "next/headers";
 import DashboardCards from "@/components/DataStats/DashboardCards";
 import ChartOne from "@/components/Charts/ChartOne";
+import IranMap from "@/components/Maps/Iran";
 
 const Dashboard = async () => {
   const cookieStore = cookies();
@@ -59,7 +60,7 @@ const Dashboard = async () => {
 
   return (
     <DefaultLayout>
-      <DashboardCards cardData={cardData} />
+      <IranMap /> <DashboardCards cardData={cardData} />
       <div className="mt-4 md:mt-6  2xl:mt-9 flex flex-row items-center justify-around mx-4">
         <ChartThree
           header="FTTH Modem Status"
