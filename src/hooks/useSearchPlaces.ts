@@ -4,27 +4,19 @@ import { Feature, FeatureCollection, GeoJsonProperties, Point } from "geojson";
 import { NominatimResponse } from "@/types/nominatim";
 import { fetchLocationData } from "@/lib/fetchLocationData";
 
-// Define a type for unique key based on coordinates
 type MarkerKey = string;
 
 const useSearchPlaces = (
   mapRef: React.MutableRefObject<mapboxgl.Map | null>
 ) => {
-  // Use a Map to store markers with a unique key (e.g., "lat,lon")
   const markersMap = useRef<Map<MarkerKey, mapboxgl.Marker>>(new Map());
 
-  // Ref to store the previous query for detecting changes
   const previousQuery = useRef<string | null>(null);
 
-  // Function to generate a unique key for a marker based on its coordinates
   const getMarkerKey = (lat: number, lon: number): MarkerKey => {
-    return `${lat.toFixed(6)},${lon.toFixed(6)}`; // Using fixed decimal places for precision
+    return `${lat.toFixed(6)},${lon.toFixed(6)}`;
   };
 
-  /**
-   * Adds points to the map as markers and updates the GeoJSON layer.
-   * Prevents adding duplicate markers based on their coordinates.
-   */
   const addPointLayer = async (
     places: NominatimResponse[],
     icons: Record<string, string>
@@ -50,7 +42,6 @@ const useSearchPlaces = (
       })
     );
 
-    // Load new icons that are not already in the map
     const newIcons = Object.entries(icons).filter(
       ([key]) => !map.hasImage(key)
     );
@@ -79,7 +70,6 @@ const useSearchPlaces = (
         } as FeatureCollection,
       });
     } else {
-      // If source exists, update the data by merging existing features with new ones
       const existingSource = map.getSource("places") as mapboxgl.GeoJSONSource;
       const existingData = existingSource._data as FeatureCollection;
       existingData.features.push(...features);
@@ -99,7 +89,6 @@ const useSearchPlaces = (
       });
     }
 
-    // Iterate through each place and add markers if they don't already exist
     places.forEach((place) => {
       const latNum = parseFloat(place.lat);
       const lonNum = parseFloat(place.lon);
@@ -116,19 +105,14 @@ const useSearchPlaces = (
     });
   };
 
-  /**
-   * Handles searching for places based on the query.
-   * If the query has changed, it clears all existing markers before performing the new search.
-   */
   const handleSearchPlaces = async (query: string) => {
     const map = mapRef.current;
 
     if (map) {
-      // Check if the query has changed
       if (previousQuery.current !== null && previousQuery.current !== query) {
         removeAllMarkers();
       }
-      // Update the previous query
+
       previousQuery.current = query;
 
       const bounds = map.getBounds();
@@ -169,10 +153,6 @@ const useSearchPlaces = (
     }
   };
 
-  /**
-   * Removes all markers from the map and clears the markers map.
-   * Also removes the GeoJSON source and layer associated with the markers.
-   */
   const removeAllMarkers = () => {
     const map = mapRef.current;
     if (!map) {
@@ -180,11 +160,9 @@ const useSearchPlaces = (
       return;
     }
 
-    // Remove all markers
     markersMap.current.forEach((marker) => marker.remove());
     markersMap.current.clear();
 
-    // Remove the GeoJSON source and layer
     if (map.getLayer("places")) {
       map.removeLayer("places");
     }
@@ -193,10 +171,8 @@ const useSearchPlaces = (
       map.removeSource("places");
     }
 
-    // Optionally, remove all custom images/icons
     const style = map.getStyle();
     if (style?.sprite) {
-      // Manually handle image removal (since images property is not available in TypeScript)
       const imagesToRemove = Array.from(markersMap.current.keys()).map(
         (key) => `icon-${key}`
       );
@@ -207,14 +183,9 @@ const useSearchPlaces = (
       });
     }
 
-    // Reset previous query
     previousQuery.current = null;
   };
 
-  /**
-   * Optional: Removes markers that are outside the current map bounds.
-   * This helps in keeping the map clean and relevant.
-   */
   const removeMarkersOutsideBounds = () => {
     const map = mapRef.current;
     if (!map) return;
