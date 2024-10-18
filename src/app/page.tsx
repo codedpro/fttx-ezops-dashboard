@@ -60,7 +60,7 @@ const Dashboard = async () => {
 
   return (
     <DefaultLayout>
-      <IranMap /> <DashboardCards cardData={cardData} />
+      {/*     <IranMap /> */} <DashboardCards cardData={cardData} />
       <div className="mt-4 md:mt-6  2xl:mt-9 flex flex-row items-center justify-around mx-4">
         <ChartThree
           header="FTTH Modem Status"

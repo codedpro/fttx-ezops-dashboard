@@ -186,6 +186,7 @@ export const useLineEditing = (
   );
 
   const handleFinishEditing = useCallback(() => {
+    console.log(startFatFeature, endFatFeature);
     if (startFatFeature && endFatFeature) {
       const feature = draw.getAll().features[0] as Feature<LineString>;
 
@@ -201,12 +202,15 @@ export const useLineEditing = (
           startFatFeature.properties?.Component_ID;
         const startPointType = startFatFeature.properties?.Type || "Unknown";
         const startPointName = startFatFeature.properties?.Name || "Unknown";
-
+        const startPointChain_ID =
+          startFatFeature.properties?.Chain_ID || "Unknown";
         const endPointId =
           endFatFeature.properties?.FAT_ID ||
           endFatFeature.properties?.Component_ID;
         const endPointType = endFatFeature.properties?.Type || "Unknown";
         const endPointName = endFatFeature.properties?.Name || "Unknown";
+        const endPointChain_ID =
+          endFatFeature.properties?.Chain_ID || "Unknown";
 
         if (startPointId === endPointId) {
           alert("The first and last features must not be the same.");
@@ -217,20 +221,22 @@ export const useLineEditing = (
           Lat: coord[1],
           Long: coord[0],
         }));
-
         const chainId = feature.id;
 
         const newRoute = {
-          startPointId: startPointId,
+          /*          startPointId: startPointId,
           startPointType: startPointType,
           endPointId: endPointId,
-          endPointType: endPointType,
-          StartPointName: startPointName,
-          EndPointName: endPointName,
-          lineType: lineType,
+          endPointType: endPointType, */
+          /*      StartPointName: startPointName,
+          EndPointName: endPointName, */
+          /*           lineType: lineType, */
           lines: lines,
-          chain_Id: chainId,
+          line_Chain_ID: chainId,
+          first_Chain_ID: startPointChain_ID,
+          second_Chain_ID: endPointChain_ID,
         };
+        console.log(newRoute);
 
         return newRoute;
       } else {
@@ -362,6 +368,37 @@ export const useLineEditing = (
       alert("Error fetching the suggested line. Please try again.");
     }
   }, [draw]);
+
+  useEffect(() => {
+    const snapFirstFeature = async () => {
+      if (startFatFeature && startFatFeature.geometry.type === "Point") {
+        const allFeatures = draw.getAll().features;
+        const lineFeature = allFeatures.find(
+          (feature): feature is Feature<LineString> =>
+            feature.geometry.type === "LineString"
+        );
+
+        if (!lineFeature) {
+          alert("No line drawn.");
+          return;
+        }
+
+        let latestCoordinates = lineFeature.geometry.coordinates;
+
+        if (lineFeature.id) {
+          await snapVertexToFatFeature(
+            latestCoordinates[0].slice(0, 2) as [number, number],
+            0,
+            String(lineFeature.id!)
+          );
+
+          latestCoordinates = [...lineFeature.geometry.coordinates];
+        }
+      }
+    };
+
+    snapFirstFeature();
+  }, [startFatFeature?.geometry.type]);
 
   return {
     isEditing,

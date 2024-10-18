@@ -10,9 +10,16 @@ import mapboxgl, {
   StyleSpecification,
 } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Modal } from "./Panels/Modal-Info";
+
 import { dynamicZoom } from "@/utils/dynamicZoom";
 import { LayerType } from "@/types/FTTHMapProps";
+import {
+  addFillLayer,
+  addHeatmapLayer,
+  addLineLayer,
+  addPointLayer,
+} from "@/utils/mapLayers";
+import { Modal } from "@/components/Modal-Info";
 
 mapboxgl.accessToken = "Dummy";
 
@@ -21,7 +28,7 @@ interface FTTHMapProps {
     id: string;
     source: GeoJSONSourceSpecification | null;
     visible: boolean;
-    type: "point" | "line" | "heatmap" | "fill";
+    type: "point" | "line" | "heatmap" | "fill" | "polygon";
     icons?: { [key: string]: string };
     paint?: {
       "line-color"?: string;
@@ -93,101 +100,76 @@ const FTTHMap = forwardRef<
   }, [zoomLocation, isStyleloaded]);
 
   const addLayersToMap = () => {
+    if (!mapRef.current) return;
+
     layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
-      if (source && mapRef.current && !mapRef.current.getSource(id)) {
-        const geoJsonSource = {
+      const layerExists = mapRef.current?.getLayer(id);
+      const sourceExists = mapRef.current?.getSource(id);
+
+      if (!sourceExists && source) {
+        mapRef.current?.addSource(id, {
           ...source,
-          type: "geojson" as const,
-        };
+        });
+      }
 
-        mapRef.current.addSource(id, geoJsonSource);
-
-        if (type === "point") {
-          const iconPromises = Object.keys(icons || {}).map((key) => {
-            return new Promise<void>((resolve, reject) => {
-              if (!mapRef.current?.hasImage(key)) {
-                mapRef.current?.loadImage(icons[key], (error, image) => {
-                  if (error) {
-                    console.error(`Error loading icon ${key}:`, error);
-                    reject(error);
-                  } else if (image) {
-                    mapRef.current?.addImage(key, image);
-                    resolve();
-                  }
-                });
-              } else {
-                resolve();
-              }
-            });
-          });
-
-          Promise.all(iconPromises)
-            .then(() => {
-              mapRef.current?.addLayer({
-                id: id,
-                type: "symbol",
-                source: id,
-                layout: {
-                  "icon-image": ["get", "icon"],
-                  "icon-size": ["get", "iconSize"],
-                  "icon-anchor": "center",
-                  "icon-allow-overlap": true,
-                },
-              });
-
-              mapRef.current?.setLayoutProperty(
-                id,
-                "visibility",
-                visible ? "visible" : "none"
-              );
-              mapRef.current?.on("click", id, (e) => {
-                const clickedFeatures = e.features;
-                if (clickedFeatures && clickedFeatures.length > 0) {
-                  setModalData(clickedFeatures[0].properties);
-                }
-              });
-            })
-            .catch((error) => {
-              console.error("Error loading icons:", error);
-            });
-        } else if (type === "line") {
-          mapRef.current.addLayer({
-            id: id,
-            type: "line",
-            source: id,
-            paint: {
-              "line-color": paint?.["line-color"] || "#ff0000",
-              "line-width": paint?.["line-width"] || 5,
-              "line-opacity": paint?.["line-opacity"] || 0.8,
-            },
-          });
+      if (!layerExists && mapRef.current?.getSource(id)) {
+        switch (type) {
+          case "point":
+            addPointLayer(mapRef, id, source, icons, visible);
+            break;
+          case "line":
+            addLineLayer(mapRef, id, source, paint, visible);
+            break;
+          case "heatmap":
+            addHeatmapLayer(mapRef, id, source, paint, visible);
+            break;
+          case "fill":
+            addFillLayer(mapRef, id, source, paint, visible);
+            break;
+          case "polygon":
+            addPointLayer(mapRef, id, source, paint, visible);
+            break;
+          default:
+            console.error("Unknown layer type", type);
+            break;
         }
       }
     });
   };
 
   useEffect(() => {
-    if (mapRef.current) {
-      layers.forEach(({ id, source, visible }) => {
-        const layerExists = mapRef.current?.getLayer(id);
-        const existingSource = mapRef.current?.getSource(id);
+    if (!mapRef.current) return;
 
-        if (existingSource && source) {
-          (existingSource as mapboxgl.GeoJSONSource).setData(
-            source.data as GeoJSON.FeatureCollection<GeoJSON.Geometry>
-          );
+    const handleClick = (e: mapboxgl.MapMouseEvent) => {
+      const features = mapRef.current?.queryRenderedFeatures(e.point);
+      if (features && features.length > 0) {
+        const clickedFeature = features.find(
+          (feature) =>
+            feature.layer &&
+            layers.map((layer) => layer.id).includes(feature.layer.id)
+        );
+
+        // If a valid feature is clicked
+        if (clickedFeature) {
+          // Extract and set modal data from the clicked feature
+          const geometryType = clickedFeature.geometry.type;
+          const featureData = {
+            ...clickedFeature.properties,
+            geometryType,
+          };
+          setModalData(featureData); // Set modal data only
         }
-        if (layerExists) {
-          mapRef.current?.setLayoutProperty(
-            id,
-            "visibility",
-            visible ? "visible" : "none"
-          );
-        } else {
-          console.error(`Layer with id ${id} does not exist.`);
-        }
-      });
-    }
+      }
+    };
+
+    mapRef.current.on("click", handleClick);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off("click", handleClick);
+      }
+    };
   }, [layers]);
 
   function debounce(func: (...args: any[]) => void, delay: number) {

@@ -9,7 +9,7 @@ interface Layer {
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
   label: string;
   icon: string;
-  type: "point" | "line" | "heatmap" | "fill";
+  type: "point" | "line" | "heatmap" | "fill" | "polygon";
 }
 
 interface LayerPanelProps {
@@ -111,7 +111,7 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
         )}
       </div>
 
-      {(customPosition === "top-left"  && isPolygonMode !== undefined)? (
+      {customPosition === "top-left" && isPolygonMode !== undefined ? (
         <div className="flex ml-2">
           <FaDrawPolygon
             className={`cursor-pointer  transition-colors duration-300 ${isPolygonMode ? "text-green-500" : "dark:text-red-500 "}`}

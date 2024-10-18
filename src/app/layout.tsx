@@ -18,6 +18,7 @@ import { useInitializeFTTHPreorders } from "@/hooks/useInitializeFTTHPreorders";
 import { useInitializeFTTHSuggestedFAT } from "@/hooks/useInitializeFTTHSuggestedFAT";
 import { useInitializeIranFTTXAreas } from "@/hooks/useInitializeIranFTTXAreas";
 import { useInitializeFTTHCities } from "@/hooks/useInitializeFTTHCities";
+import { useInitializeFTTHBlocks } from "@/hooks/useInitializeFTTHBlocks";
 
 export default function RootLayout({
   children,
@@ -34,6 +35,7 @@ export default function RootLayout({
     useInitializeFTTHSuggestedFAT(token);
     useInitializeIranFTTXAreas(token);
     useInitializeFTTHCities(token);
+    useInitializeFTTHBlocks(token);
   }
   const [loading, setLoading] = useState(true);
 

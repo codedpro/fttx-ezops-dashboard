@@ -18,7 +18,7 @@ import {
 } from "@/utils/mapLayers";
 
 import { FTTHMapProps, LayerType } from "@/types/FTTHMapProps";
-mapboxgl.accessToken = "Dummy" ?? "???";
+mapboxgl.accessToken = "???";
 import { dynamicZoom } from "@/utils/dynamicZoom";
 const PreOrdersMap = forwardRef<
   {

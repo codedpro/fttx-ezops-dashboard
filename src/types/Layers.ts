@@ -17,4 +17,5 @@ export type LayerKeys =
   | "ODCLayer"
   | "CPLayer"
   | "TCLayer"
+  | "BlockPolygonLayer"
   | "IranFTTXAreasFill";

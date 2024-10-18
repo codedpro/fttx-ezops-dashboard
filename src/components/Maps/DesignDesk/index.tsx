@@ -27,7 +27,7 @@ interface FTTHMapProps {
     id: string;
     source: any | null;
     visible: boolean;
-    type: "point" | "line" | "heatmap" | "fill";
+    type: "point" | "line" | "heatmap" | "fill" | "polygon";
     icons?: { [key: string]: string };
     paint?: {
       "line-color"?: string;
@@ -248,12 +248,11 @@ const DesignDeskMap = forwardRef<
                 ...clickedFeature.properties,
                 geometryType,
               };
-           
+
               setClickedLatLng(null);
               setModalData(featureData);
               setModalLineData(null);
             }
-  
           }
         }
       };

@@ -568,7 +568,7 @@ const DesignDesk: React.FC = () => {
     };
 
     axios
-      .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditRoute`, payload, {
+      .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditLine`, payload, {
         headers: {
           Authorization: `Bearer ${userservice.getToken()}`,
           "Content-Type": "application/json",

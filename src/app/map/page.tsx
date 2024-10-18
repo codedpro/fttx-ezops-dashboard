@@ -66,6 +66,7 @@ const FTTHModemsMap: React.FC = () => {
     "OLTLayer",
     "ODCLayer",
     "TCLayer",
+    "BlockPolygonLayer",
     //Lines
     "ODCLineLayer",
     "FATLineLayer",
@@ -82,10 +83,13 @@ const FTTHModemsMap: React.FC = () => {
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,
+    BlockPolygonLayer: true,
     DropCableLineLayer: true,
   };
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
-  const pointLayers = activeLayers.filter((layer) => layer.type === "point");
+  const pointLayers = activeLayers.filter(
+    (layer) => layer.type === "point" || layer.type === "fill"
+  );
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
 
   const handleStyleChange = (
