@@ -54,33 +54,32 @@ const DarkStyle: StyleSpecification = {
     } as RasterLayerSpecification,
   ],
 };
-const terrainStyle: StyleSpecification = {
-    version: 8,
-    sources: {
-      "stadia-satellite-tiles": {
-        type: "raster",
-        tiles: [
-          "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}.jpg",
-        ],
-        tileSize: 256,
-        attribution:
-          '© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | ' +
-          '© <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> | ' +
-          '© <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> | ' +
-          '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      } as RasterSourceSpecification,
-    },
-    layers: [
-      {
-        id: "stadia-satellite-layer",
-        type: "raster",
-        source: "stadia-satellite-tiles",
-        minzoom: 0,
-        maxzoom: 20,
-      } as RasterLayerSpecification,
-    ],
-  };
-  
+const satelliteStyle: StyleSpecification = {
+  version: 8,
+  sources: {
+    "stadia-satellite-tiles": {
+      type: "raster",
+      tiles: [
+        "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}.jpg",
+      ],
+      tileSize: 256,
+      attribution:
+        "© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data) | " +
+        '© <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> | ' +
+        '© <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> | ' +
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    } as RasterSourceSpecification,
+  },
+  layers: [
+    {
+      id: "stadia-satellite-layer",
+      type: "raster",
+      source: "stadia-satellite-tiles",
+      minzoom: 0,
+      maxzoom: 20,
+    } as RasterLayerSpecification,
+  ],
+};
 
 const satelliteStyle: StyleSpecification = {
   version: 8,
@@ -125,15 +124,15 @@ const mapStyles: MapStyle[] = [
     icon: <FaMap />,
   },
   {
-    id: "terrain",
-    name: "Terrain",
-    style: terrainStyle,
+    id: "satellite",
+    name: "satellite",
+    style: satelliteStyle,
     icon: <FaMountain />,
   },
-//  {
- //   id: "satellite",
+  //  {
+  //   id: "satellite",
   //  name: "Satellite",
-   // style: satelliteStyle,
+  // style: satelliteStyle,
   //  icon: <FaSatellite />,
   //},
 ];
