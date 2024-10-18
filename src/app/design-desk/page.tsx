@@ -557,9 +557,10 @@ const DesignDesk: React.FC = () => {
     setIsObjectAddToLineOpen(true);
   };
 
-  const { handleSearchPlaces, clearExistingMarkers } = useSearchPlaces(
-    ftthMapRef.current?.mapRef ?? { current: null }
-  );
+  const {
+    handleSearchPlaces,
+    removeAllMarkers: clearExistingMarkers,
+  } = useSearchPlaces(ftthMapRef.current?.mapRef ?? { current: null });
 
   const handleFinishLineEditing = async () => {
     const editedRoute = await handleFinishEditing();
