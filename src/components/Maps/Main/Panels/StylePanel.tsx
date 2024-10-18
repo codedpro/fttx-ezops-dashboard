@@ -81,7 +81,7 @@ const satelliteStyle: StyleSpecification = {
   ],
 };
 
-const satelliteStyle: StyleSpecification = {
+/* const satelliteStyle: StyleSpecification = {
   version: 8,
   sources: {
     "satellite-tiles": {
@@ -101,7 +101,7 @@ const satelliteStyle: StyleSpecification = {
       maxzoom: 20,
     } as RasterLayerSpecification,
   ],
-};
+}; */
 
 interface MapStyle {
   id: string;
