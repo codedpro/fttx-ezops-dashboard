@@ -257,6 +257,7 @@ const DesignDesk: React.FC = () => {
     finalizeObjectPosition: finilizeObjectEditPosition,
     isEditingObject,
     cancelObjectEditing,
+    setIsEditingObject,
     setEditObjectLat: setEditObjectLat,
     setEditObjectLng: setEditObjectLng,
     editObjectLat: editObjectLat,
@@ -557,10 +558,8 @@ const DesignDesk: React.FC = () => {
     setIsObjectAddToLineOpen(true);
   };
 
-  const {
-    handleSearchPlaces,
-    removeAllMarkers: clearExistingMarkers,
-  } = useSearchPlaces(ftthMapRef.current?.mapRef ?? { current: null });
+  const { handleSearchPlaces, removeAllMarkers: clearExistingMarkers } =
+    useSearchPlaces(ftthMapRef.current?.mapRef ?? { current: null });
 
   const handleFinishLineEditing = async () => {
     const editedRoute = await handleFinishEditing();
@@ -737,7 +736,6 @@ const DesignDesk: React.FC = () => {
             forceUpdateComponentsOther(token);
             forceUpdateComponentsFAT(token);
             forceUpdatePoints(token);
-            alert("Deleted");
           } else {
             if (endpoint === "/FTTHDeleteComponent") {
               toast.error("Failed to delete object.");
@@ -814,11 +812,44 @@ const DesignDesk: React.FC = () => {
       });
   };
 
-  useEffect(() => {
-    console.log(isModalOpen);
-  }, [isModalOpen]);
-  const handleSubmitObjectEditing = () => {
-    finilizeObjectEditPosition();
+  const handleSubmitObjectEditing = async () => {
+    const object = await finilizeObjectEditPosition();
+    const payload = {
+      ...object,
+    };
+
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHMoveComponent`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${userservice.getToken()}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          forceUpdatePoints(userservice.getToken() ?? "");
+          forceUpdateComponentsOther(userservice.getToken() ?? "");
+          forceUpdateComponentsFAT(userservice.getToken() ?? "");
+          toast.success("Route added successfully!");
+          cancelObjectEditing();
+          setIsEditingObject(false);
+
+          if (resetMenuPanel) {
+            resetMenuPanel();
+          }
+        } else {
+          toast.error("Failed to add route.");
+        }
+      })
+      .catch((error) => {
+        toast.error(
+          "Error adding route: " + error?.response?.data || error.message
+        );
+      });
   };
 
   return (

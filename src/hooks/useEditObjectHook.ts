@@ -264,14 +264,11 @@ export const useEditObjectHook = (
   }, [mapRef, isEditingObject, objectIconUrl, objectId]);
 
   const finalizeObjectPosition = () => {
-    setIsEditingObject(false);
-
     return {
       lat: editObjectLat,
-      lng: editObjectLng,
-      iconUrl: objectIconUrl,
-      id: objectId,
-      objectData: objectData,
+      long: editObjectLng,
+      Type: objectData?.Type,
+      id: objectData?.ID,
     };
   };
 
@@ -307,5 +304,6 @@ export const useEditObjectHook = (
     setEditObjectLng,
     editObjectLat,
     editObjectLng,
+    setIsEditingObject,
   };
 };

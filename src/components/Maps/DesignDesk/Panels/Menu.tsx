@@ -406,7 +406,7 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
               selectedObjectData
             ) {
               onFinishObjectEditing();
-              setCurrentMenu("main");
+      
             }
           }}
         />
