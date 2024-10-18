@@ -261,53 +261,68 @@ export const useLineDrawing = (
     []
   );
 
-  const addPointAtFeature = (
-    coordinates: [number, number],
-    feature: Feature | null
-  ) => {
-    saveState();
-    setLinePoints((prev) => {
-      const snappedPoint = snapToFeature(
-        { lat: coordinates[1], lng: coordinates[0] },
-        coordinates
-      );
-
-      const updatedLinePoints = [
-        ...prev,
-        { lng: snappedPoint.lng, lat: snappedPoint.lat },
-      ];
-
-      const currentFeature = draw.getAll().features[0];
-      if (currentFeature?.id && currentFeature.geometry.type === "LineString") {
-      
-        const newCoordinates = updatedLinePoints.map(
-          (point) => [point.lng, point.lat] as [number, number]
+  const addPointAtFeature = useCallback(
+    (coordinates: [number, number], feature: Feature | null) => {
+      if (!coordinates || coordinates.length !== 2) {
+        console.error(
+          "Invalid coordinates provided to addPointAtFeature:",
+          coordinates
         );
-
-        const updatedFeature: Feature<LineString> = {
-          ...currentFeature,
-          geometry: { type: "LineString", coordinates: newCoordinates },
-          type: "Feature",
-          properties: currentFeature.properties || {},
-        };
-
-        draw.set({ type: "FeatureCollection", features: [updatedFeature] });
-
-        draw.changeMode("simple_select", {
-          featureIds: [String(currentFeature.id)],
-        });
+        return;
       }
 
-      return updatedLinePoints;
-    });
+      saveState();
 
-    if (firstClickedFeature) {
-      setLastClickedFeature(feature);
-      setInitialLastFeatureCoords(coordinates);
-    }
+      const allFeatures = draw.getAll().features;
 
-    setIsConnectedToFeature(true);
-  };
+      if (allFeatures.length === 0) {
+        console.warn("No features found in Draw. Cannot proceed.");
+        return;
+      }
+
+      const currentFeature = allFeatures[0];
+
+      console.log("Current Feature from Draw:", currentFeature);
+
+      if (currentFeature?.id) {
+        try {
+          draw.changeMode("simple_select", {
+            featureIds: [String(currentFeature.id)],
+          });
+          console.log(
+            "Switched to simple_select mode for feature:",
+            currentFeature.id
+          );
+        } catch (error) {
+          console.error("Error changing draw mode to simple_select:", error);
+        }
+      } else {
+        console.warn("No valid feature found to select.");
+      }
+
+      if (firstClickedFeature) {
+        if (feature) {
+          setLastClickedFeature(feature);
+          setInitialLastFeatureCoords(coordinates);
+          console.log("Last clicked feature set to:", feature);
+        } else {
+          console.warn(
+            "Attempted to set lastClickedFeature with null feature."
+          );
+        }
+      }
+
+      setIsConnectedToFeature(true);
+    },
+    [
+      draw,
+      firstClickedFeature,
+      saveState,
+      setIsConnectedToFeature,
+      setLastClickedFeature,
+      setInitialLastFeatureCoords,
+    ]
+  );
 
   const handleFeatureClick = useCallback(
     (clickedFeature: Feature) => {
@@ -481,6 +496,7 @@ export const useLineDrawing = (
     setFirstClickedFeature(null);
     setLastClickedFeature(null);
     setInitialFirstFeatureCoords(null);
+    setLiveMeters("0");
     setInitialLastFeatureCoords(null);
 
     setUndoStack([]);
@@ -571,7 +587,6 @@ export const useLineDrawing = (
                 number,
               ];
 
-   
               newCoords[0] = firstCoords;
               newCoords[newCoords.length - 1] = lastCoords;
 

@@ -233,21 +233,27 @@ const DesignDeskMap = forwardRef<
               };
               setClickedLatLng(snappedLatLng);
 
+              const geometryType = clickedFeature.geometry.type;
+
               const lineData = {
                 ...clickedFeature.properties,
+                geometryType,
               };
 
               setModalData(lineData);
               setModalLineData(clickedFeature);
             } else {
+              const geometryType = clickedFeature.geometry.type;
               const featureData = {
                 ...clickedFeature.properties,
+                geometryType,
               };
-
+           
               setClickedLatLng(null);
               setModalData(featureData);
               setModalLineData(null);
             }
+  
           }
         }
       };
@@ -297,7 +303,6 @@ const DesignDeskMap = forwardRef<
         <div ref={mapContainerRef} className="w-full h-screen" />
         {modalData && !isDrawing && (
           <Modal
-          
             data={modalData}
             lineData={modalLineData}
             onClose={() => setModalData(null)}

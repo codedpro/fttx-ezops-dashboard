@@ -295,7 +295,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {onEditLine &&
               onDeleteLine &&
-              lineData &&
+            (  data.geometryType === "LineString") &&
               onAddObjectToLine &&
               onEditDetailLine &&
               (data.Type === "Metro" ||
@@ -322,7 +322,7 @@ export const Modal: React.FC<ModalProps> = ({
               )}
 
             {onEditObject &&
-              !lineData &&
+              data.geometryType === "Point" &&
               onDeleteObject &&
               onEditDetailObject &&
               (data.Type === "MFAT" ||

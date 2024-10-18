@@ -292,6 +292,7 @@ export const useLineEditing = (
     removeDrawControl();
     setIsEditing(false);
     setStartFatFeature(null);
+    setLiveMeters("0");
     setEndFatFeature(null);
   }, [removeDrawControl, draw]);
 
