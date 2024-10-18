@@ -42,3 +42,13 @@ export const getZoomLevel = (
 
   return 8;
 };
+
+export const isValidLayer = async (
+  map: mapboxgl.Map,
+  layerId: string
+): Promise<boolean> => {
+  if (!map.getLayer(layerId)) return false;
+
+  const features = map.queryRenderedFeatures({ layers: [layerId] });
+  return features && features.length > 0;
+};

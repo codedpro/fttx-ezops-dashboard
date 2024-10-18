@@ -5,9 +5,14 @@ import PlacesSearchInput from "../../DesignDesk/Panels/PlacesSearchInput";
 interface CityPanelProps {
   onCityClick: (city: { lat: number; lng: number; zoom: number }) => void;
   onSearch?: (query: string) => void;
+  onClear?: () => void;
 }
 
-const CityPanel: React.FC<CityPanelProps> = ({ onCityClick, onSearch }) => {
+const CityPanel: React.FC<CityPanelProps> = ({
+  onCityClick,
+  onSearch,
+  onClear,
+}) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isSearchMinimized, setIsSearchMinimized] = useState(true);
   const cities = [
@@ -38,7 +43,10 @@ const CityPanel: React.FC<CityPanelProps> = ({ onCityClick, onSearch }) => {
   };
 
   const toggleSearchMinimized = () => {
-    setIsSearchMinimized((prev) => !prev);
+    if (onClear) {
+      setIsSearchMinimized((prev) => !prev);
+      onClear();
+    }
   };
 
   return (

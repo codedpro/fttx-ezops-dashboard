@@ -2,17 +2,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { gsap } from "gsap";
 
-const PlacesSearchInput: React.FC<{ onSearch: (query: string) => void }> = ({ onSearch }) => {
+const PlacesSearchInput: React.FC<{ onSearch: (query: string) => void }> = ({
+  onSearch,
+}) => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const searchBarRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchIconRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const handleSearch = () => {
     if (searchQuery && searchQuery !== "") {
       onSearch(searchQuery);
-
+      setIsSearching(true);
       gsap.fromTo(
         searchIconRef.current,
         { scale: 1, rotate: 0 },
@@ -93,6 +96,17 @@ const PlacesSearchInput: React.FC<{ onSearch: (query: string) => void }> = ({ on
     };
     typePlaceholder();
   }, []);
+
+  useEffect(() => {
+    if (isSearching && searchQuery) {
+      const intervalId = setInterval(() => {
+        onSearch(searchQuery);
+        console.log("searching", searchQuery);
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isSearching, searchQuery, onSearch]);
 
   return (
     <div

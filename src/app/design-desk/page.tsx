@@ -236,6 +236,7 @@ const DesignDesk: React.FC = () => {
 
   useEffect(() => {
     const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
+
     if (areVisibleLayersLoaded) {
       setLoading(false);
     }
@@ -262,6 +263,24 @@ const DesignDesk: React.FC = () => {
     editObjectLng: editObjectLng,
   } = useEditObjectHook(ftthMapRef.current?.mapRef ?? { current: null });
 
+  const [filteredLayerIds, setFilteredLayerIds] = useState<string[]>([]);
+  const prevLayerCountRef = useRef(filteredLayerIds.length);
+
+  useEffect(() => {
+    const nonNullLayerIds = activeLayers
+      .filter((layer) => layer.source !== null)
+      .map((layer) => layer.id)
+      .filter((id) => drawingLayers.includes(id));
+
+    if (
+      nonNullLayerIds.length !== filteredLayerIds.length ||
+      !nonNullLayerIds.every((id) => filteredLayerIds.includes(id))
+    ) {
+      setFilteredLayerIds(nonNullLayerIds);
+      prevLayerCountRef.current = nonNullLayerIds.length;
+    }
+  }, [activeLayers]);
+
   const {
     isDrawing,
     startDrawing,
@@ -275,7 +294,7 @@ const DesignDesk: React.FC = () => {
     setIsDrawing,
   } = useLineDrawing(
     ftthMapRef.current?.mapRef ?? { current: null },
-    drawingLayers
+    filteredLayerIds || drawingLayers
   );
 
   const {
@@ -288,9 +307,8 @@ const DesignDesk: React.FC = () => {
     liveMeters: liveMetersEditing,
   } = useLineEditing(
     ftthMapRef.current?.mapRef ?? { current: null },
-    drawingLayers
+    filteredLayerIds || drawingLayers
   );
-
   const handleAddObject = (
     object: string,
     lat: number,
@@ -539,7 +557,7 @@ const DesignDesk: React.FC = () => {
     setIsObjectAddToLineOpen(true);
   };
 
-  const { handleSearchPlaces } = useSearchPlaces(
+  const { handleSearchPlaces, clearExistingMarkers } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
 
@@ -573,7 +591,9 @@ const DesignDesk: React.FC = () => {
         }
       })
       .catch((error) => {
-      toast.error("Error adding route: " + error?.response?.data || error.message);
+        toast.error(
+          "Error adding route: " + error?.response?.data || error.message
+        );
       });
   };
   const handleFinishLineDrawing = async () => {
@@ -716,6 +736,7 @@ const DesignDesk: React.FC = () => {
             forceUpdateComponentsOther(token);
             forceUpdateComponentsFAT(token);
             forceUpdatePoints(token);
+            alert("Deleted");
           } else {
             if (endpoint === "/FTTHDeleteComponent") {
               toast.error("Failed to delete object.");
@@ -946,6 +967,7 @@ const DesignDesk: React.FC = () => {
           <CityPanel
             onCityClick={handleCityClick}
             onSearch={handleSearchPlaces}
+            onClear={clearExistingMarkers}
           />
 
           <LayerPanel

@@ -10,13 +10,19 @@ const useSearchPlaces = (
   const markers = useRef<mapboxgl.Marker[]>([]);
 
   const clearExistingMarkers = () => {
-    if (mapRef.current?.getSource('places')) {
-      mapRef.current?.removeLayer('places');
-      mapRef.current?.removeSource('places');
+    if (mapRef.current?.getSource("places")) {
+      mapRef.current?.removeLayer("places");
+      mapRef.current?.removeSource("places");
     }
+
+    markers.current.forEach((marker) => marker.remove());
+    markers.current = [];
   };
 
-  const addPointLayer = async (places: NominatimResponse[], icons: Record<string, string>) => {
+  const addPointLayer = async (
+    places: NominatimResponse[],
+    icons: Record<string, string>
+  ) => {
     const map = mapRef.current;
 
     if (!map) {
@@ -24,20 +30,23 @@ const useSearchPlaces = (
       return;
     }
 
-    const features: Feature<Point, GeoJsonProperties>[] = places.map((place) => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [parseFloat(place.lon), parseFloat(place.lat)],
-      },
-      properties: {
-        title: place.display_name,
-        icon: place.icon ? `icon-${place.place_id}` : 'default-icon',
-      },
-    }));
+    const features: Feature<Point, GeoJsonProperties>[] = places.map(
+      (place) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [parseFloat(place.lon), parseFloat(place.lat)],
+        },
+        properties: {
+          title: place.display_name,
+          icon: place.icon ? `icon-${place.place_id}` : "default-icon",
+        },
+      })
+    );
 
-    // Filter out the icons that have not been added yet
-    const newIcons = Object.entries(icons).filter(([key]) => !map.hasImage(key));
+    const newIcons = Object.entries(icons).filter(
+      ([key]) => !map.hasImage(key)
+    );
 
     const iconPromises = newIcons.map(([key, url]) => {
       return new Promise<void>((resolve) => {
@@ -54,28 +63,40 @@ const useSearchPlaces = (
 
     await Promise.all(iconPromises);
 
-    if (!map.getSource('places')) {
-      map.addSource('places', {
-        type: 'geojson',
+    if (!map.getSource("places")) {
+      map.addSource("places", {
+        type: "geojson",
         data: {
-          type: 'FeatureCollection',
+          type: "FeatureCollection",
           features: features,
         } as FeatureCollection,
       });
     }
 
-    if (!map.getLayer('places')) {
+    if (!map.getLayer("places")) {
       map.addLayer({
-        id: 'places',
-        type: 'symbol',
-        source: 'places',
+        id: "places",
+        type: "symbol",
+        source: "places",
         layout: {
-          'icon-image': ['get', 'icon'],
-          'icon-size': 0.4,
-          'icon-allow-overlap': true,
+          "icon-image": ["get", "icon"],
+          "icon-size": 0.4,
+          "icon-allow-overlap": true,
         },
       });
     }
+
+    places.forEach((place) => {
+      const latNum = parseFloat(place.lat);
+      const lonNum = parseFloat(place.lon);
+      if (!isNaN(latNum) && !isNaN(lonNum)) {
+        const marker = new mapboxgl.Marker()
+          .setLngLat([lonNum, latNum])
+          .setPopup(new mapboxgl.Popup().setText(place.display_name))
+          .addTo(map);
+        markers.current.push(marker);
+      }
+    });
   };
 
   const handleSearchPlaces = async (query: string) => {
@@ -90,10 +111,16 @@ const useSearchPlaces = (
         clearExistingMarkers();
 
         try {
-          const places: NominatimResponse[] = await fetchLocationData(query, viewbox, true);
-          console.log('Fetched places:', places);
+          const places: NominatimResponse[] = await fetchLocationData(
+            query,
+            viewbox,
+            true
+          );
+          console.log("Fetched places:", places);
 
-          const icons: Record<string, string> = { 'default-icon': '/images/map/marker.png' };
+          const icons: Record<string, string> = {
+            "default-icon": "/images/map/marker.png",
+          };
 
           places.forEach((place) => {
             if (place.icon) {
@@ -105,20 +132,6 @@ const useSearchPlaces = (
           });
 
           await addPointLayer(places, icons);
-
-          const markersBounds = new mapboxgl.LngLatBounds();
-
-          places.forEach((place) => {
-            const latNum = parseFloat(place.lat);
-            const lonNum = parseFloat(place.lon);
-            if (!isNaN(latNum) && !isNaN(lonNum)) {
-              markersBounds.extend([lonNum, latNum]);
-            }
-          });
-/* 
-          if (!markersBounds.isEmpty()) {
-            map.fitBounds(markersBounds, { padding: 50 });
-          } */
         } catch (error) {
           console.error("Error fetching places:", error);
         }
@@ -130,7 +143,9 @@ const useSearchPlaces = (
     }
   };
 
-  return { handleSearchPlaces };
+
+
+  return { handleSearchPlaces,  clearExistingMarkers };
 };
 
 export default useSearchPlaces;
