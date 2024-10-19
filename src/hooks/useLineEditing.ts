@@ -303,6 +303,8 @@ export const useLineEditing = (
   }, [removeDrawControl, draw]);
 
   const suggestLine = useCallback(async () => {
+    console.log(startFatFeature, endFatFeature);
+
     if (!startFatFeature || !endFatFeature) {
       alert("Please draw a line connecting two features.2");
       return;
@@ -367,7 +369,7 @@ export const useLineEditing = (
       console.error("Error fetching route from Mapbox Directions API:", error);
       alert("Error fetching the suggested line. Please try again.");
     }
-  }, [draw]);
+  }, [startFatFeature, endFatFeature, draw]);
 
   useEffect(() => {
     const snapFirstFeature = async () => {
