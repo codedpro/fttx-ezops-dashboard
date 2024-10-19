@@ -175,15 +175,38 @@ const LineDetailModal: React.FC<LineDetailModalProps> = ({
               <option value="1">Execution</option>
               <option value="2">Approved</option>
             </Select>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isReverse"
-                checked={formValues.isReverse}
-                onChange={handleReverseToggle}
-                className="w-5 h-5 rounded-full mt-1 appearance-none  border-2 border-gray-400 focus:outline-none focus:ring-2  transition-colors dark:bg-dark-3 dark:border-dark-3 checked:bg-primary"
-              />
-              <Label htmlFor="isReverse" className="block   text-darkgray-8">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  name="isReverse"
+                  id="isReverse"
+                  checked={formValues.isReverse}
+                  onChange={handleReverseToggle}
+                  className="hidden" // Hides the default checkbox
+                />
+
+                <div
+                  className={`w-5 h-5 flex items-center justify-center rounded-md border-2 transition-all duration-300 ease-in-out dark:bg-dark-3 cursor-pointer transform hover:scale-105 ${
+                    formValues.isReverse
+                      ? "bg-primary border-primary shadow-lg hover:shadow-xl"
+                      : "bg-transparent border-gray-400 hover:bg-gray-200 dark:border-dark-3 hover:shadow-lg"
+                  }`}
+                  onClick={handleReverseToggle}
+                >
+                  <div
+                    className={`absolute inset-0 bg-primary transition-all duration-500 ease-in-out transform ${
+                      formValues.isReverse
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-50 rounded-full"
+                    }`}
+                  />
+                </div>
+              </div>
+              <Label
+                htmlFor="isReverse"
+                className="block text-darkgray-8 dark:text-gray-400 cursor-pointer transition-colors duration-300"
+              >
                 Reverse Line
               </Label>
             </div>

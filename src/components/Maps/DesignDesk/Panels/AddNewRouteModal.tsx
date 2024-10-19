@@ -6,7 +6,7 @@ import { LabelInputContainer } from "@/components/FormElements/InputUtils";
 import { Label } from "@/components/FormElements/Label";
 import { cn } from "@/lib/utils";
 import { useFTTHCitiesStore } from "@/store/FTTHCitiesStore";
-
+import { FaCheck, FaTimes } from "react-icons/fa";
 interface AddNewRouteModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -148,21 +148,48 @@ const AddNewRouteModal: React.FC<AddNewRouteModalProps> = ({
 
             {/* Only show Reverse Line if endPointId is not 0 */}
             {endPointId !== 0 && (
-              <LabelInputContainer className="flex flex-row space-x-2">
-                <input
-                  type="checkbox"
-                  name="isReverse"
-                  id="isReverse"
-                  checked={formValues.isReverse}
-                  onChange={() =>
-                    setFormValues((prev) => ({
-                      ...prev,
-                      isReverse: !prev.isReverse,
-                    }))
-                  }
-                  className="w-5 h-5 rounded-md mt-1 appearance-none border-2 border-gray-400 focus:outline-none focus:ring-2 transition-colors dark:bg-dark-3 dark:border-dark-3 checked:bg-primary"
-                />
-                <Label htmlFor="isReverse" className="block text-darkgray-8">
+              <LabelInputContainer className="flex flex-row space-x-3 items-center">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    name="isReverse"
+                    id="isReverse"
+                    checked={formValues.isReverse}
+                    onChange={() =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        isReverse: !prev.isReverse,
+                      }))
+                    }
+                    className="hidden"
+                  />
+
+                  <div
+                    className={`w-5 h-5 mt-2 flex items-center justify-center rounded-md border-2 transition-all duration-300 ease-in-out dark:bg-dark-3 cursor-pointer transform hover:scale-105 ${
+                      formValues.isReverse
+                        ? "bg-primary border-primary shadow-lg hover:shadow-xl"
+                        : "bg-transparent border-gray-400 hover:bg-gray-200 dark:border-dark-3 hover:shadow-lg"
+                    }`}
+                    onClick={() =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        isReverse: !prev.isReverse,
+                      }))
+                    }
+                  >
+                    <div
+                      className={`absolute inset-0 bg-primary transition-all duration-500 ease-in-out transform ${
+                        formValues.isReverse
+                          ? "opacity-100 scale-100 "
+                          : "opacity-0 scale-50 rounded-full"
+                      }`}
+                    />
+                  </div>
+                </div>
+                <Label
+                  htmlFor="isReverse"
+                  className="block text-darkgray-8 dark:text-gray-400 cursor-pointer transition-colors duration-300"
+                >
                   Reverse Line
                 </Label>
               </LabelInputContainer>
