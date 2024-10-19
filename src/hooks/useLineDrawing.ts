@@ -420,7 +420,7 @@ export const useLineDrawing = (
       return;
     }
 
-    if (!lastPointMatches) {
+    if (!lastPointMatches && lastClickedFeature) {
       alert("The last point does not match the selected feature.");
       return;
     }

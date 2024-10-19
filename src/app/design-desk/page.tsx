@@ -580,7 +580,7 @@ const DesignDesk: React.FC = () => {
           forceUpdateComponentsOther(userservice.getToken() ?? "");
           forceUpdateComponentsFAT(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
-          handleCancelEditing;
+          handleCancelEditing();
           setIsEditing(false);
 
           if (resetMenuPanel) {
