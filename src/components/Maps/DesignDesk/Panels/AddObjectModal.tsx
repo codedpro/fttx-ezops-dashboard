@@ -47,6 +47,7 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
     isLoading: state.isLoading,
     error: state.error,
   }));
+
   useEffect(() => {
     const handleDarkModeChange = () => {
       const darkModeClass = document.documentElement.classList.contains("dark");
@@ -68,14 +69,17 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
   }, []);
 
   const handleSubmit = async () => {
-    if (!OLT || !POP || !FAT || !City || !planType) {
-      toast.error("All fields are required.");
-      return;
-    }
+    const emptyField = object === "FAT" ? "" : undefined;
 
     try {
       setLoading(true);
-      onSubmit({ OLT, POP, FAT, City, Plan_Type: planType });
+      onSubmit({
+        OLT: object === "FAT" ? "" : OLT,
+        POP: object === "FAT" ? "" : POP,
+        FAT: object === "FAT" ? "" : FAT,
+        City,
+        Plan_Type: object === "FAT" ? "0" : planType,
+      });
     } catch (error) {
       toast.error("An error occurred : " + error);
     } finally {
@@ -127,27 +131,31 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
 
           {/* Input and Select Fields */}
           <div className="space-y-4">
-            <Input
-              type="text"
-              placeholder="OLT"
-              value={OLT}
-              onChange={(e) => setOLT(e.target.value)}
-              className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
-            />
-            <Input
-              type="text"
-              placeholder="POP"
-              value={POP}
-              onChange={(e) => setPOP(e.target.value)}
-              className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
-            />
-            <Input
-              type="text"
-              placeholder="FAT"
-              value={FAT}
-              onChange={(e) => setFAT(e.target.value)}
-              className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
-            />
+            {object !== "FAT" && (
+              <>
+                <Input
+                  type="text"
+                  placeholder="OLT"
+                  value={OLT}
+                  onChange={(e) => setOLT(e.target.value)}
+                  className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+                />
+                <Input
+                  type="text"
+                  placeholder="POP"
+                  value={POP}
+                  onChange={(e) => setPOP(e.target.value)}
+                  className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+                />
+                <Input
+                  type="text"
+                  placeholder="FAT"
+                  value={FAT}
+                  onChange={(e) => setFAT(e.target.value)}
+                  className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+                />
+              </>
+            )}
             <Select
               value={City}
               onChange={(e) => setCity(e.target.value)}
@@ -160,17 +168,18 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
                 </option>
               ))}
             </Select>
-            <Select
-              name="planType"
-              value={planType}
-              onChange={(e) => setplanType(e.target.value)}
-              className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
-            >
-              {/*  <option value="">Select Plan Type</option> */}
-              <option value="0">Planning</option>
-              <option value="1">Execution</option>
-              <option value="2">Approved</option>
-            </Select>
+            {object !== "FAT" && (
+              <Select
+                name="planType"
+                value={planType}
+                onChange={(e) => setplanType(e.target.value)}
+                className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+              >
+                <option value="0">Planning</option>
+                <option value="1">Execution</option>
+                <option value="2">Approved</option>
+              </Select>
+            )}
           </div>
 
           {/* Buttons */}

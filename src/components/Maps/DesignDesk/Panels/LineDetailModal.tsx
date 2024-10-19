@@ -183,7 +183,7 @@ const LineDetailModal: React.FC<LineDetailModalProps> = ({
                   id="isReverse"
                   checked={formValues.isReverse}
                   onChange={handleReverseToggle}
-                  className="hidden" // Hides the default checkbox
+                  className="hidden"
                 />
 
                 <div

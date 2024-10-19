@@ -59,13 +59,12 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
   }, []);
 
   const handleSubmit = async () => {
-    if (!City || !name || !planType) {
-      alert("All fields are required.");
-      return;
-    }
-
     try {
-      onSubmit({ City, Name: name, Plan_Type: planType });
+      onSubmit({
+        City,
+        Name: object === "CP" ? "" : name,
+        Plan_Type: object === "CP" ? "" : planType,
+      });
     } catch (error) {
       alert("An error occurred while submitting the form." + error);
     }
@@ -113,13 +112,15 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
           </div>
 
           <div className="space-y-4">
-            <Input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
-            />
+            {object !== "CP" && (
+              <Input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+              />
+            )}
             <Select
               value={City}
               onChange={(e) => setCity(e.target.value)}
@@ -132,17 +133,18 @@ const AddOtherObjectModal: React.FC<AddOtherObjectModalProps> = ({
                 </option>
               ))}
             </Select>
-            <Select
-              name="planType"
-              value={planType}
-              onChange={(e) => setplanType(e.target.value)}
-              className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
-            >
-              {/*               <option value="">Select Plan Type</option> */}
-              <option value="0">Planning</option>
-              <option value="1">Execution</option>
-              <option value="2">Approved</option>
-            </Select>
+            {object !== "CP" && (
+              <Select
+                name="planType"
+                value={planType}
+                onChange={(e) => setplanType(e.target.value)}
+                className="border p-2 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
+              >
+                <option value="0">Planning</option>
+                <option value="1">Execution</option>
+                <option value="2">Approved</option>
+              </Select>
+            )}
           </div>
 
           <div className="flex justify-end space-x-4 mt-8">
