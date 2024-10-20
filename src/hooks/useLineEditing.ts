@@ -1,7 +1,14 @@
 import { useState, MutableRefObject, useCallback, useEffect } from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import mapboxgl from "mapbox-gl";
-import { LineString, Feature, Geometry, Point, Position } from "geojson";
+import {
+  LineString,
+  Feature,
+  Geometry,
+  Point,
+  Position,
+  FeatureCollection,
+} from "geojson";
 import { throttle } from "lodash";
 import { distance } from "@turf/turf";
 import axios from "axios";
@@ -42,6 +49,12 @@ export const useLineEditing = (
 
   const snappingDistance = 0.01;
 
+  // Undo/Redo state variables
+  const MAX_STACK_SIZE = 2000;
+  const [undoStack, setUndoStack] = useState<FeatureCollection[]>([]);
+  const [redoStack, setRedoStack] = useState<FeatureCollection[]>([]);
+  const [isUndoRedoRunning, setIsUndoRedoRunning] = useState(false);
+
   const draw = useState(
     () =>
       new MapboxDraw({
@@ -66,6 +79,7 @@ export const useLineEditing = (
   const isPoint = (geometry: Geometry): geometry is Point => {
     return geometry.type === "Point";
   };
+
   const syncLinePointsWithDraw = useCallback(
     throttle(() => {
       const currentFeature = draw
@@ -95,6 +109,7 @@ export const useLineEditing = (
     }, 50),
     [draw]
   );
+
   const getClosestFatFeature = (
     point: [number, number]
   ): Feature<Point> | null => {
@@ -125,6 +140,19 @@ export const useLineEditing = (
 
     return closestFeature;
   };
+
+  // Save state function for Undo/Redo
+  const saveState = useCallback(() => {
+    const currentFeatures = draw.getAll();
+    setUndoStack((prevUndoStack) => {
+      const newStack = [...prevUndoStack, currentFeatures];
+      if (newStack.length > MAX_STACK_SIZE) {
+        newStack.shift();
+      }
+      return newStack;
+    });
+    setRedoStack([]);
+  }, [draw]);
 
   const snapVertexToFatFeature = (
     coords: [number, number],
@@ -171,6 +199,7 @@ export const useLineEditing = (
 
   const handleDrawUpdate = useCallback(
     (e: any) => {
+      saveState(); // Save state on update
       const updatedFeature = e.features[0] as Feature<LineString>;
       updatedFeature.geometry.coordinates.forEach((coord, index) => {
         snapVertexToFatFeature(
@@ -181,9 +210,122 @@ export const useLineEditing = (
       });
       syncLinePointsWithDraw();
     },
-
-    [snapVertexToFatFeature]
+    [snapVertexToFatFeature, saveState]
   );
+
+  // Undo function
+  const undo = useCallback(() => {
+    if (isUndoRedoRunning || undoStack.length === 0) {
+      console.log("No undo steps available or operation is running.");
+      return;
+    }
+
+    syncLinePointsWithDraw();
+    setIsUndoRedoRunning(true);
+
+    try {
+      const currentFeatures = draw.getAll();
+
+      const previousFeatures = undoStack.pop();
+      const lastFeatures = undoStack[undoStack.length - 1] || null;
+
+      if (lastFeatures) {
+        setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
+        draw.set(lastFeatures);
+      } else {
+        if (currentFeatures) {
+          setRedoStack((prevRedoStack) => [...prevRedoStack, currentFeatures]);
+        }
+        draw.deleteAll();
+      }
+
+      const remainingFeatures = draw.getAll().features;
+      if (remainingFeatures.length > 0) {
+        const lastFeatureId = remainingFeatures[0].id;
+        if (lastFeatureId) {
+          draw.changeMode("direct_select", {
+            featureId: String(lastFeatureId),
+          });
+        }
+      } else {
+        draw.changeMode("draw_line_string");
+      }
+    } catch (error) {
+      console.error("Error during undo operation:", error);
+    } finally {
+      setIsUndoRedoRunning(false);
+      syncLinePointsWithDraw();
+    }
+  }, [undoStack, redoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
+
+  // Redo function
+  const redo = useCallback(() => {
+    if (isUndoRedoRunning || redoStack.length === 0) {
+      console.log("No redo steps available or operation is running.");
+      return;
+    }
+
+    setIsUndoRedoRunning(true);
+    syncLinePointsWithDraw();
+    try {
+      const nextFeatures = redoStack.pop();
+
+      if (nextFeatures) {
+        setUndoStack((prevUndoStack) => [...prevUndoStack, draw.getAll()]);
+        draw.set(nextFeatures);
+        syncLinePointsWithDraw();
+      }
+    } catch (error) {
+      console.error("Error during redo operation:", error);
+    } finally {
+      setIsUndoRedoRunning(false);
+      syncLinePointsWithDraw();
+    }
+  }, [redoStack, undoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
+
+  // Keyboard event listeners for Undo/Redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && (e.key === "z" || e.key === "Z")) {
+        e.preventDefault();
+        undo();
+      } else if (e.ctrlKey && (e.key === "Y" || e.key === "y")) {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    if (isEditing) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isEditing, undo, redo]);
+
+  // Context menu listener for Undo
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map) {
+      const preventContextMenu = (
+        e: mapboxgl.MapMouseEvent & mapboxgl.Event
+      ) => {
+        if (isEditing) {
+          e.preventDefault();
+          e.originalEvent.preventDefault();
+          e.originalEvent.stopPropagation();
+          undo();
+        }
+      };
+
+      map.on("contextmenu", preventContextMenu);
+
+      return () => {
+        map.off("contextmenu", preventContextMenu);
+      };
+    }
+  }, [isEditing, undo, mapRef]);
 
   const handleFinishEditing = useCallback(() => {
     console.log(startFatFeature, endFatFeature);
@@ -224,19 +366,16 @@ export const useLineEditing = (
         const chainId = feature.id;
 
         const newRoute = {
-          /*          startPointId: startPointId,
-          startPointType: startPointType,
-          endPointId: endPointId,
-          endPointType: endPointType, */
-          /*      StartPointName: startPointName,
-          EndPointName: endPointName, */
-          /*           lineType: lineType, */
           lines: lines,
           line_Chain_ID: chainId,
           first_Chain_ID: startPointChain_ID,
           second_Chain_ID: endPointChain_ID,
         };
         console.log(newRoute);
+
+        // Clear the stacks after finishing
+        setUndoStack([]);
+        setRedoStack([]);
 
         return newRoute;
       } else {
@@ -274,11 +413,14 @@ export const useLineEditing = (
           featureId: String(lineData.chainId),
         });
         syncLinePointsWithDraw();
+
+        // Save initial state
+        saveState();
       } else {
         console.error("Invalid LineData: Missing coordinates or chainId");
       }
     },
-    [addDrawControl, draw]
+    [addDrawControl, draw, saveState]
   );
 
   useEffect(() => {
@@ -300,13 +442,17 @@ export const useLineEditing = (
     setStartFatFeature(null);
     setLiveMeters("0");
     setEndFatFeature(null);
+
+    // Clear the stacks on cancel
+    setUndoStack([]);
+    setRedoStack([]);
   }, [removeDrawControl, draw]);
 
   const suggestLine = useCallback(async () => {
     console.log(startFatFeature, endFatFeature);
 
     if (!startFatFeature || !endFatFeature) {
-      alert("Please draw a line connecting two features.2");
+      alert("Please draw a line connecting two features.");
       return;
     }
 
@@ -361,6 +507,8 @@ export const useLineEditing = (
           features: [updatedFeature],
         });
 
+        // Save state after suggesting a line
+        saveState();
         syncLinePointsWithDraw();
       } else {
         alert("Could not find a route.");
@@ -369,7 +517,7 @@ export const useLineEditing = (
       console.error("Error fetching route from Mapbox Directions API:", error);
       alert("Error fetching the suggested line. Please try again.");
     }
-  }, [startFatFeature, endFatFeature, draw]);
+  }, [startFatFeature, endFatFeature, draw, saveState]);
 
   useEffect(() => {
     const snapFirstFeature = async () => {
@@ -410,5 +558,8 @@ export const useLineEditing = (
     setIsEditing,
     liveMeters,
     suggestLine,
+    // Expose undo and redo functions
+    undo,
+    redo,
   };
 };
