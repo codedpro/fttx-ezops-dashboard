@@ -297,6 +297,7 @@ const DesignDesk: React.FC = () => {
     ftthMapRef.current?.mapRef ?? { current: null },
     filteredLayerIds || drawingLayers
   );
+  const points = useFTTHPointsStore((state) => state.points);
 
   const {
     isEditing,
@@ -512,7 +513,22 @@ const DesignDesk: React.FC = () => {
   };
 
   const handleOnEditLine = (LineData: LineData) => {
-    startEditingLine(LineData);
+    const filteredPoints = points
+      .filter((point) => point.Chain_ID === LineData.chainId)
+      .map((point) => {
+        if (typeof point.Lat === "number" && typeof point.Long === "number") {
+          return [point.Long, point.Lat] as [number, number];
+        }
+        return null;
+      })
+      .filter((coordinates) => coordinates !== null) as [number, number][];
+
+    const updatedLineData = {
+      ...LineData,
+      coordinates: filteredPoints,
+    };
+
+    startEditingLine(updatedLineData);
   };
 
   const handleOnDeleteLine = (LineData: LineData) => {
