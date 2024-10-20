@@ -27,6 +27,7 @@ interface ModalProps {
   onDeleteObject?: (ObjectData: ObjectData) => void;
   onEditDetailObject?: (ObjectData: ObjectData) => void;
   onEditDetailLine?: (lineData: LineData) => void;
+  onConnectLine?: (lineData: LineData) => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -42,6 +43,7 @@ export const Modal: React.FC<ModalProps> = ({
   onDeleteObject,
   onEditDetailLine,
   onEditDetailObject,
+  onConnectLine,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -128,6 +130,21 @@ export const Modal: React.FC<ModalProps> = ({
     const type = feature.properties?.Type || null;
 
     onEditLine({
+      coordinates,
+      chainId,
+      type,
+    });
+  };
+
+  const handleConnectLine = (feature: any) => {
+    if (!onConnectLine) {
+      return;
+    }
+    const coordinates = feature.geometry?.coordinates || [];
+    const chainId = feature.properties?.Chain_ID || null;
+    const type = feature.properties?.Type || null;
+
+    onConnectLine({
       coordinates,
       chainId,
       type,
@@ -295,7 +312,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {onEditLine &&
               onDeleteLine &&
-            (  data.geometryType === "LineString") &&
+              data.geometryType === "LineString" &&
               onAddObjectToLine &&
               onEditDetailLine &&
               (data.Type === "Metro" ||
@@ -316,6 +333,10 @@ export const Modal: React.FC<ModalProps> = ({
                   }}
                   handleEditDetailLine={() => {
                     handleEditDetailLine(lineData);
+                    onClose();
+                  }}
+                  handleConnectLine={() => {
+                    handleConnectLine(lineData);
                     onClose();
                   }}
                 />

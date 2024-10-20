@@ -49,7 +49,6 @@ export const useLineEditing = (
 
   const snappingDistance = 0.01;
 
-  // Undo/Redo state variables
   const MAX_STACK_SIZE = 2000;
   const [undoStack, setUndoStack] = useState<FeatureCollection[]>([]);
   const [redoStack, setRedoStack] = useState<FeatureCollection[]>([]);
@@ -141,7 +140,6 @@ export const useLineEditing = (
     return closestFeature;
   };
 
-  // Save state function for Undo/Redo
   const saveState = useCallback(() => {
     const currentFeatures = draw.getAll();
     setUndoStack((prevUndoStack) => {
@@ -199,7 +197,7 @@ export const useLineEditing = (
 
   const handleDrawUpdate = useCallback(
     (e: any) => {
-      saveState(); // Save state on update
+      saveState();
       const updatedFeature = e.features[0] as Feature<LineString>;
       updatedFeature.geometry.coordinates.forEach((coord, index) => {
         snapVertexToFatFeature(
@@ -213,7 +211,6 @@ export const useLineEditing = (
     [snapVertexToFatFeature, saveState]
   );
 
-  // Undo function
   const undo = useCallback(() => {
     if (isUndoRedoRunning || undoStack.length === 0) {
       console.log("No undo steps available or operation is running.");
@@ -258,7 +255,6 @@ export const useLineEditing = (
     }
   }, [undoStack, redoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
-  // Redo function
   const redo = useCallback(() => {
     if (isUndoRedoRunning || redoStack.length === 0) {
       console.log("No redo steps available or operation is running.");
@@ -283,7 +279,6 @@ export const useLineEditing = (
     }
   }, [redoStack, undoStack, draw, isUndoRedoRunning, syncLinePointsWithDraw]);
 
-  // Keyboard event listeners for Undo/Redo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && (e.key === "z" || e.key === "Z")) {
@@ -303,8 +298,6 @@ export const useLineEditing = (
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isEditing, undo, redo]);
-
-  // Context menu listener for Undo
   useEffect(() => {
     const map = mapRef.current;
     if (map) {
@@ -373,7 +366,6 @@ export const useLineEditing = (
         };
         console.log(newRoute);
 
-        // Clear the stacks after finishing
         setUndoStack([]);
         setRedoStack([]);
 
@@ -414,7 +406,6 @@ export const useLineEditing = (
         });
         syncLinePointsWithDraw();
 
-        // Save initial state
         saveState();
       } else {
         console.error("Invalid LineData: Missing coordinates or chainId");
@@ -443,7 +434,6 @@ export const useLineEditing = (
     setLiveMeters("0");
     setEndFatFeature(null);
 
-    // Clear the stacks on cancel
     setUndoStack([]);
     setRedoStack([]);
   }, [removeDrawControl, draw]);
@@ -558,7 +548,6 @@ export const useLineEditing = (
     setIsEditing,
     liveMeters,
     suggestLine,
-    // Expose undo and redo functions
     undo,
     redo,
   };

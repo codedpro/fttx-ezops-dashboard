@@ -128,6 +128,8 @@ const DesignDesk: React.FC = () => {
   });
   const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
   const [objectLabel, setObjectLabel] = useState<string>("MFAT");
+  const [isConnectingLineData, setIsConnectingLineData] =
+    useState<boolean>(false);
   const userservice = new UserService();
   const modems = useFTTHModemsStore((state) => state.modems);
   const others = useFTTHComponentsOtherStore((state) => state.others);
@@ -531,6 +533,26 @@ const DesignDesk: React.FC = () => {
     startEditingLine(updatedLineData);
   };
 
+  const handleOnConnectLine = (LineData: LineData) => {
+    const filteredPoints = points
+      .filter((point) => point.Chain_ID === LineData.chainId)
+      .map((point) => {
+        if (typeof point.Lat === "number" && typeof point.Long === "number") {
+          return [point.Long, point.Lat] as [number, number];
+        }
+        return null;
+      })
+      .filter((coordinates) => coordinates !== null) as [number, number][];
+
+    const updatedLineData = {
+      ...LineData,
+      coordinates: filteredPoints,
+    };
+
+    setIsConnectingLineData(true);
+    startEditingLine(updatedLineData);
+  };
+
   const handleOnDeleteLine = (LineData: LineData) => {
     confirm(() => {
       const payload = LineData.chainId;
@@ -584,12 +606,16 @@ const DesignDesk: React.FC = () => {
     };
 
     axios
-      .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditLine`, payload, {
-        headers: {
-          Authorization: `Bearer ${userservice.getToken()}`,
-          "Content-Type": "application/json",
-        },
-      })
+      .post(
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}/${isConnectingLineData ? "FTTHConnectLine" : "FTTHEditLine"}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${userservice.getToken()}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
       .then((response) => {
         if (response.status === 200) {
           forceUpdatePoints(userservice.getToken() ?? "");
@@ -597,6 +623,7 @@ const DesignDesk: React.FC = () => {
           forceUpdateComponentsFAT(userservice.getToken() ?? "");
           toast.success("Route added successfully!");
           handleCancelEditing();
+          setIsConnectingLineData(false);
           setIsEditing(false);
 
           if (resetMenuPanel) {
@@ -612,6 +639,7 @@ const DesignDesk: React.FC = () => {
         );
       });
   };
+
   const handleFinishLineDrawing = async () => {
     const newRoute = await handleFinishLineDraw();
 
@@ -1000,7 +1028,10 @@ const DesignDesk: React.FC = () => {
             editObjectLng={editObjectLng}
             setEditObjectLat={setEditObjectLat}
             setEditObjectLng={setEditObjectLng}
-            onCancelEditing={handleCancelEditing}
+            onCancelEditing={() => {
+              handleCancelEditing();
+              setIsConnectingLineData(false);
+            }}
             onFinishLineEditing={handleFinishLineEditing}
             onFinishObjectEditing={handleSubmitObjectEditing}
             onCancelObjectEditing={cancelObjectEditing}
@@ -1050,6 +1081,7 @@ const DesignDesk: React.FC = () => {
               onDeleteObject={handleOnDeleteObject}
               onEditDetailLine={handleOnEditDetailLine}
               onEditDetailObject={handleOnEditDetailObject}
+              onConnectLine={handleOnConnectLine}
             />
           </div>
         </div>

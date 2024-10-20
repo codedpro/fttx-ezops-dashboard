@@ -49,6 +49,7 @@ interface FTTHMapProps {
   ) => void;
   onEditDetailObject: (ObjectData: ObjectData) => void;
   onEditDetailLine: (lineData: LineData) => void;
+  onConnectLine: (LineData: LineData) => void;
 }
 
 const DesignDeskMap = forwardRef<
@@ -68,6 +69,7 @@ const DesignDeskMap = forwardRef<
       onDeleteObject,
       onEditDetailLine,
       onEditDetailObject,
+      onConnectLine,
     },
     ref
   ) => {
@@ -313,6 +315,7 @@ const DesignDeskMap = forwardRef<
             onDeleteObject={onDeleteObject}
             onEditDetailLine={onEditDetailLine}
             onEditDetailObject={onEditDetailObject}
+            onConnectLine={onConnectLine}
           />
         )}
       </>

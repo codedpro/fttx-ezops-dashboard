@@ -5,12 +5,14 @@ interface ActionButtonsProps {
   handleAddObjectClick: () => void;
   handleDeleteLine: () => void;
   handleEditDetailLine: () => void;
+  handleConnectLine: () => void;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
   handleEditLine,
   handleAddObjectClick,
   handleDeleteLine,
+  handleConnectLine,
   handleEditDetailLine,
 }) => {
   return (
@@ -38,6 +40,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         className="flex-1 min-w-[120px] px-4 py-2 bg-primary  text-white text-base rounded-md hover:bg-primaryhover  transition-transform duration-300 ease-in-out transform hover:scale-105"
       >
         Edit Details
+      </button>
+      <button
+        onClick={handleConnectLine}
+        className="flex-1 min-w-[120px] px-4 py-2 bg-orange-600  text-white text-base rounded-md hover:bg-orange-700  transition-transform duration-300 ease-in-out transform hover:scale-105"
+      >
+        Connect line
       </button>
     </div>
   );
