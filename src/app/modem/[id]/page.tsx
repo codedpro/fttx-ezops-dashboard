@@ -152,6 +152,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             columns={internetOnlinesColumns}
             header="Internet Online Sessions"
             emoji="🌐"
+            initialLimit={20}
           />
         </div>
 
@@ -161,6 +162,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             columns={connectionHistoryColumns}
             header="Connection History"
             emoji="🔗"
+            initialLimit={20}
           />
         </div>
 
@@ -170,6 +172,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             columns={ballancesColumns}
             header="Balances"
             emoji="💰"
+            initialLimit={20}
           />
         </div>
       </div>

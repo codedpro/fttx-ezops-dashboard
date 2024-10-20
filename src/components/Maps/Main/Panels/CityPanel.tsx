@@ -53,13 +53,15 @@ const CityPanel: React.FC<CityPanelProps> = ({
     <>
       <div className="reletive">
         <div className="absolute top-4 right-4 flex items-start space-x-4 z-50">
-          <button
-            onClick={toggleSearchMinimized}
-            className={`p-2 rounded-full mt-4 transition duration-200 bg-white bg-opacity-50 dark:bg-[#1F2937]  dark:bg-opacity-60 backdrop-blur-lg  text-4xl shadow-md 
+          {onSearch && onClear && (
+            <button
+              onClick={toggleSearchMinimized}
+              className={`p-2 rounded-full mt-4 transition duration-200 bg-white bg-opacity-50 dark:bg-[#1F2937]  dark:bg-opacity-60 backdrop-blur-lg  text-4xl shadow-md 
               ${isSearchMinimized ? "text-black dark:text-gray-200 hover:text-black/85 dark:text-gray-200/85 " : "text-primary hover:text-primary/85"}`}
-          >
-            <IoMdSearch size={22} />
-          </button>
+            >
+              <IoMdSearch size={22} />
+            </button>
+          )}
 
           <div
             className={`z-30 m-2 p-2 bg-white bg-opacity-50 dark:bg-[#1F2937] dark:text-gray-200 text-black dark:bg-opacity-60 backdrop-blur-lg rounded-lg shadow-xl transition-all ${
@@ -117,7 +119,6 @@ const CityPanel: React.FC<CityPanelProps> = ({
           </div>
         </div>
 
-        {/* PlacesSearchInput remains unaffected by the positioning */}
         {onSearch && !isSearchMinimized && (
           <PlacesSearchInput onSearch={onSearch} />
         )}

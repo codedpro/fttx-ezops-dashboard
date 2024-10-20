@@ -312,7 +312,7 @@ const FTTHModemsMap: React.FC = () => {
     }
   }, [activeLayers]);
 
-  const { handleSearchPlaces } = useSearchPlaces(
+  const { handleSearchPlaces ,removeAllMarkers } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
   return (
@@ -326,6 +326,7 @@ const FTTHModemsMap: React.FC = () => {
           <CityPanel
             onCityClick={handleCityClick}
             onSearch={handleSearchPlaces}
+            onClear={removeAllMarkers}
           />
           {isPolygonMode && (
             <>
