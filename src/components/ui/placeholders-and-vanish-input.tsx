@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useFTTHComponentsOtherStore } from "@/store/FTTHComponentsOtherStore";
 import { useFTTHModemsStore } from "@/store/FTTHModemsStore";
 import { cn } from "@/lib/utils";
+import { useFTTHPreordersStore } from "@/store/FTTHPreordersStore";
 
 export function PlaceholdersAndVanishInput({
   placeholders,
@@ -22,6 +23,7 @@ export function PlaceholdersAndVanishInput({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const others = useFTTHComponentsOtherStore((state) => state.others);
   const modems = useFTTHModemsStore((state) => state.modems);
+  const preorders = useFTTHPreordersStore((state) => state.preorders);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -189,7 +191,6 @@ export function PlaceholdersAndVanishInput({
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("search", value);
 
-    // Conditional handling for search patterns
     const isLatLng = value.match(/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/);
     const isMapOrPreorders =
       currentPath.startsWith("/map") || currentPath.startsWith("/preorders");
@@ -211,6 +212,11 @@ export function PlaceholdersAndVanishInput({
           router.push(`/map?search=${value}`);
         }, 500);
       }
+    } else if (value.startsWith("FTH") && value.length > 3) {
+      setTimeout(() => {
+        setValue("");
+        router.replace(`/preorders?search=${value}`);
+      }, 500);
     } else if (value.match(oltPattern2)) {
       if (currentPath.startsWith("/map")) {
         setTimeout(() => {
@@ -272,6 +278,11 @@ export function PlaceholdersAndVanishInput({
           router.push(`/map?search=${suggestion}`);
         }, 500);
       }
+    } else if (suggestion.startsWith("FTH") && suggestion.length > 3) {
+      setTimeout(() => {
+        setValue("");
+        router.replace(`/preorders?search=${suggestion}`);
+      }, 500);
     } else if (suggestion.match(oltPattern2)) {
       if (currentPath.startsWith("/map")) {
         setTimeout(() => {
@@ -327,6 +338,12 @@ export function PlaceholdersAndVanishInput({
           .slice(0, 5)
           .map((modem) => modem.Modem_ID.toString());
       }
+    } else if (value.startsWith("FTH") && value.length > 3) {
+      console.log("l");
+      newSuggestions = preorders
+        .filter((preorder) => preorder.Tracking_Code.startsWith(value))
+        .slice(0, 5)
+        .map((preorder) => preorder.Tracking_Code);
     }
 
     newSuggestions = newSuggestions.filter(

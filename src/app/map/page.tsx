@@ -173,7 +173,7 @@ const FTTHModemsMap: React.FC = () => {
           <div className="text-2xl font-bold">Loading Map...</div>
         </div>
       ) : (
-        <div className="w-full h-[80vh] relative overflow-hidden">
+        <div className="w-full h-[80vh] z-0 relative overflow-hidden">
           {isPolygonMode && (
             <>
               {" "}

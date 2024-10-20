@@ -853,7 +853,7 @@ const DesignDesk: React.FC = () => {
   };
 
   return (
-    <DefaultLayout className="p-0 md:p-0 z-0">
+    <DefaultLayout className="p-0 md:p-0 z-30">
       <div className="z-999">
         {" "}
         <ModeModal
@@ -962,7 +962,7 @@ const DesignDesk: React.FC = () => {
           <div className="text-2xl font-bold">Loading Map...</div>
         </div>
       ) : (
-        <div className="w-full h-[80vh] relative overflow-hidden z-20">
+        <div className="w-full h-[80vh] relative overflow-hidden z-0">
           <MenuPanel
             isEditing={isEditing}
             isEditingObject={isEditingObject}
@@ -1020,7 +1020,7 @@ const DesignDesk: React.FC = () => {
             onStyleChange={handleStyleChange}
             selectedStyleId={selectedStyleId}
           />
-          <div className="z-50 w-full">
+          <div className="z-20 w-full">
             <DesignDeskMap
               isDrawing={isDrawing || isEditing}
               ref={ftthMapRef}

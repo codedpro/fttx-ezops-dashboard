@@ -22,6 +22,7 @@ import {
 } from "mapbox-gl";
 import ScreenshotEditorModal from "@/components/ScreenshotEditorModal";
 import useSearchPlaces from "@/hooks/useSearchPlaces";
+import { useFTTHPreordersStore } from "@/store/FTTHPreordersStore";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -134,6 +135,7 @@ const FTTHModemsMap: React.FC = () => {
     setSelectedPath(path);
   };
 
+  const preorders = useFTTHPreordersStore((state) => state.preorders);
   useEffect(() => {
     const search = searchParams.get("search");
     if (!search) return;
@@ -142,6 +144,14 @@ const FTTHModemsMap: React.FC = () => {
       const [lat, lng] = search.split(",").map(Number);
       if (!isNaN(lat) && !isNaN(lng)) {
         setZoomLocation({ lat, lng, zoom: 20 });
+      }
+    }
+    if (search.startsWith("FTH")) {
+      const preorder = preorders.find(
+        (preorder) => preorder.Tracking_Code === search
+      );
+      if (preorder) {
+        setZoomLocation({ lat: preorder.Lat, lng: preorder.Long, zoom: 20 });
       }
     }
   }, [searchParams]);
@@ -312,7 +322,7 @@ const FTTHModemsMap: React.FC = () => {
     }
   }, [activeLayers]);
 
-  const { handleSearchPlaces ,removeAllMarkers } = useSearchPlaces(
+  const { handleSearchPlaces, removeAllMarkers } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
   return (
@@ -322,7 +332,7 @@ const FTTHModemsMap: React.FC = () => {
           <div className="text-2xl font-bold">Loading Map...</div>
         </div>
       ) : (
-        <div className="w-full h-[80vh] relative overflow-hidden">
+        <div className="w-full h-[80vh] z-0 relative overflow-hidden">
           <CityPanel
             onCityClick={handleCityClick}
             onSearch={handleSearchPlaces}

@@ -31,7 +31,7 @@ export default function DefaultLayout({
   return (
     <>
       {/* <!-- ===== Page Wrapper Start ===== --> */}
-      <div className="flex h-screen z-0 overflow-hidden bg-grid-black/[0.01] dark:bg-grid-white/[0.01]">
+      <div className="flex h-screen z-30 overflow-hidden bg-grid-black/[0.01] dark:bg-grid-white/[0.01]">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         {/* <!-- ===== Content Area Start ===== --> */}
