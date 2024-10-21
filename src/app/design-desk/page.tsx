@@ -419,9 +419,9 @@ const DesignDesk: React.FC = () => {
     }
   };
 
-  const handleFATDetailSubmit = (ObjectData: ObjectData) => {};
+  const handleFATDetailSubmit = (ObjectData: any) => {};
 
-  const handleOtherDetailSubmit = (ObjectData: ObjectData) => {};
+  const handleOtherDetailSubmit = (ObjectData: any) => {};
 
   const handleLineDetailSubmit = (lineData: any) => {
     fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditLineDetail`, {
@@ -439,9 +439,9 @@ const DesignDesk: React.FC = () => {
           toast.success("Object added successfully!");
 
           setTimeout(() => {
-            finalizeObjectPosition();
-            forceUpdateComponentsOther(userservice.getToken() ?? "");
-            setIsOtherModalOpen(false);
+            forceUpdatePoints(userservice.getToken() ?? "");
+            setIsLineDetailOpen(false);
+            setLineDetailsData(null);
           }, 300);
         } else {
           toast.error("Failed to add object.");
@@ -764,7 +764,6 @@ const DesignDesk: React.FC = () => {
       let payload: any;
 
       if (chainOrder && chainOrder.length >= 2) {
-        // Prepare payload for merging lines
         payload = {
           chain_ID: dataToProcess.Chain_ID,
           name:
