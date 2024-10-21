@@ -16,7 +16,7 @@ interface LineDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   lineData: LineData | null;
-  onSubmit: (updatedData: LineData) => void;
+  onSubmit: (updatedData: any) => void;
 }
 
 const LineDetailModal: React.FC<LineDetailModalProps> = ({
@@ -41,21 +41,19 @@ const LineDetailModal: React.FC<LineDetailModalProps> = ({
 
   useEffect(() => {
     if (points.length > 0) {
-      // Extract unique types from all points
       const allPointTypes = Array.from(
         new Set(points.map((point) => point.Type))
       );
       setUniqueTypes(allPointTypes);
 
       if (lineData) {
-        // Filter points by Chain_ID to extract city and plan type for the current line
         const matchingPoints = points.filter(
           (point: FTTHPoint) => point.Chain_ID === lineData.chainId
         );
 
         if (matchingPoints.length > 0) {
           setFormValues({
-            type: lineData.type || allPointTypes[0], // Set type as the first found type
+            type: lineData.type || allPointTypes[0],
             isReverse: false,
             City: matchingPoints[0].City || "",
             Plan_Type: matchingPoints[0].Plan_Type.toString() || "0",
@@ -102,15 +100,14 @@ const LineDetailModal: React.FC<LineDetailModalProps> = ({
 
     if (!lineData) return;
 
-    const updatedData: LineData = {
-      ...lineData,
-      type: formValues.type,
-      coordinates: formValues.isReverse
-        ? [...lineData.coordinates].reverse()
-        : lineData.coordinates,
-      chainId: lineData.chainId ?? null,
+    const updatedData: any = {
+      LineType: formValues.type,
+      Line_Chain_ID: lineData.chainId,
+      IsReverse: formValues.isReverse,
+      City: formValues.City,
+      Plan_Type: formValues.Plan_Type,
     };
-
+    console.log(updatedData);
     onSubmit(updatedData);
   };
 

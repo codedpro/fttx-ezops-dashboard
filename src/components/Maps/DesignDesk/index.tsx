@@ -94,7 +94,7 @@ const DesignDeskMap = forwardRef<
             style: mapStyle,
             center: [53.29974681542001, 36.652031726978095],
             zoom: 13.5,
-            maxZoom: 19,
+      
           });
 
           mapRef.current.on("load", () => {

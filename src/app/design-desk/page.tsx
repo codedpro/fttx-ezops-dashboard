@@ -423,7 +423,34 @@ const DesignDesk: React.FC = () => {
 
   const handleOtherDetailSubmit = (ObjectData: ObjectData) => {};
 
-  const handleLineDetailSubmit = (lineData: LineData) => {};
+  const handleLineDetailSubmit = (lineData: any) => {
+    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditLineDetail`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...lineData,
+      }),
+      headers: {
+        Authorization: `Bearer ${userservice.getToken()}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("Object added successfully!");
+
+          setTimeout(() => {
+            finalizeObjectPosition();
+            forceUpdateComponentsOther(userservice.getToken() ?? "");
+            setIsOtherModalOpen(false);
+          }, 300);
+        } else {
+          toast.error("Failed to add object.");
+        }
+      })
+      .catch((err) => {
+        toast.error("Error adding object: " + err.message);
+      });
+  };
 
   const handleOtherModalSubmit = (data: {
     City: string;
