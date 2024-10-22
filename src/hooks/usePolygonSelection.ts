@@ -2,7 +2,7 @@ import { useState, useEffect, MutableRefObject } from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import mapboxgl from "mapbox-gl";
 import { ExtendedFeature } from "@/types/ExtendedFeature";
-
+import * as turf from "@turf/turf";
 export const usePolygonSelection = (
   mapRef: MutableRefObject<mapboxgl.Map | null>
 ) => {
@@ -47,14 +47,63 @@ export const usePolygonSelection = (
       if (activeDrawings.length > 0) {
         const polygon = activeDrawings[0];
         if (polygon.geometry.type === "Polygon") {
-          const features = mapRef.current.queryRenderedFeatures({
-            filter: ["within", polygon.geometry],
+          // Retrieve all rendered features
+          const features = mapRef.current.queryRenderedFeatures();
+  
+          // Filter out Mapbox default layers and unwanted features
+          const filteredFeatures = features.filter((feature) => {
+            // Ensure feature.layer is defined
+            if (!feature.layer || !feature.layer.source || !feature.layer.id) {
+              return false;
+            }
+  
+            const unwantedSources = ["composite", "mapbox"]; // Mapbox default sources
+            const unwantedLayerIds = ["place-label", "poi-label", "road-label"]; // Mapbox default layer IDs
+            return (
+              !unwantedSources.includes(feature.layer.source) &&
+              !unwantedLayerIds.includes(feature.layer.id)
+            );
           });
-          setSelectedFeatures(features);
+  
+          // Perform spatial filtering with Turf.js
+          const turfPolygon = turf.polygon(polygon.geometry.coordinates);
+  
+          const selectedFeatures = filteredFeatures.filter((feature) => {
+            // Handle different geometry types
+            if (feature.geometry.type === "Point") {
+              return turf.booleanPointInPolygon(feature.geometry, turfPolygon);
+            } else if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
+              const turfFeature = turf.feature(feature.geometry);
+              return (
+                turf.booleanWithin(turfFeature, turfPolygon) ||
+                turf.booleanOverlap(turfFeature, turfPolygon)
+              );
+            } else if (feature.geometry.type === "LineString") {
+              const turfFeature = turf.feature(feature.geometry);
+              return (
+                turf.booleanCrosses(turfFeature, turfPolygon) ||
+                turf.booleanWithin(turfFeature, turfPolygon)
+              );
+            } else if (feature.geometry.type === "MultiLineString") {
+              // Handle MultiLineString by treating it as multiple LineStrings
+              return feature.geometry.coordinates.some((lineString) => {
+                const turfFeature = turf.lineString(lineString);
+                return (
+                  turf.booleanCrosses(turfFeature, turfPolygon) ||
+                  turf.booleanWithin(turfFeature, turfPolygon)
+                );
+              });
+            }
+            return false;
+          });
+  
+          console.log(selectedFeatures);
+          setSelectedFeatures(selectedFeatures);
         }
       }
     }
   };
+  
 
   const handleClickOnMap = (e: MouseEvent) => {
     if (isPolygonMode) {
