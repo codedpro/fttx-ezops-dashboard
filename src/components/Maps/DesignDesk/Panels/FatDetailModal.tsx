@@ -36,7 +36,7 @@ const FatDetailModal: React.FC<FatDetailModalProps> = ({
     Type: objectData?.Type || "FAT",
     OLT: "",
     POP: "",
-    Plan_Type: "0", // Ensure this is a string to avoid type conflicts
+    Plan_Type: "0",
     FAT: "",
     City: "NEKA",
   });
@@ -85,16 +85,14 @@ const FatDetailModal: React.FC<FatDetailModalProps> = ({
   }, [objectData]);
 
   const fetchLocalObjectDetails = (id: number) => {
-    // Filter the `fats` data from the Zustand store based on the ID
     const filteredFat = fats.find((fat) => fat.FAT_ID === id);
     if (filteredFat) {
-      // Set default values for OLT, POP, FAT, and Plan_Type from the local store
       setFormValues((prev) => ({
         ...prev,
         OLT: filteredFat.OLT || "",
         POP: filteredFat.POP || "",
         FAT: filteredFat.FAT || "",
-        Plan_Type: filteredFat.Plan_Type.toString() || "0", // Convert Plan_Type to string
+        Plan_Type: filteredFat.Plan_Type.toString() || "0",
       }));
     }
   };
@@ -110,13 +108,12 @@ const FatDetailModal: React.FC<FatDetailModalProps> = ({
         setShowExtraFields(true);
         fetchLocalObjectDetails(Number(objectData?.ID || 0)); // Ensure ID is a number
       } else if (value === "FAT") {
-        // Clear extra fields when switching to FAT
         setFormValues((prev) => ({
           ...prev,
           OLT: "",
           POP: "",
           FAT: "",
-          Plan_Type: "0", // Keep Plan_Type as a string
+          Plan_Type: "0", 
         }));
         setShowExtraFields(false);
       }

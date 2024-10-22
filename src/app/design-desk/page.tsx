@@ -419,9 +419,63 @@ const DesignDesk: React.FC = () => {
     }
   };
 
-  const handleFATDetailSubmit = (ObjectData: any) => {};
+  const handleFATDetailSubmit = (ObjectData: any) => {
+    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditFATPoint`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...ObjectData,
+      }),
+      headers: {
+        Authorization: `Bearer ${userservice.getToken()}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("FAT Edited successfully!");
 
-  const handleOtherDetailSubmit = (ObjectData: any) => {};
+          setTimeout(() => {
+            forceUpdateComponentsFAT(userservice.getToken() ?? "");
+            setIsFATDetailOpen(false);
+            setFatDetailData(null);
+          }, 300);
+        } else {
+          toast.error("Failed to edit FAT");
+        }
+      })
+      .catch((err) => {
+        toast.error("Error Editing FAT: " + err.message);
+      });
+  };
+
+  const handleOtherDetailSubmit = (ObjectData: any) => {
+    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditComponentPoint`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...ObjectData,
+      }),
+      headers: {
+        Authorization: `Bearer ${userservice.getToken()}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("Component Edited successfully!");
+
+          setTimeout(() => {
+            forceUpdateComponentsFAT(userservice.getToken() ?? "");
+            setIsOtherDetailOpen(false);
+            setOtherDetailData(null);
+          }, 300);
+        } else {
+          toast.error("Failed to edit Component");
+        }
+      })
+      .catch((err) => {
+        toast.error("Error Editing Component: " + err.message);
+      });
+  };
 
   const handleLineDetailSubmit = (lineData: any) => {
     fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditLineDetail`, {
@@ -436,7 +490,7 @@ const DesignDesk: React.FC = () => {
     })
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Object added successfully!");
+          toast.success("Line Edited successfully!");
 
           setTimeout(() => {
             forceUpdatePoints(userservice.getToken() ?? "");
@@ -444,11 +498,11 @@ const DesignDesk: React.FC = () => {
             setLineDetailsData(null);
           }, 300);
         } else {
-          toast.error("Failed to add object.");
+          toast.error("Failed to edit Line");
         }
       })
       .catch((err) => {
-        toast.error("Error adding object: " + err.message);
+        toast.error("Error Editing Line: " + err.message);
       });
   };
 

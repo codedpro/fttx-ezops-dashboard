@@ -24,11 +24,10 @@ export default function Modem() {
 
   const filteredModems = modems.filter(
     (modem) =>
-      modem.Modem_ID.toString().includes(searchTerm) ||
-      modem.OLT.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (modem.Online_Status && modem.Online_Status.toLowerCase().includes(searchTerm.toLowerCase()))
+      modem.Modem_ID?.toString().includes(searchTerm) ||
+      modem.OLT?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (modem.Online_Status?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
-  
 
   const loadMoreModems = () => {
     setVisibleModems((prev) => prev + 30);
@@ -62,15 +61,19 @@ export default function Modem() {
               className="bg-white dark:bg-[#1b2a3c] p-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg cursor-pointer"
             >
               <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                Modem ID: {modem.Modem_ID}
+                Modem ID: {modem.Modem_ID ?? "N/A"}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                OLT: {modem.OLT}
+                OLT: {modem.OLT ?? "N/A"}
               </p>
-              <p className={`text-sm text-gray-700 dark:text-gray-300 `}>
+              <p className={`text-sm text-gray-700 dark:text-gray-300`}>
                 Status:
-                <span 
-                  className={`ml-1 ${modem.Online_Status == "Online" ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"}`}
+                <span
+                  className={`ml-1 ${
+                    modem.Online_Status === "Online"
+                      ? "text-green-500 dark:text-green-400"
+                      : "text-red-500 dark:text-red-400"
+                  }`}
                 >
                   {modem.Online_Status || "Offline"}
                 </span>
