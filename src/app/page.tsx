@@ -37,11 +37,12 @@ const Dashboard = async () => {
   ];
   const series_Paid_to_Modems = [
     dashboardData?.online_Count + dashboardData?.offline_Count || 2,
-    dashboardData?.preorder_Paid || 1,
+    dashboardData?.preorder_Paid -
+      (dashboardData?.online_Count + dashboardData?.offline_Count) || 1,
   ];
   const colors = ["#feca00", "#ADBCF2"];
   const labels = ["Online", "Offline"];
-  const labels_Paid_to_modems = ["Delivered", "Payment"];
+  const labels_Paid_to_modems = ["Delivered", "ٔNot Delivered"];
   const totalClosed = dashboardData?.uT_Closed || 0;
   const totalRunning = dashboardData?.uT_Open || 0;
 
@@ -69,7 +70,7 @@ const Dashboard = async () => {
           labels={labels}
         />
         <ChartThree
-          header="Payment vs Delivery Overview"
+          header="Payment Delivery Status"
           series={series_Paid_to_Modems}
           colors={colors}
           labels={labels_Paid_to_modems}
