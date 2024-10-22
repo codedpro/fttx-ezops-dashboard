@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FaMap, FaSatellite, FaMountain } from "react-icons/fa";
+import { FaMap, FaSatellite, FaMountain, FaLightbulb, FaCloud } from "react-icons/fa";
 import { gsap } from "gsap";
 import ClickOutside from "@/components/ClickOutside";
 import {
@@ -54,6 +54,28 @@ const DarkStyle: StyleSpecification = {
     } as RasterLayerSpecification,
   ],
 };
+
+const LightStyle: StyleSpecification = {
+  version: 8,
+  sources: {
+    "light-tiles": {
+      type: "raster",
+      tiles: ["https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "Irancell",
+    } as RasterSourceSpecification,
+  },
+  layers: [
+    {
+      id: "light-layer",
+      type: "raster",
+      source: "light-tiles",
+      minzoom: 0,
+      maxzoom: 20,
+    } as RasterLayerSpecification,
+  ],
+};
+
 const satelliteStyle: StyleSpecification = {
   version: 8,
   sources: {
@@ -112,8 +134,8 @@ interface MapStyle {
 
 const mapStyles: MapStyle[] = [
   {
-    id: "Light",
-    name: "Light",
+    id: "Street",
+    name: "Street",
     style: lightStyle,
     icon: <FaMap />,
   },
@@ -121,11 +143,17 @@ const mapStyles: MapStyle[] = [
     id: "Dark",
     name: "Dark",
     style: DarkStyle,
-    icon: <FaMap />,
+    icon: <FaCloud />,
   },
   {
-    id: "satellite",
-    name: "satellite",
+    id: "Light",
+    name: "Light",
+    style: LightStyle,
+    icon: <FaLightbulb />,
+  },
+  {
+    id: "Satellite",
+    name: "Satellite",
     style: satelliteStyle,
     icon: <FaMountain />,
   },
