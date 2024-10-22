@@ -934,11 +934,17 @@ export const useLineDrawing = (
           lastCoords,
         ];
 
+        const uniqueCoordinates = updatedSuggestedRoute.filter(
+          (coord, index, self) =>
+            index ===
+            self.findIndex((c) => c[0] === coord[0] && c[1] === coord[1])
+        );
+
         const updatedFeature: Feature<LineString> = {
           ...currentFeature,
           geometry: {
             type: "LineString",
-            coordinates: updatedSuggestedRoute,
+            coordinates: uniqueCoordinates,
           },
         };
 

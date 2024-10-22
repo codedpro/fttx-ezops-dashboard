@@ -439,22 +439,20 @@ export const useLineEditing = (
   }, [removeDrawControl, draw]);
 
   const suggestLine = useCallback(async () => {
-    console.log(startFatFeature, endFatFeature);
-
     if (!startFatFeature || !endFatFeature) {
       alert("Please draw a line connecting two features.");
       return;
     }
-
+  
     const currentFeature = draw.getAll().features[0] as Feature<LineString>;
     const coords = currentFeature?.geometry.coordinates;
-
+  
     syncLinePointsWithDraw();
     if (!coords || coords.length < 2) {
       alert("Not enough points to suggest a line.");
       return;
     }
-
+  
     try {
       const firstCoords = (startFatFeature.geometry as Point).coordinates as [
         number,
@@ -464,39 +462,46 @@ export const useLineEditing = (
         number,
         number,
       ];
-
+  
       const waypoints = [
         `${firstCoords[0]},${firstCoords[1]}`,
         ...coords.map((point) => `${point[0]},${point[1]}`),
         `${lastCoords[0]},${lastCoords[1]}`,
       ].join(";");
-
+  
       const response = await axios.get(
         `https://api.mapbox.com/directions/v5/mapbox/walking/${waypoints}?geometries=geojson&access_token=${process.env.NEXT_PUBLIC_MAPBOX_API}`
       );
-
+  
       if (response.data.routes && response.data.routes.length > 0) {
         const suggestedRoute = response.data.routes[0].geometry.coordinates;
-
+  
+        // Construct the updated suggested route
         const updatedSuggestedRoute = [
           firstCoords,
           ...suggestedRoute,
           lastCoords,
         ];
-
+  
+        // Filter out duplicate coordinates
+        const uniqueCoordinates = updatedSuggestedRoute.filter(
+          (coord, index, self) =>
+            index === self.findIndex((c) => c[0] === coord[0] && c[1] === coord[1])
+        );
+  
         const updatedFeature: Feature<LineString> = {
           ...currentFeature,
           geometry: {
             type: "LineString",
-            coordinates: updatedSuggestedRoute,
+            coordinates: uniqueCoordinates,
           },
         };
-
+  
         draw.set({
           type: "FeatureCollection",
           features: [updatedFeature],
         });
-
+  
         // Save state after suggesting a line
         saveState();
         syncLinePointsWithDraw();
@@ -508,7 +513,7 @@ export const useLineEditing = (
       alert("Error fetching the suggested line. Please try again.");
     }
   }, [startFatFeature, endFatFeature, draw, saveState]);
-
+  
   useEffect(() => {
     const snapFirstFeature = async () => {
       if (startFatFeature && startFatFeature.geometry.type === "Point") {
