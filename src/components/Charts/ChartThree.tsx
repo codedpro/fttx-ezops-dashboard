@@ -178,7 +178,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
       </div>
 
       <div className="mx-auto w-full max-w-[350px]">
-        <div className="flex flex-wrap sm:flex-row  items-center justify-center gap-3 sm:gap-5">
+        <div className="flex flex-wrap sm:flex-nowrap sm:flex-row  items-center justify-center gap-3 sm:gap-5">
           {labels.map((label, index) => {
             const percentage = ((series[index] / total) * 100).toFixed(2);
 

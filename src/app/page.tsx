@@ -54,7 +54,7 @@ const Dashboard = async () => {
     {
       label: "Preorder Paid",
       value: dashboardData?.preorder_Paid || 0,
-      id: "preorder_Paid ",
+      id: "preorder_Paid",
     },
 
     { label: "SFAT", value: dashboardData?.sfaT_Count || 0, id: "sfat" },
@@ -69,7 +69,6 @@ const Dashboard = async () => {
     <DefaultLayout>
       <DashboardCards cardData={cardData} />
 
-      {/* Responsive container for charts */}
       <div className="mt-4 md:mt-6 2xl:mt-9 md:flex md:flex-col lg:flex-row items-center  justify-around mx-4 gap-4">
         <div>
           {" "}
@@ -92,7 +91,6 @@ const Dashboard = async () => {
         </div>
       </div>
 
-      {/* Responsive wrapper for the chart below */}
       <div className="mt-4 w-full gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
         <ChartOne
           dailyData={dailyData}
