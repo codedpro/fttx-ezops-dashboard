@@ -1,15 +1,22 @@
+"use client";
 import React from "react";
 import Image from "next/image";
+import axios from "axios";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 import {
   FaTicketAlt,
   FaMoneyBillWave,
   FaExclamationTriangle,
 } from "react-icons/fa";
-
-// Define the structure of each card's data
+import { useFTTHComponentsOtherStore } from "@/store/FTTHComponentsOtherStore";
+import { useFTTHComponentsFatStore } from "@/store/FTTHComponentsFatStore";
+import { FaCloudDownloadAlt } from "react-icons/fa";
+import { UserService } from "@/services/userService";
 interface CardDataItem {
   label: string;
   value: number | string;
+  id: string;
 }
 
 interface DashboardCardsProps {
@@ -17,6 +24,9 @@ interface DashboardCardsProps {
 }
 
 const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
+  const others = useFTTHComponentsOtherStore((state) => state.others);
+  const fats = useFTTHComponentsFatStore((state) => state.fats);
+
   const getIconOrImage = (label: string) => {
     switch (label) {
       case "Preorder Not Paid":
@@ -35,7 +45,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
         return (
           <Image
             src="/images/map/HandHole.png"
-            alt="Household"
+            alt="Hand Hole"
             width={40}
             height={40}
           />
@@ -50,14 +60,112 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
         );
       case "MFAT":
         return (
-          <Image src="/images/map/MFAT.png" alt="TC" width={40} height={40} />
+          <Image src="/images/map/MFAT.png" alt="MFAT" width={40} height={40} />
         );
       case "SFAT":
         return (
-          <Image src="/images/map/SFAT.png" alt="TC" width={40} height={40} />
+          <Image src="/images/map/SFAT.png" alt="SFAT" width={40} height={40} />
         );
       default:
         return <FaTicketAlt size={30} className="text-gray-500" />;
+    }
+  };
+
+  const exportToXLSX = (data: any[], fileName: string) => {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    });
+
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString("en-GB").replace(/\//g, "-");
+    const formattedTime = now
+      .toLocaleTimeString("en-GB", { hour12: false })
+      .replace(/:/g, "-");
+
+    const fileNameWithTime = `${fileName} ${formattedDate} ${formattedTime}`;
+
+    saveAs(blob, `${fileNameWithTime}.xlsx`);
+  };
+  const userservice = new UserService();
+  const handleDownload = async (id: string) => {
+    try {
+      let data: any[] = [];
+      let fileName: string = "";
+
+      switch (id) {
+        case "preorder_Notpaid":
+          const responseNotPaid = await axios.get(
+            `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreOrderNotPaid`,
+            {
+              headers: {
+                Authorization: `Bearer ${userservice.getToken()}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          data = responseNotPaid.data;
+          fileName = "preorder_not_paid";
+          break;
+        case "preorder_Paid":
+          const responsePaid = await axios.get(
+            `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreorderPaid`,
+            {
+              headers: {
+                Authorization: `Bearer ${userservice.getToken()}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          data = responsePaid.data;
+          fileName = "preorder_paid";
+          break;
+        case "sfat":
+          data = fats.filter((fat) => fat.Type === "SFAT");
+          fileName = "sfat";
+          break;
+        case "mfat":
+          data = data = fats.filter((fat) => fat.Type === "MFAT");
+          fileName = "mfat";
+          break;
+        case "olt":
+          data = others.filter((component) => component.Type === "OLT");
+          fileName = "olt";
+          break;
+        case "hh":
+          data = others.filter((component) => component.Type === "HH");
+          fileName = "hand_hole";
+          break;
+        case "odc":
+          data = others.filter((component) => component.Type === "ODC");
+          fileName = "odc";
+          break;
+        case "tc":
+          data = others.filter((component) => component.Type === "TC");
+          fileName = "tc";
+          break;
+        default:
+          console.error("No handler for this card ID");
+          return;
+      }
+
+      if (data.length === 0) {
+        alert("No data available to download.");
+        return;
+      }
+
+      exportToXLSX(data, fileName);
+    } catch (error) {
+      console.error("Error downloading data:", error);
+      alert("Failed to download data. Please try again.");
     }
   };
 
@@ -66,7 +174,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
       {cardData.map((item: CardDataItem, idx: number) => (
         <div
           key={idx}
-          className="relative  p-6 overflow-hidden rounded-lg bg-white dark:bg-[#122031]  bg-grid-black/[0.01] dark:bg-grid-white/[0.01]   shadow-md transition-transform transform hover:scale-105 hover:shadow-lg group"
+          className="relative p-6 overflow-hidden rounded-lg bg-white dark:bg-[#122031] bg-grid-black/[0.01] dark:bg-grid-white/[0.01] shadow-md transition-transform transform hover:scale-105 hover:shadow-lg group"
         >
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-opacity-10 bg-white dark:bg-primary-dark mb-4 transition-shadow duration-300 mx-auto">
             {getIconOrImage(item.label)}
@@ -79,6 +187,14 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
             <span className="text-sm font-medium text-gray-500 dark:text-gray-300">
               {item.label}
             </span>
+          </div>
+
+          <div
+            className="absolute top-2 z-50  right-2 cursor-pointer text-gray-500 dark:text-gray-300 text-2xl"
+            onClick={() => handleDownload(item.id)}
+            title={`Download ${item.label} data`}
+          >
+            <FaCloudDownloadAlt />
           </div>
 
           <div className="absolute inset-0 border-2 border-transparent rounded-lg group-hover:border-primary dark:group-hover:border-secondary transition-colors duration-300"></div>

@@ -47,21 +47,29 @@ const Dashboard = async () => {
   const totalRunning = dashboardData?.uT_Open || 0;
 
   const cardData = [
-    { label: "Preorder Not Paid", value: dashboardData?.preorder_Notpaid || 0 },
-    { label: "Preorder Paid", value: dashboardData?.preorder_Paid || 0 },
-    // { label: "UT Closed", value: totalClosed },
-    // { label: "UT Open", value: totalRunning },
-    { label: "SFAT", value: dashboardData?.sfaT_Count || 0 },
-    { label: "MFAT", value: dashboardData?.mfaT_Count || 0 },
-    { label: "OLT", value: dashboardData?.olT_Count || 0 },
-    { label: "Hand Hole", value: dashboardData?.hH_Count || 0 },
-    { label: "ODC", value: dashboardData?.odC_Count || 0 },
-    { label: "TC", value: dashboardData?.tC_Count || 0 },
-  ];
+    {
+      label: "Preorder Not Paid",
+      value: dashboardData?.preorder_Notpaid || 0,
+      id: "preorder_Notpaid",
+    },
+    {
+      label: "Preorder Paid",
+      value: dashboardData?.preorder_Paid || 0,
+      id: "preorder_Paid ",
+    },
 
+    { label: "SFAT", value: dashboardData?.sfaT_Count || 0, id: "sfat" },
+    { label: "MFAT", value: dashboardData?.mfaT_Count || 0, id: "mfat" },
+    { label: "OLT", value: dashboardData?.olT_Count || 0, id: "olt" },
+    { label: "Hand Hole", value: dashboardData?.hH_Count || 0, id: "hh" },
+    { label: "ODC", value: dashboardData?.odC_Count || 0, id: "odc" },
+    { label: "TC", value: dashboardData?.tC_Count || 0, id: "tc" },
+  ];
+  // { label: "UT Closed", value: totalClosed },
+  // { label: "UT Open", value: totalRunning },
   return (
     <DefaultLayout>
-      {/*     <IranMap /> */} <DashboardCards cardData={cardData} />
+      {/*       <IranMap /> */} <DashboardCards cardData={cardData} />
       <div className="mt-4 md:mt-6  2xl:mt-9 flex flex-row items-center justify-around mx-4">
         <ChartThree
           header="FTTH Modem Status"
