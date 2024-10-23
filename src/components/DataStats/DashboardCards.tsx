@@ -2,8 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import axios from "axios";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
+
 import {
   FaTicketAlt,
   FaMoneyBillWave,
@@ -13,6 +12,7 @@ import { useFTTHComponentsOtherStore } from "@/store/FTTHComponentsOtherStore";
 import { useFTTHComponentsFatStore } from "@/store/FTTHComponentsFatStore";
 import { FaCloudDownloadAlt } from "react-icons/fa";
 import { UserService } from "@/services/userService";
+import { exportToXLSX } from "@/utils/exportToExcel";
 interface CardDataItem {
   label: string;
   value: number | string;
@@ -71,30 +71,6 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
     }
   };
 
-  const exportToXLSX = (data: any[], fileName: string) => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
-    });
-
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString("en-GB").replace(/\//g, "-");
-    const formattedTime = now
-      .toLocaleTimeString("en-GB", { hour12: false })
-      .replace(/:/g, "-");
-
-    const fileNameWithTime = `${fileName} ${formattedDate} ${formattedTime}`;
-
-    saveAs(blob, `${fileNameWithTime}.xlsx`);
-  };
   const userservice = new UserService();
   const handleDownload = async (id: string) => {
     try {

@@ -1,8 +1,10 @@
 import * as XLSX from "xlsx";
-import { ExtendedFeature } from "@/types/ExtendedFeature"; // Import the correct type
+import { ExtendedFeature } from "@/types/ExtendedFeature";
+import { saveAs } from "file-saver";
 
-// Update the function to accept ExtendedFeature
-export const exportToExcel = (groupedFeatures: { [key: string]: ExtendedFeature[] }) => {
+export const exportToExcel = (groupedFeatures: {
+  [key: string]: ExtendedFeature[];
+}) => {
   const workbook = XLSX.utils.book_new();
 
   Object.keys(groupedFeatures).forEach((source) => {
@@ -23,4 +25,28 @@ export const exportToExcel = (groupedFeatures: { [key: string]: ExtendedFeature[
   const fileName = `MTN_Irancell_FTTX_Time_${formattedDateTime}.xlsx`;
 
   XLSX.writeFile(workbook, fileName);
+};
+export const exportToXLSX = (data: any[], fileName: string) => {
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+  });
+
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString("en-GB").replace(/\//g, "-");
+  const formattedTime = now
+    .toLocaleTimeString("en-GB", { hour12: false })
+    .replace(/:/g, "-");
+
+  const fileNameWithTime = `${fileName} ${formattedDate} ${formattedTime}`;
+
+  saveAs(blob, `${fileNameWithTime}.xlsx`);
 };

@@ -5,7 +5,6 @@ import { fetchFTTHDashboard, fetchFTTHDailyChartData } from "@/lib/actions";
 import { cookies } from "next/headers";
 import DashboardCards from "@/components/DataStats/DashboardCards";
 import ChartOne from "@/components/Charts/ChartOne";
-import IranMap from "@/components/Maps/Iran";
 
 const Dashboard = async () => {
   const cookieStore = cookies();
@@ -65,27 +64,36 @@ const Dashboard = async () => {
     { label: "ODC", value: dashboardData?.odC_Count || 0, id: "odc" },
     { label: "TC", value: dashboardData?.tC_Count || 0, id: "tc" },
   ];
-  // { label: "UT Closed", value: totalClosed },
-  // { label: "UT Open", value: totalRunning },
+
   return (
     <DefaultLayout>
-      {/*       <IranMap /> */} <DashboardCards cardData={cardData} />
-      <div className="mt-4 md:mt-6  2xl:mt-9 flex flex-row items-center justify-around mx-4">
-        <ChartThree
-          header="FTTH Modem Status"
-          series={series}
-          colors={colors}
-          labels={labels}
-        />
-        <ChartThree
-          header="Payment Delivery Status"
-          series={series_Paid_to_Modems}
-          colors={colors}
-          labels={labels_Paid_to_modems}
-        />{" "}
-      </div>{" "}
+      <DashboardCards cardData={cardData} />
+
+      {/* Responsive container for charts */}
+      <div className="mt-4 md:mt-6 2xl:mt-9 md:flex md:flex-col lg:flex-row items-center  justify-around mx-4 gap-4">
+        <div>
+          {" "}
+          <ChartThree
+            header="FTTH Modem Status"
+            series={series}
+            colors={colors}
+            labels={labels}
+            apiname="FTTHDashboardExportModemStatus"
+          />
+        </div>
+        <div className="mt-4">
+          <ChartThree
+            header="Payment Delivery Status"
+            series={series_Paid_to_Modems}
+            colors={colors}
+            labels={labels_Paid_to_modems}
+            apiname="FTTHDashboardExportPreOrder"
+          />
+        </div>
+      </div>
+
+      {/* Responsive wrapper for the chart below */}
       <div className="mt-4 w-full gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-        {" "}
         <ChartOne
           dailyData={dailyData}
           totalClosed={totalClosed}

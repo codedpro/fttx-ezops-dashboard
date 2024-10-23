@@ -3,6 +3,10 @@ import { ApexOptions } from "apexcharts";
 import React, { useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import DefaultSelectOption from "@/components/SelectOption/DefaultSelectOption";
+import { FaCloudDownloadAlt } from "react-icons/fa";
+import axios from "axios";
+import { exportToXLSX } from "@/utils/exportToExcel";
+import { UserService } from "@/services/userService";
 
 interface ChartOneProps {
   dailyData: {
@@ -107,6 +111,40 @@ const ChartOne: React.FC<ChartOneProps> = ({
     },
   };
 
+  const userService = new UserService();
+
+  const handleDownload = async () => {
+    const end = filter === "Week" ? 7 : 30;
+    const start = 0;
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportUTTicketDaily`,
+        {
+          Start: start,
+          End: end,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userService.getToken()}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = response.data;
+
+      if (data.length === 0) {
+        alert("No data available to download.");
+        return;
+      }
+
+      exportToXLSX(data, "UT_Complains_Overview");
+    } catch (error) {
+      console.error("Error downloading data:", error);
+      alert("Failed to download data. Please try again.");
+    }
+  };
+
   return (
     <div className="col-span-12 rounded-[10px] bg-white px-7.5 pb-6 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card xl:col-span-7">
       <div className="mb-3.5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between relative z-10">
@@ -123,6 +161,14 @@ const ChartOne: React.FC<ChartOneProps> = ({
             options={["Week", "Month"]}
             onChange={(value: string) => setFilter(value)}
           />
+          <button
+            className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
+            onClick={handleDownload}
+            title="Download"
+          >
+            <FaCloudDownloadAlt size={14} />
+            <span className="hidden sm:inline">Download</span>
+          </button>
         </div>
       </div>
       <div>
