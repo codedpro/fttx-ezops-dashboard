@@ -119,7 +119,6 @@ export const fetchFTTHDynamicExportList = async (
       },
       {}
     );
-    console.log(categories)
 
     return categories;
   } catch (error) {

@@ -7,6 +7,7 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Select } from "../FormElements/Select";
 import { UserService } from "@/services/userService";
 import axios from "axios";
+import { saveAs } from "file-saver";
 
 interface ExportItemProps {
   exportItem: ExportItemType;
@@ -42,12 +43,12 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
 
     const exportDto = {
       ID: exportItem.id,
-      City: exportItem.isCity ? city : undefined,
+      City: exportItem.isCity ? city : "",
       NumberParameter:
         exportItem.isNumberParameter && numberParameter !== null
           ? numberParameter
-          : undefined,
-      PlanStatus: exportItem.isPlanStatus ? planStatus : undefined,
+          : null,
+      PlanStatus: exportItem.isPlanStatus ? planStatus : "",
     };
 
     const config = {
@@ -67,16 +68,12 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
         throw new Error("Failed to fetch export data");
       }
 
-      const data: ExportResponse = response.data;
-      const xlsxData = generateXLSX(data);
+      const data = response.data;
+      const xlsxData = generateXLSX(data as any[]);
 
-      const blob = new Blob([xlsxData], {
+      const blob = new Blob([s2ab(xlsxData)], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
 
       const date = new Date();
       const dateString = `${date.getFullYear()}-${(date.getMonth() + 1)
@@ -92,30 +89,29 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
         .toString()
         .padStart(2, "0")}`;
 
-      a.download = `${exportItem.name}_${dateString}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      saveAs(blob, `${exportItem.name}_${dateString}.xlsx`);
     } catch (error) {
       console.error("Failed to download export:", error);
-      alert("Failed to download export");
     } finally {
       setLoading(false);
     }
   };
 
-  const generateXLSX = (data: ExportResponse): ArrayBuffer => {
+  const generateXLSX = (data: any[]): string => {
     const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
-    for (const sheetName in data) {
-      const wsData = data[sheetName];
-      const ws = XLSX.utils.json_to_sheet(wsData);
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    return XLSX.write(wb, { bookType: "xlsx", type: "binary" });
+  };
+
+  const s2ab = (s: string) => {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < s.length; i++) {
+      view[i] = s.charCodeAt(i) & 0xff;
     }
-
-    const xlsxData = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    return xlsxData;
+    return buf;
   };
 
   return (
@@ -205,7 +201,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
               <button
                 onClick={handleDownload}
                 disabled={loading || !isDownloadEnabled}
-                className={`mt-5  mb-1 lg:mt-0 w-full lg:w-auto flex items-center justify-center rounded-md bg-primary px-4 py-2 text-white font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                className={`mt-5 mb-1 lg:mt-0 w-full lg:w-auto flex items-center justify-center rounded-md bg-primary px-4 py-2 text-white font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                   loading || !isDownloadEnabled
                     ? "opacity-50 cursor-not-allowed"
                     : ""
