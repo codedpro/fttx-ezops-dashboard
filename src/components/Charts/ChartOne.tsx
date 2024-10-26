@@ -167,7 +167,7 @@ const ChartOne: React.FC<ChartOneProps> = ({
             title="Download"
           >
             <FaCloudDownloadAlt size={14} />
-            <span className="hidden sm:inline">Download</span>
+            <span className="hidden sm:inline">Export</span>
           </button>
         </div>
       </div>

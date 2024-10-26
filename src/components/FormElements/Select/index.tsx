@@ -5,7 +5,7 @@ import { useMotionTemplate, useMotionValue, motion } from "framer-motion";
 
 export interface SelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  isError?: boolean; // Add a new prop for error state
+  isError?: boolean;
 }
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -41,7 +41,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       >
         <select
           className={cn(
-            `appearance-none flex h-10 w-full border-none bg-neutral-800 text-white rounded-md px-3 py-2 text-sm  
+            `appearance-none flex h-10 w-full border-none dark:bg-gray-dark  text-white rounded-md px-3 py-2 text-sm  
             file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder-text-neutral-600 
             focus-visible:outline-none focus-visible:ring-[2px] 
             disabled:cursor-not-allowed disabled:opacity-50
@@ -49,8 +49,8 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             group-hover/input:shadow-none transition duration-400
         ${
           isError
-              ? "focus-visible:ring-red-500 shadow-[0px_0px_1px_1px_var(--red-500)]"
-                : "focus-visible:ring-primary shadow-[0px_0px_1px_1px_var(--zinc-800)]"
+            ? "focus-visible:ring-red-500 shadow-[0px_0px_1px_1px_var(--red-500)]"
+            : "focus-visible:ring-primary  dark:shadow-[0px_0px_1px_1px_var(--dark-3)] shadow-[0px_0px_1px_1px_var(--gray-300)]"
         } 
             `,
             className

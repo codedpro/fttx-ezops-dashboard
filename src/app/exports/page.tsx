@@ -17,8 +17,10 @@ const ExportsPage: React.FC = () => {
 
   return (
     <DefaultLayout>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Exports</h1>
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold text-dark dark:text-white mb-6">
+          Exports
+        </h1>
         <ExportList categories={categories} />
       </div>
     </DefaultLayout>

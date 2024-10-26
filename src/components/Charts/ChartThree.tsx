@@ -153,7 +153,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
           title="Download"
         >
           <FaCloudDownloadAlt size={16} className="sm:mr-2" />
-          <span className=" sm:inline">Download</span>
+          <span className=" sm:inline">Export</span>
         </button>
       </div>
 

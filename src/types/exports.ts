@@ -7,6 +7,7 @@ export interface ExportItemType {
   isPlanStatus: boolean;
   numberParameters: number[] | null;
   planStatus: string[] | null;
+  cities: string[] | null;
 }
 
 export interface ExportData {

@@ -1,33 +1,35 @@
 [
-    {
-      "id": 1,
-      "name": "Export A",
-      "category": "Category 1",
-      "isCity": true,
-      "isNumberParameter": false,
-      "isPlanStatus": true,
-      "numberParameters": null,
-      "planStatus": ["Active", "Inactive"]
-    },
-    {
-      "id": 2,
-      "name": "Export B",
-      "category": "Category 1",
-      "isCity": false,
-      "isNumberParameter": true,
-      "isPlanStatus": false,
-      "numberParameters": [1, 2, 3, 4],
-      "planStatus": null
-    },
-    {
-      "id": 3,
-      "name": "Export C",
-      "category": "Category 2",
-      "isCity": false,
-      "isNumberParameter": false,
-      "isPlanStatus": false,
-      "numberParameters": null,
-      "planStatus": null
-    }
-  ]
-  
+  {
+    "id": 1,
+    "name": "Export A",
+    "category": "Category 1",
+    "isCity": true,
+    "isNumberParameter": true,
+    "isPlanStatus": true,
+    "numberParameters": [0, 1, 2, 3],
+    "planStatus": ["Active", "Inactive"],
+    "cities": ["babol", "tehran", "sari"]
+  },
+  {
+    "id": 2,
+    "name": "Export B",
+    "category": "Category 1",
+    "isCity": false,
+    "isNumberParameter": true,
+    "isPlanStatus": false,
+    "numberParameters": [1, 2, 3, 4],
+    "planStatus": null,
+    "cities": ["babol", "tehran", "sari"]
+  },
+  {
+    "id": 3,
+    "name": "Export C",
+    "category": "Category 2",
+    "isCity": false,
+    "isNumberParameter": false,
+    "isPlanStatus": false,
+    "numberParameters": null,
+    "planStatus": null,
+    "cities": null
+  }
+]
