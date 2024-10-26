@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import { ExportItemType, ExportParams, ExportResponse } from "@/types/exports";
+import React, { useState, useEffect } from "react";
+import { ExportItemType, ExportResponse } from "@/types/exports";
 import * as XLSX from "xlsx";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Select } from "../FormElements/Select";
+import { UserService } from "@/services/userService";
+import axios from "axios";
 
 interface ExportItemProps {
   exportItem: ExportItemType;
@@ -12,38 +14,62 @@ interface ExportItemProps {
 
 const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
   const [city, setCity] = useState<string>("");
-  const [numberParameter, setNumberParameter] = useState<number | "">("");
+  const [numberParameter, setNumberParameter] = useState<number | null>(null);
   const [planStatus, setPlanStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(true); // Collapsible state
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+  const [isDownloadEnabled, setIsDownloadEnabled] = useState<boolean>(false);
+  const userservice = new UserService();
+
+  useEffect(() => {
+    const cityRequired = exportItem.isCity && city;
+    const numberParameterRequired =
+      exportItem.isNumberParameter && numberParameter !== null;
+    const planStatusRequired = exportItem.isPlanStatus && planStatus;
+
+    setIsDownloadEnabled(
+      Boolean(
+        (!exportItem.isCity || cityRequired) &&
+          (!exportItem.isNumberParameter || numberParameterRequired) &&
+          (!exportItem.isPlanStatus || planStatusRequired)
+      )
+    );
+  }, [city, numberParameter, planStatus, exportItem]);
 
   const handleDownload = async () => {
+    const token = userservice.getToken();
     setLoading(true);
 
-    const params: ExportParams = { id: exportItem.id };
-    if (exportItem.isCity) params.city = city;
-    if (exportItem.isNumberParameter && typeof numberParameter === "number") {
-      params.numberParameter = numberParameter;
-    }
-    if (exportItem.isPlanStatus) params.planStatus = planStatus;
+    const exportDto = {
+      ID: exportItem.id,
+      City: exportItem.isCity ? city : undefined,
+      NumberParameter:
+        exportItem.isNumberParameter && numberParameter !== null
+          ? numberParameter
+          : undefined,
+      PlanStatus: exportItem.isPlanStatus ? planStatus : undefined,
+    };
+
+    const config = {
+      method: "post",
+      url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDynamicExport`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data: exportDto,
+    };
 
     try {
-      const response = await fetch("/api/export", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
-      });
+      const response = await axios(config);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to fetch export data");
       }
 
-      const data: ExportResponse = await response.json();
-
-      // Generate XLSX file
+      const data: ExportResponse = response.data;
       const xlsxData = generateXLSX(data);
 
-      // Create a blob and trigger download
       const blob = new Blob([xlsxData], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
@@ -72,7 +98,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to download export:", error);
       alert("Failed to download export");
     } finally {
       setLoading(false);
@@ -94,7 +120,6 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
 
   return (
     <div className="export-item mb-4 rounded-lg border border-stroke bg-white shadow-sm dark:border-dark-3 dark:bg-gray-dark">
-      {/* Collapsible Header */}
       <div
         className="flex justify-between items-center p-4 cursor-pointer"
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -109,7 +134,6 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
         )}
       </div>
 
-      {/* Collapsible Body */}
       {!isCollapsed && (
         <div className="p-4 ">
           <div className="space-y-4 lg:space-y-0 lg:flex lg:space-x-4 lg:items-end">
@@ -139,10 +163,10 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
                   Radius Distance:
                 </label>
                 <Select
-                  value={numberParameter}
+                  value={numberParameter ?? ""}
                   onChange={(e) =>
                     setNumberParameter(
-                      e.target.value ? parseInt(e.target.value) : ""
+                      e.target.value ? parseInt(e.target.value) : null
                     )
                   }
                   className=""
@@ -180,9 +204,11 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
             <div className="w-full lg:w-1/4">
               <button
                 onClick={handleDownload}
-                disabled={loading}
+                disabled={loading || !isDownloadEnabled}
                 className={`mt-5  mb-1 lg:mt-0 w-full lg:w-auto flex items-center justify-center rounded-md bg-primary px-4 py-2 text-white font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
+                  loading || !isDownloadEnabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                 }`}
               >
                 {loading ? "Downloading..." : "Download"}

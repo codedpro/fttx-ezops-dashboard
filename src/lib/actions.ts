@@ -1,6 +1,8 @@
 import axios from "axios";
 import { ModemDetails } from "@/types/ModemDetails";
 import qs from "qs";
+
+import { ExportItemType, ExportData } from "@/types/exports";
 export const fetchModemDetails = async (
   id: string,
   token: string
@@ -88,5 +90,40 @@ export const fetchFTTHDailyChartData = async (token: string) => {
   } catch (error) {
     console.error("Failed to fetch daily chart data:", error);
     throw error;
+  }
+};
+
+export const fetchFTTHDynamicExportList = async (
+  token: string
+): Promise<ExportData> => {
+  const config = {
+    method: "get",
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDynamicExportList`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  };
+
+  try {
+    const response = await axios.request(config);
+    const exportsData: ExportItemType[] = response.data;
+
+    const categories: ExportData = exportsData.reduce<ExportData>(
+      (acc, exp) => {
+        if (!acc[exp.category]) {
+          acc[exp.category] = [];
+        }
+        acc[exp.category].push(exp);
+        return acc;
+      },
+      {}
+    );
+    console.log(categories)
+
+    return categories;
+  } catch (error) {
+    console.error("Error fetching FTTH export list data:", error);
+    throw new Error("Failed to fetch FTTH export list data");
   }
 };

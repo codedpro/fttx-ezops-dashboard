@@ -1,19 +1,33 @@
 import React from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import ExportList from "@/components/ExportList";
-import data from "@/data/exports.json";
-import { ExportItemType, ExportData } from "@/types/exports";
+import { fetchFTTHDynamicExportList } from "@/lib/actions";
+import { cookies } from "next/headers";
+import { ExportData } from "@/types/exports";
 
-const ExportsPage: React.FC = () => {
-  const exportsData: ExportItemType[] = data;
+const ExportsPage = async () => {
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value;
 
-  const categories: ExportData = exportsData.reduce<ExportData>((acc, exp) => {
-    if (!acc[exp.category]) {
-      acc[exp.category] = [];
-    }
-    acc[exp.category].push(exp);
-    return acc;
-  }, {});
+  if (!token) {
+    return <div className="text-center text-red-600">Unauthorized</div>;
+  }
+
+  let categories: ExportData = {};
+
+  try {
+    categories = await fetchFTTHDynamicExportList(token);
+  } catch (error) {
+    console.error("Failed to fetch export list data:", error);
+    return (
+      <DefaultLayout>
+        {" "}
+        <div className="text-center text-red-600">
+          Failed to load export list data.
+        </div>
+      </DefaultLayout>
+    );
+  }
 
   return (
     <DefaultLayout>

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { ExportData, ExportItemType } from '@/types/exports';
-import ExportItem from './ExportItem';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { Input } from '../FormElements/Input';
+import React, { useState } from "react";
+import { ExportData, ExportItemType } from "@/types/exports";
+import ExportItem from "./ExportItem";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { Input } from "../FormElements/Input";
 
 interface ExportListProps {
   categories: ExportData;
@@ -13,15 +13,17 @@ interface ExportListProps {
 const ExportList: React.FC<ExportListProps> = ({ categories }) => {
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
     () =>
-      Object.keys(categories).reduce<Record<string, boolean>>((acc, category) => {
-        acc[category] = true; // All categories are open by default
-        return acc;
-      }, {})
+      Object.keys(categories).reduce<Record<string, boolean>>(
+        (acc, category) => {
+          acc[category] = true;
+          return acc;
+        },
+        {}
+      )
   );
 
-  const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Handle category toggle
   const toggleCategory = (category: string) => {
     setOpenCategories((prev) => ({
       ...prev,
@@ -29,12 +31,12 @@ const ExportList: React.FC<ExportListProps> = ({ categories }) => {
     }));
   };
 
-  // Filter the exports based on the search query
   const filteredCategories = Object.entries(categories).reduce<ExportData>(
     (acc, [category, exports]) => {
-      const filteredExports = exports.filter((exportItem) =>
-        exportItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        category.toLowerCase().includes(searchQuery.toLowerCase())
+      const filteredExports = exports.filter(
+        (exportItem) =>
+          exportItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          category.toLowerCase().includes(searchQuery.toLowerCase())
       );
       if (filteredExports.length > 0) {
         acc[category] = filteredExports;
@@ -46,7 +48,6 @@ const ExportList: React.FC<ExportListProps> = ({ categories }) => {
 
   return (
     <div className="container mx-auto">
-      {/* Search Input */}
       <div className="mb-4">
         <Input
           type="text"
@@ -57,7 +58,6 @@ const ExportList: React.FC<ExportListProps> = ({ categories }) => {
         />
       </div>
 
-      {/* Display filtered categories and exports */}
       <div className="grid grid-cols-1 gap-6">
         {Object.entries(filteredCategories).length > 0 ? (
           Object.entries(filteredCategories).map(([category, exports]) => (
