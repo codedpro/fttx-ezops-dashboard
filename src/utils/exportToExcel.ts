@@ -28,6 +28,16 @@ export const exportToExcel = (groupedFeatures: {
 };
 export const exportToXLSX = (data: any[], fileName: string) => {
   const worksheet = XLSX.utils.json_to_sheet(data);
+
+  const columns = Object.keys(data[0] || {});
+  const columnWidths = columns.map((col) => ({
+    wch:
+      Math.max(
+        ...data.map((row) => (row[col] ? row[col].toString().length : 10))
+      ) + 5,
+  }));
+  worksheet["!cols"] = columnWidths;
+
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 

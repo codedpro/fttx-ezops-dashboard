@@ -106,11 +106,20 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
   const generateXLSX = (data: any[]): string => {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
+
+    const columns = Object.keys(data[0] || {});
+    const columnWidths = columns.map((col) => ({
+      wch:
+        Math.max(
+          ...data.map((row) => (row[col] ? row[col].toString().length : 10))
+        ) + 5,
+    }));
+    ws["!cols"] = columnWidths;
+
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
     return XLSX.write(wb, { bookType: "xlsx", type: "binary" });
   };
-
   const s2ab = (s: string) => {
     const buf = new ArrayBuffer(s.length);
     const view = new Uint8Array(buf);
@@ -213,7 +222,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
                     : ""
                 }`}
               >
-                {loading ? "Downloading..." : "Download"}
+                {loading ? "Generating Report ..." : "Download"}
               </button>
             </div>
           </div>

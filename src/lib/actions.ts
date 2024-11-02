@@ -24,7 +24,7 @@ export const fetchModemDetails = async (
 
   try {
     const response = await axios.request(config);
-
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching modem details:", error);
@@ -61,6 +61,7 @@ export const fetchFTTHDashboard = async (token: string) => {
 
   try {
     const response = await axios.request(config);
+
     return response.data;
   } catch (error) {
     console.error("Error fetching FTTH dashboard data:", error);

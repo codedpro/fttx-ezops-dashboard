@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FaLightbulb } from "react-icons/fa";
 import * as XLSX from "xlsx";
-import { Input } from "../FormElements/Input";
+import { Input } from "../FormElements/InputSmall";
 
 interface TableThreeProps {
   data: any[];
@@ -81,11 +81,10 @@ const TableThree: React.FC<TableThreeProps> = ({
               {filteredColumns.map((col) => (
                 <th
                   key={col.key}
-                  className="min-w-[150px] px-6 py-4 font-semibold text-center text-dark dark:text-[#E2E8F0] border-b text-nowrap border-[#eee] dark:border-[#2F3A47] text-xs md:text-sm lg:text-base transition-all hover:text-primary"
+                  className="min-w-[150px] px-3 py-2 font-semibold text-center text-dark dark:text-[#E2E8F0] border-b text-nowrap border-[#eee] dark:border-[#2F3A47] text-xs md:text-sm lg:text-base transition-all hover:text-primary"
                 >
                   {col.label}
                   <div className="mt-1 text-white">
-                    {" "}
                     <Input
                       type="text"
                       placeholder={"Filter " + col.label}

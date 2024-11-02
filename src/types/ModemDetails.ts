@@ -67,10 +67,33 @@ export interface IBSNG_Ballances {
   Unused_Value: string;
   Start_Time: string;
 }
+export interface ACS_Main {
+  ACS_ID: string;
+  modelName: string;
+  serialNumber: string;
+  manufacturer: string;
+  pppVlan: number;
+  mac: string;
+  activationDate: string;
+  blacklisted: string;
+  lastSessionTime: string;
+  lastEmptySessionTime: string;
+  lastBootstrapTime: string;
+  lastRebootTime: string;
+  ipAddress: string;
+  hardwareVersion: string;
+  softwareVersion: string;
+  productClass: string;
+  TXPower: number;
+  TransceiverTemperature: number;
+  RXPower: number;
+  Vgroup: string;
+}
 
 export interface ModemDetails {
   IBSNG_Main: IBSNG_Main[];
   IBSNG_Internet_Onlines: IBSNG_Internet_Onlines[];
   IBSNG_Connection_History: IBSNG_Connection_History[];
   IBSNG_Ballances: IBSNG_Ballances[];
+  ACS_Main: ACS_Main[];
 }
