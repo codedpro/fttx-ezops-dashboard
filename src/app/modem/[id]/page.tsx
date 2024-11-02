@@ -93,99 +93,99 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
-              { label: "FTTH ID", value: modemDetails.IBSNG_Main[0].FTTH_ID },
-              { label: "User ID", value: modemDetails.IBSNG_Main[0].User_ID },
-              { label: "Customer", value: modemDetails.IBSNG_Main[0].Customer },
-              { label: "Group", value: modemDetails.IBSNG_Main[0].Group },
+              { label: "FTTH ID", value: modemDetails?.IBSNG_Main[0]?.FTTH_ID },
+              { label: "User ID", value: modemDetails?.IBSNG_Main[0]?.User_ID },
+              { label: "Customer", value: modemDetails?.IBSNG_Main[0]?.Customer },
+              { label: "Group", value: modemDetails?.IBSNG_Main[0]?.Group },
               {
                 label: "Last Successful Login",
-                value: modemDetails.IBSNG_Main[0].Last_Successful_Login,
+                value: modemDetails?.IBSNG_Main[0]?.Last_Successful_Login,
               },
               {
                 label: "Expiration Status",
-                value: modemDetails.IBSNG_Main[0].Expiration_Status,
+                value: modemDetails?.IBSNG_Main[0]?.Expiration_Status,
                 status: true,
               },
               {
                 label: "Parent User ID",
-                value: modemDetails.IBSNG_Main[0].Parent_User_Id,
+                value: modemDetails?.IBSNG_Main[0]?.Parent_User_Id,
               },
               {
                 label: "Creation Date",
-                value: modemDetails.IBSNG_Main[0].Creation_Date,
+                value: modemDetails?.IBSNG_Main[0]?.Creation_Date,
               },
-              { label: "Owner", value: modemDetails.IBSNG_Main[0].Owner_IS },
+              { label: "Owner", value: modemDetails?.IBSNG_Main[0]?.Owner_IS },
               {
                 label: "is User Locked",
-                value: modemDetails.IBSNG_Main[0].User_is_Locked,
+                value: modemDetails?.IBSNG_Main[0]?.User_is_Locked,
               },
-              { label: "Charge", value: modemDetails.IBSNG_Main[0].Charge },
+              { label: "Charge", value: modemDetails?.IBSNG_Main[0]?.Charge },
               {
                 label: "Real First Login",
-                value: modemDetails.IBSNG_Main[0].Real_First_Login,
+                value: modemDetails?.IBSNG_Main[0]?.Real_First_Login,
               },
-              { label: "ACS ID", value: modemDetails.ACS_Main[0].ACS_ID },
+              { label: "ACS ID", value: modemDetails?.ACS_Main[0]?.ACS_ID },
               {
                 label: "Model Name",
-                value: modemDetails.ACS_Main[0].modelName,
+                value: modemDetails?.ACS_Main[0]?.modelName,
               },
               {
                 label: "Serial Number",
-                value: modemDetails.ACS_Main[0].serialNumber,
+                value: modemDetails?.ACS_Main[0]?.serialNumber,
               },
               {
                 label: "Manufacturer",
-                value: modemDetails.ACS_Main[0].manufacturer,
+                value: modemDetails?.ACS_Main[0]?.manufacturer,
               },
-              { label: "PPP VLAN", value: modemDetails.ACS_Main[0].pppVlan },
-              { label: "MAC Address", value: modemDetails.ACS_Main[0].mac },
+              { label: "PPP VLAN", value: modemDetails?.ACS_Main[0]?.pppVlan },
+              { label: "MAC Address", value: modemDetails?.ACS_Main[0]?.mac },
               {
                 label: "Activation Date",
-                value: modemDetails.ACS_Main[0].activationDate,
+                value: modemDetails?.ACS_Main[0]?.activationDate,
               },
               {
                 label: "Blacklisted",
-                value: modemDetails.ACS_Main[0].blacklisted,
+                value: modemDetails?.ACS_Main[0]?.blacklisted,
               },
               {
                 label: "Last Session Time",
-                value: modemDetails.ACS_Main[0].lastSessionTime,
+                value: modemDetails?.ACS_Main[0]?.lastSessionTime,
               },
               {
                 label: "Last Empty Session Time",
-                value: modemDetails.ACS_Main[0].lastEmptySessionTime,
+                value: modemDetails?.ACS_Main[0]?.lastEmptySessionTime,
               },
               {
                 label: "Last Bootstrap Time",
-                value: modemDetails.ACS_Main[0].lastBootstrapTime,
+                value: modemDetails?.ACS_Main[0]?.lastBootstrapTime,
               },
               {
                 label: "Last Reboot Time",
-                value: modemDetails.ACS_Main[0].lastRebootTime,
+                value: modemDetails?.ACS_Main[0]?.lastRebootTime,
               },
               {
                 label: "IP Address",
-                value: modemDetails.ACS_Main[0].ipAddress,
+                value: modemDetails?.ACS_Main[0]?.ipAddress,
               },
               {
                 label: "Hardware Version",
-                value: modemDetails.ACS_Main[0].hardwareVersion,
+                value: modemDetails?.ACS_Main[0]?.hardwareVersion,
               },
               {
                 label: "Software Version",
-                value: modemDetails.ACS_Main[0].softwareVersion,
+                value: modemDetails?.ACS_Main[0]?.softwareVersion,
               },
               {
                 label: "Product Class",
-                value: modemDetails.ACS_Main[0].productClass,
+                value: modemDetails?.ACS_Main[0]?.productClass,
               },
-              { label: "TX Power", value: modemDetails.ACS_Main[0].TXPower },
+              { label: "TX Power", value: modemDetails?.ACS_Main[0]?.TXPower },
               {
                 label: "Transceiver Temperature",
-                value: modemDetails.ACS_Main[0].TransceiverTemperature,
+                value: modemDetails?.ACS_Main[0]?.TransceiverTemperature,
               },
-              { label: "RX Power", value: modemDetails.ACS_Main[0].RXPower },
-              { label: "Vgroup", value: modemDetails.ACS_Main[0].Vgroup },
+              { label: "RX Power", value: modemDetails?.ACS_Main[0]?.RXPower },
+              { label: "Vgroup", value: modemDetails?.ACS_Main[0]?.Vgroup },
             ]
 
               .sort((a, b) => a.label.localeCompare(b.label))
@@ -215,7 +215,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             columns={internetOnlinesColumns}
             header="Internet Online Sessions"
             emoji="🌐"
-            initialLimit={20}
+            initialLimit={5}
           />
         </div>
 
@@ -225,7 +225,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             columns={connectionHistoryColumns}
             header="Connection History"
             emoji="🔗"
-            initialLimit={20}
+            initialLimit={5}
           />
         </div>
 
@@ -235,7 +235,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             columns={ballancesColumns}
             header="Balances"
             emoji="💰"
-            initialLimit={20}
+            initialLimit={5}
           />
         </div>
       </div>

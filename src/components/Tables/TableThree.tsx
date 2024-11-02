@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { FaLightbulb } from "react-icons/fa";
 import * as XLSX from "xlsx";
-import { Input } from "../FormElements/InputSmall";
 
 interface TableThreeProps {
   data: any[];
@@ -18,7 +17,7 @@ const TableThree: React.FC<TableThreeProps> = ({
   columns,
   header,
   emoji,
-  initialLimit = 20,
+  initialLimit = 5,
 }) => {
   const [limit, setLimit] = useState(initialLimit);
   const [filters, setFilters] = useState<{ [key: string]: string }>({});
@@ -49,7 +48,6 @@ const TableThree: React.FC<TableThreeProps> = ({
     XLSX.writeFile(workbook, "table_data.xlsx");
   };
 
-  // Handle string-based filtering
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -59,18 +57,16 @@ const TableThree: React.FC<TableThreeProps> = ({
 
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-[#1F2B37] dark:bg-[#122031] dark:shadow-card sm:p-7.5 hover:shadow-lg">
-      <h3 className="text-xl font-bold mb-4 dark:text-[#E2E8F0]">
-        <span className="mr-2">{emoji}</span>
-        {header}
-      </h3>
-
-      {/* Export to Excel Button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-row items-center justify-between mb-4">
+        <h3 className="text-xl font-bold dark:text-[#E2E8F0] flex items-center">
+          <span className="mr-2">{emoji}</span>
+          {header}
+        </h3>
         <button
           onClick={exportToExcel}
-          className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300"
+          className="px-3 py-2 text-sm bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all duration-300"
         >
-          Export to Excel
+          Export
         </button>
       </div>
 
@@ -84,14 +80,14 @@ const TableThree: React.FC<TableThreeProps> = ({
                   className="min-w-[150px] px-3 py-2 font-semibold text-center text-dark dark:text-[#E2E8F0] border-b text-nowrap border-[#eee] dark:border-[#2F3A47] text-xs md:text-sm lg:text-base transition-all hover:text-primary"
                 >
                   {col.label}
-                  <div className="mt-1 text-white">
-                    <Input
+                  <div className="flex justify-center mt-2 w-full">
+                    <input
                       type="text"
                       placeholder={"Filter " + col.label}
                       onChange={(e) =>
                         handleFilterChange(col.key, e.target.value)
                       }
-                      className=""
+                      className="px-2 py-1 text-xs bg-transparent placeholder:text-center  w-full border-b border-gray-300 placeholder:text-xs placeholder:ellipsis focus:outline-none focus:border-primary focus:ring-0 transition-all"
                     />
                   </div>
                 </th>
@@ -130,10 +126,10 @@ const TableThree: React.FC<TableThreeProps> = ({
       </div>
 
       {limit < data.length && (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-4 flex justify-center">
           <button
             onClick={handleLoadMore}
-            className="px-8 py-3 bg-primary text-white font-semibold rounded-full shadow-lg transform transition-all duration-300 hover:bg-primary-dark hover:scale-105 hover:shadow-xl active:scale-95 focus:outline-none focus:ring-4 focus:ring-primary-light"
+            className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-full shadow-lg transform transition-all duration-300 hover:bg-primary-dark hover:scale-105 hover:shadow-xl active:scale-95 focus:outline-none focus:ring-4 focus:ring-primary-light"
           >
             Load More
           </button>

@@ -24,7 +24,6 @@ export const fetchModemDetails = async (
 
   try {
     const response = await axios.request(config);
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching modem details:", error);
