@@ -102,6 +102,7 @@ export const useFTTHPreordersStore = create<FTTHPreordersState>((set, get) => ({
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            
           },
         });
 
