@@ -7,6 +7,7 @@ import {
   FaWifi,
   FaChevronLeft,
   FaPaintBrush,
+  FaFileExport,
 } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
@@ -86,11 +87,16 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       icon: <PiMapPinArea />,
       route: "/iranfttx",
     },
-/*     {
+    /*     {
       label: "Design Desk",
       icon: <FaPaintBrush />,
       route: "/design-desk",
     }, */
+    {
+      label: "Exports",
+      icon: <FaFileExport />,
+      route: "/exports",
+    },
   ];
 
   if (!sidebarOpen) {
