@@ -87,7 +87,7 @@ const TableThree: React.FC<TableThreeProps> = ({
                       onChange={(e) =>
                         handleFilterChange(col.key, e.target.value)
                       }
-                      className="px-2 py-1 text-xs bg-transparent placeholder:text-center  w-full border-b border-gray-300 placeholder:text-xs placeholder:ellipsis focus:outline-none focus:border-primary focus:ring-0 transition-all"
+                      className="px-2 py-1 text-xs bg-transparent placeholder:text-center w-full placeholder:text-xs placeholder:ellipsis focus:outline-none focus:border-b focus:border-primary "
                     />
                   </div>
                 </th>

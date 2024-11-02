@@ -10,6 +10,7 @@ import {
 } from "@/data/modemColumns";
 import RefreshButton from "@/components/Buttons/RefreshButton";
 import Link from "next/link";
+import DataGrid from "@/components/DataGrid";
 
 const ModemPage = async ({ params }: { params: { id: string } }) => {
   const cookieStore = cookies();
@@ -63,150 +64,141 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
   const onlineStatus = modemDetails?.IBSNG_Main[0].Online_Status || "Offline";
   const lastUpdate = modemDetails?.IBSNG_Main[0].DB_Last_Update || "Unknown";
 
+  const modemdetailsData = [
+    { label: "FTTH ID", value: modemDetails?.IBSNG_Main[0]?.FTTH_ID },
+    { label: "User ID", value: modemDetails?.IBSNG_Main[0]?.User_ID },
+    { label: "Customer", value: modemDetails?.IBSNG_Main[0]?.Customer },
+    { label: "Group", value: modemDetails?.IBSNG_Main[0]?.Group },
+    {
+      label: "Last Successful Login",
+      value: modemDetails?.IBSNG_Main[0]?.Last_Successful_Login,
+    },
+    {
+      label: "Expiration Status",
+      value: modemDetails?.IBSNG_Main[0]?.Expiration_Status,
+      status: true,
+    },
+    {
+      label: "Parent User ID",
+      value: modemDetails?.IBSNG_Main[0]?.Parent_User_Id,
+    },
+    {
+      label: "Creation Date",
+      value: modemDetails?.IBSNG_Main[0]?.Creation_Date,
+    },
+    { label: "Owner", value: modemDetails?.IBSNG_Main[0]?.Owner_IS },
+    {
+      label: "is User Locked",
+      value: modemDetails?.IBSNG_Main[0]?.User_is_Locked,
+    },
+    { label: "Charge", value: modemDetails?.IBSNG_Main[0]?.Charge },
+    {
+      label: "Real First Login",
+      value: modemDetails?.IBSNG_Main[0]?.Real_First_Login,
+    },
+  ];
+
+  const acsdata = [
+    { label: "ACS ID", value: modemDetails?.ACS_Main[0]?.ACS_ID },
+    {
+      label: "Model Name",
+      value: modemDetails?.ACS_Main[0]?.modelName,
+    },
+    {
+      label: "Serial Number",
+      value: modemDetails?.ACS_Main[0]?.serialNumber,
+    },
+    { label: "RX Power", value: modemDetails?.ACS_Main[0]?.RXPower },
+    { label: "TX Power", value: modemDetails?.ACS_Main[0]?.TXPower },
+    {
+      label: "Manufacturer",
+      value: modemDetails?.ACS_Main[0]?.manufacturer,
+    },
+
+    { label: "PPP VLAN", value: modemDetails?.ACS_Main[0]?.pppVlan },
+    { label: "MAC Address", value: modemDetails?.ACS_Main[0]?.mac },
+    {
+      label: "Activation Date",
+      value: modemDetails?.ACS_Main[0]?.activationDate,
+    },
+    {
+      label: "Blacklisted",
+      value: modemDetails?.ACS_Main[0]?.blacklisted,
+    },
+    {
+      label: "Last Session Time",
+      value: modemDetails?.ACS_Main[0]?.lastSessionTime,
+    },
+    {
+      label: "Last Empty Session Time",
+      value: modemDetails?.ACS_Main[0]?.lastEmptySessionTime,
+    },
+    {
+      label: "Last Bootstrap Time",
+      value: modemDetails?.ACS_Main[0]?.lastBootstrapTime,
+    },
+    {
+      label: "Last Reboot Time",
+      value: modemDetails?.ACS_Main[0]?.lastRebootTime,
+    },
+    {
+      label: "IP Address",
+      value: modemDetails?.ACS_Main[0]?.ipAddress,
+    },
+    {
+      label: "Hardware Version",
+      value: modemDetails?.ACS_Main[0]?.hardwareVersion,
+    },
+    {
+      label: "Software Version",
+      value: modemDetails?.ACS_Main[0]?.softwareVersion,
+    },
+    {
+      label: "Product Class",
+      value: modemDetails?.ACS_Main[0]?.productClass,
+    },
+
+    {
+      label: "Transceiver Temperature",
+      value: modemDetails?.ACS_Main[0]?.TransceiverTemperature,
+    },
+
+    { label: "Vgroup", value: modemDetails?.ACS_Main[0]?.Vgroup },
+  ];
   return (
     <DefaultLayout>
       <div className="container mx-auto p-4 space-y-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center justify-center space-x-2">
-            <FaWifi
-              className={`text-2xl ${getIconColor(onlineStatus)} bg-transparent`}
-            />
-            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-              <span className="font-semibold">{onlineStatus}</span>
-            </p>
-            <Link href={`/map?search=${modemId}`}>
-              <FaMap className="text-2xl text-gray-700 dark:text-gray-300 cursor-pointer" />
-            </Link>
-          </div>
-          <div className="flex items-center space-x-4">
-            <p className="text-sm text-gray-500 dark:text-gray-300">
-              Last Update: {lastUpdate}
-            </p>
-            <RefreshButton modemId={modemId} token={token} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-[#122031] shadow-lg rounded-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold mb-6 dark:text-[#E2E8F0] flex items-center">
-            <span className="text-primary text-3xl mr-2">📡</span> Modem Details
-          </h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {[
-              { label: "FTTH ID", value: modemDetails?.IBSNG_Main[0]?.FTTH_ID },
-              { label: "User ID", value: modemDetails?.IBSNG_Main[0]?.User_ID },
-              { label: "Customer", value: modemDetails?.IBSNG_Main[0]?.Customer },
-              { label: "Group", value: modemDetails?.IBSNG_Main[0]?.Group },
-              {
-                label: "Last Successful Login",
-                value: modemDetails?.IBSNG_Main[0]?.Last_Successful_Login,
-              },
-              {
-                label: "Expiration Status",
-                value: modemDetails?.IBSNG_Main[0]?.Expiration_Status,
-                status: true,
-              },
-              {
-                label: "Parent User ID",
-                value: modemDetails?.IBSNG_Main[0]?.Parent_User_Id,
-              },
-              {
-                label: "Creation Date",
-                value: modemDetails?.IBSNG_Main[0]?.Creation_Date,
-              },
-              { label: "Owner", value: modemDetails?.IBSNG_Main[0]?.Owner_IS },
-              {
-                label: "is User Locked",
-                value: modemDetails?.IBSNG_Main[0]?.User_is_Locked,
-              },
-              { label: "Charge", value: modemDetails?.IBSNG_Main[0]?.Charge },
-              {
-                label: "Real First Login",
-                value: modemDetails?.IBSNG_Main[0]?.Real_First_Login,
-              },
-              { label: "ACS ID", value: modemDetails?.ACS_Main[0]?.ACS_ID },
-              {
-                label: "Model Name",
-                value: modemDetails?.ACS_Main[0]?.modelName,
-              },
-              {
-                label: "Serial Number",
-                value: modemDetails?.ACS_Main[0]?.serialNumber,
-              },
-              {
-                label: "Manufacturer",
-                value: modemDetails?.ACS_Main[0]?.manufacturer,
-              },
-              { label: "PPP VLAN", value: modemDetails?.ACS_Main[0]?.pppVlan },
-              { label: "MAC Address", value: modemDetails?.ACS_Main[0]?.mac },
-              {
-                label: "Activation Date",
-                value: modemDetails?.ACS_Main[0]?.activationDate,
-              },
-              {
-                label: "Blacklisted",
-                value: modemDetails?.ACS_Main[0]?.blacklisted,
-              },
-              {
-                label: "Last Session Time",
-                value: modemDetails?.ACS_Main[0]?.lastSessionTime,
-              },
-              {
-                label: "Last Empty Session Time",
-                value: modemDetails?.ACS_Main[0]?.lastEmptySessionTime,
-              },
-              {
-                label: "Last Bootstrap Time",
-                value: modemDetails?.ACS_Main[0]?.lastBootstrapTime,
-              },
-              {
-                label: "Last Reboot Time",
-                value: modemDetails?.ACS_Main[0]?.lastRebootTime,
-              },
-              {
-                label: "IP Address",
-                value: modemDetails?.ACS_Main[0]?.ipAddress,
-              },
-              {
-                label: "Hardware Version",
-                value: modemDetails?.ACS_Main[0]?.hardwareVersion,
-              },
-              {
-                label: "Software Version",
-                value: modemDetails?.ACS_Main[0]?.softwareVersion,
-              },
-              {
-                label: "Product Class",
-                value: modemDetails?.ACS_Main[0]?.productClass,
-              },
-              { label: "TX Power", value: modemDetails?.ACS_Main[0]?.TXPower },
-              {
-                label: "Transceiver Temperature",
-                value: modemDetails?.ACS_Main[0]?.TransceiverTemperature,
-              },
-              { label: "RX Power", value: modemDetails?.ACS_Main[0]?.RXPower },
-              { label: "Vgroup", value: modemDetails?.ACS_Main[0]?.Vgroup },
-            ]
-
-              .sort((a, b) => a.label.localeCompare(b.label))
-              .map(({ label, value, status }, idx) => (
-                <div
-                  key={idx}
-                  className="bg-white dark:bg-[#1b2a3c]  bg-grid-black/[0.01] dark:bg-grid-white/[0.01]  p-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hover:shadow-lg"
-                >
-                  <p className="text-xs dark:text-gray-400 mb-1">{label}</p>
-                  <p
-                    className={`font-semibold text-sm dark:text-[#E2E8F0]  ${
-                      status
-                        ? `inline-block px-2 py-1 rounded text-sm ${getIconColor2(value)} text-black`
-                        : ""
-                    }`}
-                  >
-                    {value}
-                  </p>
-                </div>
-              ))}
-          </div>
+        <div className="space-y-4">
+          {" "}
+          <div className="flex items-center justify-between ">
+            <div className="flex items-center justify-center space-x-2">
+              <FaWifi
+                className={`text-2xl ${getIconColor(onlineStatus)} bg-transparent`}
+              />
+              <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                <span className="font-semibold">{onlineStatus}</span>
+              </p>
+              <Link href={`/map?search=${modemId}`}>
+                <FaMap className="text-2xl text-gray-700 dark:text-gray-300 cursor-pointer" />
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <p className="text-sm text-gray-500 dark:text-gray-300">
+                Last Update: {lastUpdate}
+              </p>
+              <RefreshButton modemId={modemId} token={token} />
+            </div>
+          </div>{" "}
+          <DataGrid
+            title="Modem Details (IBSNG)"
+            data={modemdetailsData}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-6"
+          />
+          <DataGrid
+            title="ACS"
+            data={acsdata}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-6"
+          />
         </div>
 
         <div>
