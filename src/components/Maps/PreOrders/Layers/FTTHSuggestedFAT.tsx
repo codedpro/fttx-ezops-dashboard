@@ -24,7 +24,7 @@ export const useFTTHSuggestedFATLayer = () => {
         features: suggestedFATS.map(
           (suggestedFAT): Feature<Polygon | MultiPolygon> => {
             const point = turf.point([suggestedFAT.Long, suggestedFAT.Lat]);
-            const buffer = turf.buffer(point, 0.2, { units: "kilometers" });
+            const buffer = turf.buffer(point, 0.15, { units: "kilometers" });
 
             if (
               buffer &&

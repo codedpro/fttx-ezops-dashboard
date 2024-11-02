@@ -69,6 +69,12 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
       }
 
       const data = response.data;
+      if (Array.isArray(data) && data.length === 0) {
+        alert(
+          "We don't have any data based on your parameters. Please change your parameters."
+        );
+        return;
+      }
       const xlsxData = generateXLSX(data as any[]);
 
       const blob = new Blob([s2ab(xlsxData)], {

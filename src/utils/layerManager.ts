@@ -20,12 +20,13 @@ import { useIranFTTXAreaLayer } from "@/components/Maps/IranFTTX/Layers/IranFTTX
 import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
 import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
 import { useFTTHBlockPolygonLayer } from "@/components/Maps/Main/Layers/BlockLayer";
+import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
 
 interface LayerConfig {
   id: string;
   label: string;
   icon: string;
-  type: "point" | "line" | "heatmap" | "fill" ;
+  type: "point" | "line" | "heatmap" | "fill";
   visible: boolean;
   source: mapboxgl.GeoJSONSourceSpecification | null;
   toggle: () => void;
@@ -113,7 +114,14 @@ export const useLayerManager = (
       visible: layerVisibility.BlockPolygonLayer,
       toggle: () => toggleLayerVisibility("BlockPolygonLayer"),
     },
-
+    FTTHPowerLayer: {
+      ...useFTTHPowerLayer(),
+      label: "Power",
+      icon: "",
+      type: "heatmap",
+      visible: layerVisibility.FTTHPowerLayer,
+      toggle: () => toggleLayerVisibility("FTTHPowerLayer"),
+    },
     DropCableLineLayer: {
       ...useDropCableLineLayer(),
       label: "Drop Cable",

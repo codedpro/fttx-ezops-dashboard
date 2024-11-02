@@ -510,10 +510,10 @@ const MenuPanel: React.FC<MenuPanelProps> = ({
         })}
       {currentMenu === "kmz" &&
         renderSubMenu("KMZ Files", KMZ_FILES, onSelectKMZ, true, onAddKMZ)}
-      {currentMenu === "drafts" &&
+{/*       {currentMenu === "drafts" &&
         renderSubMenu("Drafts", DRAFTS, onSelectDraft, true, () =>
           console.log("Add new draft")
-        )}
+        )} */}
       {currentMenu === "objectDetails" && renderObjectDetails()}
       {currentMenu === "editObjectDetails" && renderEditObjectDetails()}
       {currentMenu === "lineDetails" && renderLineDetails()}
