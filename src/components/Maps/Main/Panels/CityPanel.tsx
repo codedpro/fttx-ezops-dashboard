@@ -102,7 +102,7 @@ const CityPanel: React.FC<CityPanelProps> = ({
                     placeholder="Search city"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full p-1 text-xs bg-transparent border-b border-gray-300 dark:border-gray-600 text-black dark:text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-0 mb-2"
+                    className="w-full p-1 text-xs bg-transparent border-b border-gray-300 dark:border-gray-600 text-black dark:text-gray-200 placeholder-gray-600 dark:placeholder-gray-300 focus:outline-none focus:border-b focus:!border-primary mb-2 "
                   />
   
                   <ul className="space-y-2">
