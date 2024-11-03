@@ -55,6 +55,9 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
 
   const [isEditingNewText, setIsEditingNewText] = useState<boolean>(false);
 
+  const [dragOffsetX, setDragOffsetX] = useState<number>(0);
+  const [dragOffsetY, setDragOffsetY] = useState<number>(0);
+
   const loadImageOntoCanvas = () => {
     if (screenshotData && canvasRef.current && !isImageLoaded) {
       const canvas = canvasRef.current;
@@ -99,11 +102,10 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
     }
   };
 
-  // Reset isImageLoaded when the modal is opened
   useEffect(() => {
     if (isOpen) {
       setIsImageLoaded(false);
-      setActions([]); // Clear previous actions if needed
+      setActions([]);
     }
   }, [isOpen]);
 
@@ -157,6 +159,7 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
         ctx.fillStyle = action.color;
         ctx.globalAlpha = action.opacity / 100;
         ctx.font = `${action.fontSize}px Arial`;
+        ctx.textBaseline = "top";
         ctx.fillText(action.text, action.x, action.y);
         ctx.globalAlpha = 1;
       }
@@ -194,6 +197,9 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
       points: [{ x, y }],
     });
     setIsDrawing(true);
+    if (canvasRef.current) {
+      canvasRef.current.style.cursor = "crosshair";
+    }
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
@@ -201,7 +207,6 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
 
     const { x, y } = getCanvasCoordinates(e);
 
-    // Update current drawing
     setCurrentDrawing((prevDrawing) => {
       if (prevDrawing) {
         const updatedDrawing = {
@@ -220,6 +225,9 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
       setCurrentDrawing(null);
       setIsDrawing(false);
       saveCanvasState();
+      if (canvasRef.current) {
+        canvasRef.current.style.cursor = "default";
+      }
     }
   };
 
@@ -241,31 +249,35 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
       return;
     }
 
-    // Left-click (e.button === 0)
-    if (e.button === 0) {
-      const { x, y } = getCanvasCoordinates(e);
+    const { x, y } = getCanvasCoordinates(e);
 
+    if (e.button === 0) {
       for (let i = actions.length - 1; i >= 0; i--) {
         const action = actions[i];
         if (action.type === "text") {
-          const textWidth = action.text.length * (action.fontSize / 2);
+          const textWidth = measureTextWidth(action.text, action.fontSize);
           const textHeight = action.fontSize;
           if (
             x >= action.x &&
             x <= action.x + textWidth &&
-            y >= action.y - textHeight &&
-            y <= action.y
+            y >= action.y &&
+            y <= action.y + textHeight
           ) {
             setSelectedTextIndex(i);
             action.isDragging = true;
             setIsDraggingText(true);
             setHasMoved(false);
+
+            setDragOffsetX(x - action.x);
+            setDragOffsetY(y - action.y);
+            if (canvasRef.current) {
+              canvasRef.current.style.cursor = "move";
+            }
             return;
           }
         }
       }
 
-      // If no text was selected, start drawing
       startDrawing(e);
     }
   };
@@ -273,8 +285,9 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
   const handleMouseMove = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
   ) => {
+    const { x, y } = getCanvasCoordinates(e);
+
     if (isDraggingText && selectedTextIndex !== null && canvasRef.current) {
-      const { x, y } = getCanvasCoordinates(e);
       setHasMoved(true);
 
       setActions((prevActions) =>
@@ -284,13 +297,29 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
             action.type === "text" &&
             action.isDragging
           ) {
-            return { ...action, x, y };
+            return {
+              ...action,
+              x: x - dragOffsetX,
+              y: y - dragOffsetY,
+            };
           }
           return action;
         })
       );
     } else {
       draw(e);
+
+      const overText = isMouseOverText(x, y);
+
+      if (canvasRef.current) {
+        if (overText) {
+          canvasRef.current.style.cursor = "pointer";
+        } else if (isDrawing) {
+          canvasRef.current.style.cursor = "crosshair";
+        } else {
+          canvasRef.current.style.cursor = "default";
+        }
+      }
     }
   };
 
@@ -300,11 +329,20 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
       if (action.type === "text") {
         action.isDragging = false;
         setIsDraggingText(false);
-        setSelectedTextIndex(null); // Reset after dragging
+        setSelectedTextIndex(null);
         saveCanvasState();
+        if (canvasRef.current) {
+          canvasRef.current.style.cursor = "default";
+        }
       }
     } else {
       stopDrawing();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (canvasRef.current) {
+      canvasRef.current.style.cursor = "default";
     }
   };
 
@@ -319,19 +357,16 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
     for (let i = actions.length - 1; i >= 0; i--) {
       const action = actions[i];
       if (action.type === "text") {
-        const textWidth = action.text.length * (action.fontSize / 2);
+        const textWidth = measureTextWidth(action.text, action.fontSize);
         const textHeight = action.fontSize;
         if (
           x >= action.x &&
           x <= action.x + textWidth &&
-          y >= action.y - textHeight &&
-          y <= action.y
+          y >= action.y &&
+          y <= action.y + textHeight
         ) {
-          // Open editing panel on right-click
           setSelectedTextIndex(i);
-          setIsDraggingText(false); // Ensure we're not in dragging mode
-
-          // Set editing controls
+          setIsDraggingText(false);
           setEditingText(action.text);
           setEditingFontSize(action.fontSize);
           setEditingColor(action.color);
@@ -354,6 +389,37 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
     return { x, y };
+  };
+
+  const isMouseOverText = (x: number, y: number): boolean => {
+    for (let i = actions.length - 1; i >= 0; i--) {
+      const action = actions[i];
+      if (action.type === "text") {
+        const textWidth = measureTextWidth(action.text, action.fontSize);
+        const textHeight = action.fontSize;
+        if (
+          x >= action.x &&
+          x <= action.x + textWidth &&
+          y >= action.y &&
+          y <= action.y + textHeight
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const measureTextWidth = (text: string, fontSize: number): number => {
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      if (ctx) {
+        ctx.font = `${fontSize}px Arial`;
+        const metrics = ctx.measureText(text);
+        return metrics.width;
+      }
+    }
+    return text.length * (fontSize / 2);
   };
 
   const undo = () => {
@@ -440,6 +506,7 @@ const useCanvas = ({ screenshotData, drawColor, isOpen }: UseCanvasProps) => {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleMouseLeave,
     handleContextMenu,
     handleAddText,
     applyTextEdits,

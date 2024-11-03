@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { FiX } from "react-icons/fi";
 import ClickOutside from "@/components/ClickOutside";
 import useCanvas from "@/hooks/useCanvas";
@@ -16,8 +16,9 @@ const ScreenshotEditorModal: React.FC<ScreenshotEditorModalProps> = ({
   onClose,
   screenshotData,
 }) => {
-  const [drawColor, setDrawColor] = useState<string>("#FF0000");
+  const [drawColor, setDrawColor] = useState("#FF0000");
 
+  const canvasProps = useCanvas({ screenshotData, drawColor, isOpen });
   const {
     canvasRef,
     canvasWidth,
@@ -41,9 +42,9 @@ const ScreenshotEditorModal: React.FC<ScreenshotEditorModalProps> = ({
     undo,
     isDraggingText,
     selectedTextIndex,
-  } = useCanvas({ screenshotData, drawColor, isOpen });
+  } = canvasProps;
 
-  const handleCopyToClipboard = async () => {
+  const handleCopyToClipboard = useCallback(async () => {
     if (!canvasRef.current) return;
     try {
       const blob = await new Promise<Blob | null>((resolve) =>
@@ -58,25 +59,30 @@ const ScreenshotEditorModal: React.FC<ScreenshotEditorModalProps> = ({
       console.error("Failed to copy image to clipboard:", error);
       alert("Unable to copy. Ensure you have permission and try again.");
     }
-  };
+  }, [canvasRef]);
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     if (!canvasRef.current) return;
     const link = document.createElement("a");
     link.href = canvasRef.current.toDataURL("image/png");
     link.download = "edited-screenshot.png";
     link.click();
-  };
+  }, [canvasRef]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 custom-scrollbar">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 custom-scrollbar"
+      role="dialog"
+      aria-modal="true"
+    >
       <ClickOutside onClick={onClose} className="w-full max-w-3xl px-4">
-        <div className="relative bg-white dark:bg-darkgray-2 p-6 rounded-[10px] w-full h-[80vh] space-y-4 overflow-auto shadow-lg dark:shadow-card">
+        <div className="relative bg-white dark:bg-dark-2 p-6 w-full h-[80vh] space-y-4 overflow-auto shadow-lg dark:shadow-card rounded-md">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-darkgray hover:text-gray-700 dark:text-white dark:hover:text-gray-500 transition duration-200"
+            className="absolute top-4 right-4 text-dark hover:text-gray-700 dark:text-white dark:hover:text-gray-500 transition duration-200"
+            aria-label="Close Editor"
           >
             <FiX size={24} />
           </button>
@@ -90,7 +96,7 @@ const ScreenshotEditorModal: React.FC<ScreenshotEditorModalProps> = ({
               ref={canvasRef}
               width={canvasWidth}
               height={canvasHeight}
-              className="border border-stroke dark:border-darkgray-3 rounded-[10px]"
+              className="border border-stroke dark:border-dark-3 rounded-[10px]"
               style={{ cursor: "crosshair" }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
