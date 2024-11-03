@@ -54,13 +54,6 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     return "text-gray-500  bg-gray-500";
   };
 
-  const getIconColor2 = (status: string) => {
-    if (status === "Online" || status === "Not Expired") return "bg-green-500";
-    if (status === "Offline" || !status) return " bg-red-500";
-    if (status === "Expired") return " bg-yellow-500";
-    return "  bg-gray-500";
-  };
-
   const onlineStatus = modemDetails?.IBSNG_Main[0].Online_Status || "Offline";
   const lastUpdate = modemDetails?.IBSNG_Main[0].DB_Last_Update || "Unknown";
 
@@ -108,7 +101,11 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
       label: "Serial Number",
       value: modemDetails?.ACS_Main[0]?.serialNumber,
     },
-    { label: "RX Power", value: modemDetails?.ACS_Main[0]?.RXPower },
+    {
+      label: "RX Power",
+      value: modemDetails?.ACS_Main[0]?.RXPower,
+      status: true,
+    },
     { label: "TX Power", value: modemDetails?.ACS_Main[0]?.TXPower },
     {
       label: "Manufacturer",
@@ -124,6 +121,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     {
       label: "Blacklisted",
       value: modemDetails?.ACS_Main[0]?.blacklisted,
+      status: true,
     },
     {
       label: "Last Session Time",
@@ -193,11 +191,13 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             title="Modem Details (IBSNG)"
             data={modemdetailsData}
             className="grid grid-cols-2 sm:grid-cols-3 gap-6"
+            emoji="📡"
           />
           <DataGrid
             title="ACS"
             data={acsdata}
             className="grid grid-cols-2 sm:grid-cols-4 gap-6"
+            emoji="⚙️"
           />
         </div>
 
