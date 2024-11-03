@@ -85,7 +85,6 @@ const FTTHModemsMap: React.FC = () => {
     "FTTHSuggestedFATLayer",
     "FTTHSuggestedFATSmallFillLayer",
     "BlockPolygonLayer",
-    "FTTHPowerLayer",
 
     //Lines
     "ODCLineLayer",
