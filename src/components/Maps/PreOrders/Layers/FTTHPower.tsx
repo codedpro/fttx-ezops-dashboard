@@ -39,7 +39,6 @@ export const useFTTHPowerLayer = () => {
     visible: true,
     type: "heatmap",
     paint: {
-      // Set heatmap weight based on Count to influence density
       "heatmap-weight": [
         "interpolate",
         ["linear"],

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import TableThree from "@/components/Tables/TableThree";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { FaMap, FaMapMarkerAlt, FaWifi } from "react-icons/fa";
+import { FaMap, FaWifi } from "react-icons/fa";
 import { fetchModemDetails } from "@/lib/actions";
 import {
   ballancesColumns,
@@ -11,6 +11,8 @@ import {
 import RefreshButton from "@/components/Buttons/RefreshButton";
 import Link from "next/link";
 import DataGrid from "@/components/DataGrid";
+import ChartThree from "@/components/Charts/ChartThree"; // Make sure to import your chart component
+import moment from "moment-jalaali";
 
 const ModemPage = async ({ params }: { params: { id: string } }) => {
   const cookieStore = cookies();
@@ -163,15 +165,72 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
     { label: "Vgroup", value: modemDetails?.ACS_Main[0]?.Vgroup },
   ];
+  const activePackages = modemDetails.IBSNG_Ballances.filter((pkg) => {
+    const expTime = moment(pkg.Exp_Time, "jYYYY-jMM-jDD HH:mm:ss").toDate();
+    const now = new Date();
+
+    const unusedValue = parseFloat(pkg.Unused_Value.replace(/,/g, ""));
+
+    return expTime > now && unusedValue > 0;
+  }).sort((a, b) => {
+    const priorityA = parseInt(a.Priority);
+    const priorityB = parseInt(b.Priority);
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    const expTimeA = moment(a.Exp_Time, "jYYYY-jMM-jDD HH:mm:ss")
+      .toDate()
+      .getTime();
+    const expTimeB = moment(b.Exp_Time, "jYYYY-jMM-jDD HH:mm:ss")
+      .toDate()
+      .getTime();
+    return expTimeA - expTimeB;
+  });
+
+  let chartContent = null;
+  if (activePackages.length > 0) {
+    const activePackage = activePackages[0];
+    const unusedValue = parseFloat(
+      (
+        parseFloat((activePackage?.Unused_Value ?? "50").replace(/,/g, "")) /
+        1024
+      ).toFixed(3)
+    );
+    const initialValue = parseFloat(
+      (
+        parseFloat((activePackage?.Initial_Value ?? "100").replace(/,/g, "")) /
+        1024
+      ).toFixed(3)
+    );
+    const usedValue = parseFloat((initialValue - unusedValue).toFixed(3));
+
+    const series = [unusedValue, usedValue];
+    const colors = ["#feca00", "#ADBCF2"];
+    const labels = ["Remaining (GB)", "Used (GB)"];
+    chartContent = (
+      <div className=" h-full">
+        <ChartThree
+          header="Remaining Package"
+          series={series}
+          colors={colors}
+          labels={labels}
+          apiname="RemainingPackageChart"
+        />
+      </div>
+    );
+  }
+
   return (
     <DefaultLayout>
       <div className="container mx-auto p-4 space-y-8">
         <div className="space-y-4">
-          {" "}
           <div className="flex items-center justify-between ">
             <div className="flex items-center justify-center space-x-2">
               <FaWifi
-                className={`text-2xl ${getIconColor(onlineStatus)} bg-transparent`}
+                className={`text-2xl ${getIconColor(
+                  onlineStatus
+                )} bg-transparent`}
               />
               <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
                 <span className="font-semibold">{onlineStatus}</span>
@@ -186,13 +245,17 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
               </p>
               <RefreshButton modemId={modemId} token={token} />
             </div>
+          </div>
+          <div className="mt-4 md:mt-6 2xl:mt-9 md:flex md:flex-col lg:flex-row items-center  justify-around  gap-4">
+            <DataGrid
+              title="Modem Details (IBSNG)"
+              data={modemdetailsData}
+              className="grid grid-cols-2 sm:grid-cols-3 gap-6"
+              emoji="📡"
+            />
+
+            {chartContent && <>{chartContent}</>}
           </div>{" "}
-          <DataGrid
-            title="Modem Details (IBSNG)"
-            data={modemdetailsData}
-            className="grid grid-cols-2 sm:grid-cols-3 gap-6"
-            emoji="📡"
-          />
           <DataGrid
             title="ACS"
             data={acsdata}

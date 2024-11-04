@@ -171,7 +171,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
               Total
             </p>
             <p className="text-gray-800 dark:text-white text-2xl sm:text-3xl font-bold">
-              {total}
+              {total % 1 === 0 ? total : total.toFixed(3).replace(/\.?0+$/, "")}
             </p>
           </div>
         </div>

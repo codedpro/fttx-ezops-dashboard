@@ -52,7 +52,7 @@ const DataGrid: React.FC<DataGridProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#122031] shadow-lg rounded-lg p-6 mb-6">
+    <div className="bg-white dark:bg-gray-dark shadow-lg rounded-lg p-8  w-full">
       <h2 className="text-2xl font-bold mb-6 dark:text-[#E2E8F0] flex items-center">
         <span className="text-primary text-3xl mr-2">{emoji}</span> {title}
       </h2>
