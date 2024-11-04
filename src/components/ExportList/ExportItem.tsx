@@ -135,8 +135,13 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
         className="flex justify-between items-center p-4 cursor-pointer"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <h3 className="text-lg font-medium text-dark dark:text-white">
-          {exportItem.name}
+        <h3 className="text-xs md:text-lg font-medium text-dark dark:text-white flex items-baseline flex-wrap">
+          <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+            {exportItem.name}
+          </span>
+          <span className="text-xs md:text-base text-gray-500 opacity-70 ml-2 whitespace-nowrap overflow-hidden text-ellipsis">
+            {exportItem.Persian_Name}
+          </span>
         </h3>
         {isCollapsed ? (
           <FaChevronDown className="text-gray-600 dark:text-gray-300" />
