@@ -147,14 +147,17 @@ const ChartThree: React.FC<ChartThreeProps> = ({
             {header}
           </h4>
         </div>
-        <button
-          className="flex items-center justify-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
-          onClick={handleDownload}
-          title="Download"
-        >
-          <FaCloudDownloadAlt size={16} className="sm:mr-2" />
-          <span className=" sm:inline">Export</span>
-        </button>
+
+        {apiname !== "" && (
+          <button
+            className="flex items-center justify-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
+            onClick={handleDownload}
+            title="Download"
+          >
+            <FaCloudDownloadAlt size={16} className="sm:mr-2" />
+            <span className=" sm:inline">Export</span>
+          </button>
+        )}
       </div>
 
       <div className="relative mb-6 md:mb-8">

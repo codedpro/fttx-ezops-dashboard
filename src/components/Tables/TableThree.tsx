@@ -57,7 +57,7 @@ const TableThree: React.FC<TableThreeProps> = ({
 
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-[#1F2B37] dark:bg-[#122031] dark:shadow-card sm:p-7.5 hover:shadow-lg">
-      <div className="flex flex-row items-center justify-between mb-4">
+      <div  className="flex flex-row items-center justify-between mb-4">
         <h3 className="text-xl font-bold dark:text-[#E2E8F0] flex items-center">
           <span className="mr-2">{emoji}</span>
           {header}

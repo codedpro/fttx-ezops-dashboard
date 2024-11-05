@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import TableThree from "@/components/Tables/TableThree";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { FaMap, FaWifi } from "react-icons/fa";
+import { FaLightbulb, FaMap, FaWifi } from "react-icons/fa";
 import { fetchModemDetails } from "@/lib/actions";
 import {
   ballancesColumns,
@@ -215,7 +215,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
           series={series}
           colors={colors}
           labels={labels}
-          apiname="RemainingPackageChart"
+          apiname=""
         />
       </div>
     );
@@ -224,7 +224,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
   return (
     <DefaultLayout>
       <div className="container mx-auto p-4 space-y-8">
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-center justify-between ">
             <div className="flex items-center justify-center space-x-2">
               <FaWifi
@@ -238,33 +238,52 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
               <Link href={`/map?search=${modemId}`}>
                 <FaMap className="text-2xl text-gray-700 dark:text-gray-300 cursor-pointer" />
               </Link>
+
+              {Array.from({ length: 5 }).map((_, index) => {
+                const isOnline = modemDetails.IBSNG_Internet_Onlines[index];
+                return (
+                  <Link
+                    key={index}
+                    href="#IBSNG_Internet_Onlines"
+                    className="cursor-pointer"
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full ${
+                        isOnline ? "bg-primary" : "bg-red-500"
+                      }`}
+                    ></div>
+                  </Link>
+                );
+              })}
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mr-2">
               <p className="text-sm text-gray-500 dark:text-gray-300">
                 Last Update: {lastUpdate}
               </p>
               <RefreshButton modemId={modemId} token={token} />
             </div>
           </div>
-          <div className="mt-4 md:mt-6 2xl:mt-9 md:flex md:flex-col lg:flex-row items-center  justify-around  gap-4">
-            <DataGrid
-              title="Modem Details (IBSNG)"
-              data={modemdetailsData}
-              className="grid grid-cols-2 sm:grid-cols-3 gap-6"
-              emoji="📡"
-            />
+          <div className="space-y-4">
+            <div className=" md:flex md:flex-col lg:flex-row items-center  justify-around  gap-4">
+              <DataGrid
+                title="Modem Details (IBSNG)"
+                data={modemdetailsData}
+                className="grid grid-cols-2 sm:grid-cols-3 gap-6"
+                emoji="📡"
+              />
 
-            {chartContent && <>{chartContent}</>}
+              {chartContent && <>{chartContent}</>}
+            </div>{" "}
+            <DataGrid
+              title="ACS"
+              data={acsdata}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-6"
+              emoji="⚙️"
+            />
           </div>{" "}
-          <DataGrid
-            title="ACS"
-            data={acsdata}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-6"
-            emoji="⚙️"
-          />
         </div>
 
-        <div>
+        <div id="IBSNG_Internet_Onlines">
           <TableThree
             data={modemDetails.IBSNG_Internet_Onlines}
             columns={internetOnlinesColumns}
