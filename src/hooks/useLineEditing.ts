@@ -158,11 +158,11 @@ export const useLineEditing = (
     featureId: string
   ) => {
     const closestFatFeature = getClosestFatFeature(coords);
-
+  
     if (closestFatFeature) {
       const snappedCoords = closestFatFeature.geometry.coordinates;
       const feature = draw.getAll().features[0];
-
+  
       if (
         feature &&
         feature.geometry &&
@@ -179,22 +179,17 @@ export const useLineEditing = (
             },
           ],
         });
-
+  
         if (vertexIndex === 0) {
           setStartFatFeature(closestFatFeature);
         } else if (vertexIndex === updatedCoords.length - 1) {
           setEndFatFeature(closestFatFeature);
         }
       }
-    } else {
-      if (vertexIndex === 0) {
-        setStartFatFeature(null);
-      } else if (vertexIndex === coords.length - 1) {
-        setEndFatFeature(null);
-      }
     }
+    // Do not reset startFatFeature or endFatFeature to null
   };
-
+  
   const handleDrawUpdate = useCallback(
     (e: any) => {
       saveState();
@@ -545,6 +540,9 @@ export const useLineEditing = (
     snapFirstFeature();
   }, [startFatFeature?.geometry.type]);
 
+  useEffect(() => {
+    console.log(startFatFeature, endFatFeature);
+  }, [startFatFeature, endFatFeature]);
   return {
     isEditing,
     startEditingLine,
