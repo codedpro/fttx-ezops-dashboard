@@ -39,7 +39,7 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
   const [POP, setPOP] = useState<string>("");
   const [planType, setplanType] = useState<string>("0");
   const [FAT, setFAT] = useState<string>("");
-  const [City, setCity] = useState<string>("NEKA");
+  const [City, setCity] = useState<string>("BL");
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [loading, setLoading] = useState(false);
   const { cities } = useFTTHCitiesStore((state) => ({
@@ -161,7 +161,7 @@ const AddObjectModal: React.FC<AddObjectModalProps> = ({
               onChange={(e) => setCity(e.target.value)}
               className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
             >
-              <option value="NEKA">NEKA</option>
+              <option value="BL">BL</option>
               {cities.map((city) => (
                 <option key={city.Name} value={city.Name}>
                   {city.Name}

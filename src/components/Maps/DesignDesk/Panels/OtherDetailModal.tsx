@@ -26,7 +26,7 @@ const OtherDetailModal: React.FC<OtherDetailModalProps> = ({
   otherData,
   onSubmit,
 }) => {
-  const [City, setCity] = useState<string>("NEKA");
+  const [City, setCity] = useState<string>("BL");
   const [name, setName] = useState<string>("");
   const [planType, setPlanType] = useState<string>("0");
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -48,7 +48,7 @@ const OtherDetailModal: React.FC<OtherDetailModalProps> = ({
       );
 
       if (matchingOther) {
-        setCity(matchingOther.City || "NEKA");
+        setCity(matchingOther.City || "BL");
         setName(matchingOther.Name || "");
         setPlanType(matchingOther.Plan_Type.toString() || "0");
       }
@@ -131,7 +131,7 @@ const OtherDetailModal: React.FC<OtherDetailModalProps> = ({
               onChange={(e) => setCity(e.target.value)}
               className="border p-3 w-full rounded-md dark:bg-dark-3 dark:border-dark-3 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 transition-shadow"
             >
-              <option value="NEKA">NEKA</option>
+              <option value="BL">BL</option>
               {cities.map((city) => (
                 <option key={city.Name} value={city.Name}>
                   {city.Name}

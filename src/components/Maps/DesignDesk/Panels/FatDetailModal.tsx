@@ -38,7 +38,7 @@ const FatDetailModal: React.FC<FatDetailModalProps> = ({
     POP: "",
     Plan_Type: "0",
     FAT: "",
-    City: "NEKA",
+    City: "BL",
   });
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showExtraFields, setShowExtraFields] = useState(false);
