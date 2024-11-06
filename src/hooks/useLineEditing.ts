@@ -157,39 +157,41 @@ export const useLineEditing = (
     vertexIndex: number,
     featureId: string
   ) => {
-    const closestFatFeature = getClosestFatFeature(coords);
-  
-    if (closestFatFeature) {
-      const snappedCoords = closestFatFeature.geometry.coordinates;
-      const feature = draw.getAll().features[0];
-  
-      if (
-        feature &&
-        feature.geometry &&
-        feature.geometry.type === "LineString"
-      ) {
-        const updatedCoords = [...(feature.geometry as LineString).coordinates];
-        updatedCoords[vertexIndex] = snappedCoords;
-        draw.set({
-          type: "FeatureCollection",
-          features: [
-            {
-              ...feature,
-              geometry: { type: "LineString", coordinates: updatedCoords },
-            },
-          ],
-        });
-  
-        if (vertexIndex === 0) {
-          setStartFatFeature(closestFatFeature);
-        } else if (vertexIndex === updatedCoords.length - 1) {
-          setEndFatFeature(closestFatFeature);
+    const feature = draw.getAll().features[0];
+
+    if (feature && feature.geometry && feature.geometry.type === "LineString") {
+      const updatedCoords = [...(feature.geometry as LineString).coordinates];
+
+      // Only proceed if the vertex is the first or last point
+      if (vertexIndex === 0 || vertexIndex === updatedCoords.length - 1) {
+        const closestFatFeature = getClosestFatFeature(coords);
+
+        if (closestFatFeature) {
+          const snappedCoords = closestFatFeature.geometry.coordinates;
+          updatedCoords[vertexIndex] = snappedCoords;
+
+          draw.set({
+            type: "FeatureCollection",
+            features: [
+              {
+                ...feature,
+                geometry: { type: "LineString", coordinates: updatedCoords },
+              },
+            ],
+          });
+
+          if (vertexIndex === 0) {
+            setStartFatFeature(closestFatFeature);
+          } else if (vertexIndex === updatedCoords.length - 1) {
+            setEndFatFeature(closestFatFeature);
+          }
         }
+        // Do not reset startFatFeature or endFatFeature to null
       }
+      // For other vertices, do nothing (no snapping)
     }
-    // Do not reset startFatFeature or endFatFeature to null
   };
-  
+
   const handleDrawUpdate = useCallback(
     (e: any) => {
       saveState();
