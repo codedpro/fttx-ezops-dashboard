@@ -16,12 +16,14 @@ interface ChartOneProps {
   }[];
   totalClosed: number;
   totalRunning: number;
+  exportid?: string;
 }
 
 const ChartOne: React.FC<ChartOneProps> = ({
   dailyData,
   totalClosed,
   totalRunning,
+  exportid,
 }) => {
   const [filter, setFilter] = useState<string>("Week");
 
@@ -157,10 +159,13 @@ const ChartOne: React.FC<ChartOneProps> = ({
           <p className="font-medium uppercase text-dark dark:text-dark-6">
             Filter by:
           </p>
-          <DefaultSelectOption
-            options={["Week", "Month"]}
-            onChange={(value: string) => setFilter(value)}
-          />
+          <div id={exportid}>
+            <DefaultSelectOption
+              options={["Week", "Month"]}
+              onChange={(value: string) => setFilter(value)}
+            />
+          </div>
+
           <button
             className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
             onClick={handleDownload}

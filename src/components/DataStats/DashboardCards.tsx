@@ -169,6 +169,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
             className="absolute top-2 z-50  right-2 cursor-pointer text-gray-500 dark:text-gray-300 text-2xl"
             onClick={() => handleDownload(item.id)}
             title={`Export ${item.label} data`}
+            id={item.label === "Preorder Paid" ? "dashboard-step2" : ""}
           >
             <FaCloudDownloadAlt />
           </div>

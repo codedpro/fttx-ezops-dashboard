@@ -17,6 +17,7 @@ interface ChartThreeProps {
   labels: string[];
   header: string;
   apiname: string;
+  exportid?: string;
 }
 
 const ChartThree: React.FC<ChartThreeProps> = ({
@@ -25,6 +26,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
   labels,
   header,
   apiname,
+  exportid,
 }) => {
   const [isClient, setIsClient] = useState(false);
 
@@ -150,6 +152,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
 
         {apiname !== "" && (
           <button
+            id={exportid}
             className="flex items-center justify-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
             onClick={handleDownload}
             title="Download"

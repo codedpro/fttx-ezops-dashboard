@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 import DashboardCards from "@/components/DataStats/DashboardCards";
 import ChartOne from "@/components/Charts/ChartOne";
 import IranMap from "@/components/Maps/Iran";
+import Tutorial from "@/components/Tutorial";
+import { dashboardTutorialSteps } from "@/tutorials";
 
 const Dashboard = async () => {
   const cookieStore = cookies();
@@ -68,21 +70,24 @@ const Dashboard = async () => {
 
   return (
     <DefaultLayout>
-  {/*     <IranMap /> */}
-      <DashboardCards cardData={cardData} />
+      {/*     <IranMap /> */}
+
+      <div id="dashboard-step1">
+        <DashboardCards cardData={cardData} />
+      </div>
 
       <div className="mt-4 md:mt-6 2xl:mt-9 md:flex md:flex-col lg:flex-row items-center  justify-around mx-4 gap-4">
-        <div>
-          {" "}
+        <div id="dashboard-step3">
           <ChartThree
             header="FTTH Modem Status"
             series={series}
             colors={colors}
             labels={labels}
             apiname="FTTHDashboardExportModemStatus"
+            exportid="dashboard-step4"
           />
         </div>
-        <div className="mt-4 sm:mt-0">
+        <div id="dashboard-step5" className="mt-4 sm:mt-0">
           <ChartThree
             header="Payment Delivery Status"
             series={series_Paid_to_Modems}
@@ -93,13 +98,27 @@ const Dashboard = async () => {
         </div>
       </div>
 
-      <div className="mt-4 w-full gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
+      <div
+        id="dashboard-step6"
+        className="mt-4 w-full gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5"
+      >
         <ChartOne
           dailyData={dailyData}
           totalClosed={totalClosed}
           totalRunning={totalRunning}
+          exportid="dashboard-step7"
         />
       </div>
+      {dashboardData && dailyData && (
+        <Tutorial
+          tutorialKey="DashboardTutorial"
+          steps={dashboardTutorialSteps}
+          continuous
+          showProgress
+          showSkipButton
+          startOnLoad={true}
+        />
+      )}
     </DefaultLayout>
   );
 };
