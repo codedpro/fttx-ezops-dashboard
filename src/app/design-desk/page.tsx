@@ -917,7 +917,7 @@ const DesignDesk: React.FC = () => {
           setIsModalOpen(false);
           setIsRouteModalOpen(false);
           setFormLineValues({
-            city: "NEKA",
+            city: "BL",
             planType: "0",
             isReverse: false,
           });
@@ -1014,7 +1014,7 @@ const DesignDesk: React.FC = () => {
           onClose={() => {
             setIsRouteModalOpen(false);
             setFormLineValues({
-              city: "NEKA",
+              city: "BL",
               planType: "0",
               isReverse: false,
             });
