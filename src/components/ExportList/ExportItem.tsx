@@ -139,7 +139,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
           <span className="whitespace-nowrap overflow-hidden text-ellipsis">
             {exportItem.name}
           </span>
-          <span className="text-xs md:text-base text-gray-500 opacity-70 ml-2 whitespace-nowrap overflow-hidden text-ellipsis">
+          <span dir="rtl" className="text-xs md:text-base text-gray-500 opacity-70 ml-2 whitespace-nowrap overflow-hidden text-ellipsis">
             {exportItem.persian_Name}
           </span>
         </h3>
