@@ -107,7 +107,6 @@ export const fetchFTTHDynamicExportList = async (
 
   try {
     const response = await axios.request(config);
-    console.log(response.data)
     const exportsData: ExportItemType[] = response.data;
 
     const categories: ExportData = exportsData.reduce<ExportData>(
@@ -121,7 +120,6 @@ export const fetchFTTHDynamicExportList = async (
       {}
     );
 
-    console.log(categories);
     return categories;
   } catch (error) {
     console.error("Error fetching FTTH export list data:", error);
