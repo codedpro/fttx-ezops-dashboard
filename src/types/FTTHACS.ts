@@ -1,0 +1,31 @@
+export interface FTTHACS {
+  ACS_ID: string;
+  Modem_ID: number;
+  cpePppUsername: string;
+  modelName: string;
+  manufacturer: string;
+  serialNumber: string;
+  root_cwmp_GPON: string;
+  pppVlan: number;
+  mac: string;
+  upTime: number;
+  activationDate: string;
+  remappingEnabled: boolean;
+  cpeLastConnectionError: string;
+  PPPoEUpTime: number;
+  blacklisted: boolean;
+  provisioningEnabled: boolean;
+  lastSessionTime: string;
+  lastEmptySessionTime: string | null;
+  lastBootstrapTime: string;
+  lastRebootTime: string;
+  creationTime: string;
+  ipAddress: string;
+  hardwareVersion: string;
+  softwareVersion: string;
+  productClass: string;
+  TXPower: number;
+  TransceiverTemperature: number;
+  RXPower: number;
+  Vgroup: string | null;
+}

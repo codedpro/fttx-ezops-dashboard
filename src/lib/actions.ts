@@ -3,6 +3,7 @@ import { ModemDetails } from "@/types/ModemDetails";
 import qs from "qs";
 
 import { ExportItemType, ExportData } from "@/types/exports";
+import { FTTHACS } from "@/types/FTTHACS";
 export const fetchModemDetails = async (
   id: string,
   token: string
@@ -124,5 +125,25 @@ export const fetchFTTHDynamicExportList = async (
   } catch (error) {
     console.error("Error fetching FTTH export list data:", error);
     throw new Error("Failed to fetch FTTH export list data");
+  }
+};
+
+export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
+  const config = {
+    method: "get",
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHACS`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  };
+
+  try {
+    const response = await axios.request(config);
+
+    return response.data as FTTHACS[];
+  } catch (error) {
+    console.error("Error fetching FTTH ACS Data:", error);
+    throw new Error("Failed to fetch FTTH ACS data");
   }
 };

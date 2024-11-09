@@ -26,7 +26,19 @@ importers:
       '@tabler/icons-react':
         specifier: ^3.14.0
         version: 3.14.0(react@18.3.1)
+      '@turf/boolean-overlap':
+        specifier: ^7.1.0
+        version: 7.1.0
+      '@turf/circle':
+        specifier: ^7.1.0
+        version: 7.1.0
+      '@turf/dissolve':
+        specifier: ^7.1.0
+        version: 7.1.0
       '@turf/turf':
+        specifier: ^7.1.0
+        version: 7.1.0
+      '@turf/union':
         specifier: ^7.1.0
         version: 7.1.0
       '@types/mapbox-gl':

@@ -1,78 +1,70 @@
-import { useFTTHSuggestedFATStore } from "@/store/FTTHSuggestedFAT";
 import { useEffect, useState } from "react";
 import { GeoJSONSourceSpecification } from "mapbox-gl";
-import { Feature, FeatureCollection, Point } from "geojson";
+import { Feature, FeatureCollection, Polygon } from "geojson";
+import { useFTTHACSRXPowerStore } from "@/store/FTTHACSRXPower";
+
+import circle from "@turf/circle";
 
 export const useFTTHPowerLayer = () => {
-  const suggestedFATS = useFTTHSuggestedFATStore((state) => state.suggestedFAT);
-  const [heatmapSource, setHeatmapSource] =
+  const acsPowers = useFTTHACSRXPowerStore((state) => state.acsPowers);
+  const [sourceData, setSourceData] =
     useState<GeoJSONSourceSpecification | null>(null);
 
   useEffect(() => {
-    if (suggestedFATS.length > 0) {
-      const pointsGeoJson: FeatureCollection<Point> = {
+    if (acsPowers.length > 0) {
+      type CircleFeature = Feature<
+        Polygon,
+        {
+          color: string;
+          RXPower: number;
+          Modem_ID: number;
+          Lat: number;
+          Long: number;
+        }
+      >;
+
+      const circles: CircleFeature[] = [];
+
+      acsPowers.forEach((acsPower) => {
+        const center: [number, number] = [acsPower.Long, acsPower.Lat];
+        const radius = 0.05;
+        const options = { steps: 64, units: "kilometers" as const };
+
+        const circleFeature = circle(center, radius, options) as CircleFeature;
+
+        circleFeature.properties = {
+          Modem_ID: acsPower.Modem_ID,
+          RXPower: acsPower.RXPower,
+          Lat: acsPower.Lat,
+          Long: acsPower.Long,
+          color:
+            acsPower.RXPower >= -28 && acsPower.RXPower <= -8 ? "green" : "red",
+        };
+
+        circles.push(circleFeature);
+      });
+
+      const geojsonData: FeatureCollection<Polygon, { color: string }> = {
         type: "FeatureCollection",
-        features: suggestedFATS.map(
-          (suggestedFAT): Feature<Point> => ({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [suggestedFAT.Long, suggestedFAT.Lat],
-            },
-            properties: {
-              Count: suggestedFAT.Count,
-            },
-          })
-        ),
+        features: circles,
       };
 
-      setHeatmapSource({
+      setSourceData({
         type: "geojson",
-        data: pointsGeoJson,
+        data: geojsonData,
       });
     }
-  }, [suggestedFATS]);
+  }, [acsPowers]);
 
   return {
     id: "FTTHPowerLayer",
-    source: heatmapSource,
+    source: sourceData,
     visible: true,
-    type: "heatmap",
+    type: "fill",
     paint: {
-      "heatmap-weight": [
-        "interpolate",
-        ["linear"],
-        ["get", "Count"],
-        0,
-        0,
-        10,
-        1,
-      ],
-      "heatmap-intensity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0,
-        0.5,
-        12,
-        1.5,
-      ],
-      "heatmap-color": [
-        "interpolate",
-        ["linear"],
-        ["heatmap-density"],
-        0,
-        "rgba(0, 128, 0, 0)",
-        0.3,
-        "green",
-        0.6,
-        "yellow",
-        1,
-        "red",
-      ],
-
-      "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 10, 12, 25],
-      "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 12, 0.6],
+      "fill-color": ["get", "color"],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "transparent",
     },
   };
 };

@@ -118,7 +118,7 @@ export const useLayerManager = (
       ...useFTTHPowerLayer(),
       label: "Power",
       icon: "",
-      type: "heatmap",
+      type: "fill",
       visible: layerVisibility.FTTHPowerLayer,
       toggle: () => toggleLayerVisibility("FTTHPowerLayer"),
     },
