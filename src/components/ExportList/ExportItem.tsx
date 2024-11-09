@@ -140,7 +140,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
             {exportItem.name}
           </span>
           <span className="text-xs md:text-base text-gray-500 opacity-70 ml-2 whitespace-nowrap overflow-hidden text-ellipsis">
-            {exportItem.Persian_Name}
+            {exportItem.persian_Name}
           </span>
         </h3>
         {isCollapsed ? (

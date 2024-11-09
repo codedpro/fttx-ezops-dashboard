@@ -8,7 +8,7 @@ export interface ExportItemType {
   numberParameters: number[] | null;
   planStatus: string[] | null;
   cities: string[] | null;
-  Persian_Name: string;
+  persian_Name: string;
 }
 
 export interface ExportData {
