@@ -37,15 +37,7 @@ const Dashboard = async () => {
     );
   }
 
-  const unwantedValues = ["ARG", "", "MTN", "Greenpacket"];
-
-  // Filter out unwanted root_cwmp_GPON values
-  const filteredAcsData = acsData.filter(
-    (item) => !unwantedValues.includes(item.root_cwmp_GPON)
-  );
-
-  // Process Manufacturer Chart Data
-  const rootCwmpGponCounts = filteredAcsData.reduce(
+  const rootCwmpGponCounts = acsData.reduce(
     (acc: { [key: string]: number }, item) => {
       const key = item.root_cwmp_GPON;
       if (acc[key]) {
@@ -58,14 +50,28 @@ const Dashboard = async () => {
     {}
   );
 
-  const labels_root_cwmp_GPON = Object.keys(rootCwmpGponCounts);
-  const series_root_cwmp_GPON = labels_root_cwmp_GPON.map(
-    (label) => rootCwmpGponCounts[label]
+  const sortedRootCwmpGponCounts = Object.entries(rootCwmpGponCounts).sort(
+    ([, countA], [, countB]) => countB - countA
   );
+
+  const topRootCwmpGponCountsEntries = sortedRootCwmpGponCounts.slice(0, 2);
+  const topRootCwmpGponCounts = Object.fromEntries(
+    topRootCwmpGponCountsEntries
+  );
+
+  const othersCount = sortedRootCwmpGponCounts
+    .slice(2)
+    .reduce((sum, [, count]) => sum + count, 0);
+
+  if (othersCount > 0) {
+    topRootCwmpGponCounts["Others"] = othersCount;
+  }
+
+  const labels_root_cwmp_GPON = Object.keys(topRootCwmpGponCounts);
+  const series_root_cwmp_GPON = Object.values(topRootCwmpGponCounts);
 
   const RXPowerRange = { min: -28, max: -8 };
 
-  // Process RXPower Chart Data
   const rxPowerCounts = acsData.reduce(
     (acc: { [key: string]: number }, item) => {
       const rxPower = item.RXPower;
@@ -90,8 +96,8 @@ const Dashboard = async () => {
   );
 
   const predefinedColors = [
-    "#feca00", // Fixed color 1
-    "#ADBCF2", // Fixed color 2
+    "#feca00",
+    "#ADBCF2",
     "#4caf50",
     "#673ab7",
     "#ff9800",
@@ -100,8 +106,6 @@ const Dashboard = async () => {
     "#ff0003",
     "#8bc34a",
     "#00bcd4",
-
-    // Add more colors as needed
   ];
 
   const assignColors = (labels: string[]) => {
@@ -142,12 +146,12 @@ const Dashboard = async () => {
 
   const topModelNameCounts = Object.fromEntries(sortedModelNames);
 
-  const othersCount = Object.entries(modelNameCounts)
+  const othersCountModel = Object.entries(modelNameCounts)
     .filter(([key]) => !topModelNameCounts[key])
     .reduce((sum, [, count]) => sum + count, 0);
 
-  if (othersCount > 0) {
-    topModelNameCounts["Others"] = othersCount;
+  if (othersCountModel > 0) {
+    topModelNameCounts["Others"] = othersCountModel;
   }
 
   const labels_modelName = Object.keys(topModelNameCounts);
@@ -155,7 +159,6 @@ const Dashboard = async () => {
 
   const colors_modelName = assignColors(labels_modelName);
 
-  // Existing Chart Data
   const series = [
     dashboardData?.online_Count || 2,
     dashboardData?.offline_Count || 1,
@@ -197,7 +200,6 @@ const Dashboard = async () => {
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-        {/* Existing Charts */}
         <div
           id="dashboard-step3"
           className="col-span-12 md:col-span-6 lg:col-span-6 "
@@ -225,32 +227,35 @@ const Dashboard = async () => {
           />
         </div>
 
-        <div id="dashboard-step6" className="col-span-12 lg:col-span-4">
+        <div
+          id="dashboard-root-cwmp-gpon-chart"
+          className="col-span-12 md:col-span-12 lg:col-span-4"
+        >
           <ChartThree
             header="Manufacturer"
             series={series_root_cwmp_GPON}
             colors={colors_root_cwmp_GPON}
             labels={labels_root_cwmp_GPON}
             apiname="FTTHDashboardExportRootCwmpGpon"
-            exportid="dashboard-step8"
+            exportid=""
           />
         </div>
 
         <div
-          id="dashboard-root-cwmp-gpon-chart"
-          className="col-span-12 lg:col-span-8 "
+          id="dashboard-step6"
+          className="col-span-12 md:col-span-12 lg:col-span-8 "
         >
           <ChartOne
             dailyData={dailyData}
             totalClosed={totalClosed}
             totalRunning={totalRunning}
-            exportid="dashboard-step7"
+            exportid=""
           />
         </div>
 
         <div
           id="dashboard-step9"
-          className="col-span-12 md:col-span-4 lg:col-span-4 "
+          className="col-span-12 md:col-span-12 lg:col-span-4 "
         >
           <ChartThree
             header="RXPower Status"
@@ -262,10 +267,9 @@ const Dashboard = async () => {
           />
         </div>
 
-        {/* **New Chart for modelName** */}
         <div
           id="dashboard-step10"
-          className="col-span-12 md:col-span-8 lg:col-span-8 "
+          className="col-span-12 md:col-span-12 lg:col-span-8 "
         >
           <ChartThree
             header="FTTH Modem Model Names"
