@@ -191,7 +191,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
             return (
               <div
                 key={index}
-                className="w-full sm:w-1/2 text-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 p-2 sm:p-3 rounded-lg"
+                className="w-full sm:w-1/2 text-nowrap text-center transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 p-2 sm:p-3 rounded-lg"
               >
                 <div className="flex w-full items-center justify-center space-x-2">
                   <span

@@ -39,10 +39,12 @@ const Dashboard = async () => {
 
   const unwantedValues = ["ARG", "", "MTN", "Greenpacket"];
 
+  // Filter out unwanted root_cwmp_GPON values
   const filteredAcsData = acsData.filter(
     (item) => !unwantedValues.includes(item.root_cwmp_GPON)
   );
 
+  // Process Manufacturer Chart Data
   const rootCwmpGponCounts = filteredAcsData.reduce(
     (acc: { [key: string]: number }, item) => {
       const key = item.root_cwmp_GPON;
@@ -57,29 +59,103 @@ const Dashboard = async () => {
   );
 
   const labels_root_cwmp_GPON = Object.keys(rootCwmpGponCounts);
-
   const series_root_cwmp_GPON = labels_root_cwmp_GPON.map(
     (label) => rootCwmpGponCounts[label]
   );
 
-  const generateColors = (numColors: number) => {
-    const randomColors = [];
-    for (let i = 0; i < numColors; i++) {
-      randomColors.push(
-        `#${Math.floor(Math.random() * 16777215).toString(16)}`
-      );
-    }
-    return randomColors;
-  };
+  const RXPowerRange = { min: -28, max: -8 };
 
-  const colors_root_cwmp_GPON = [
-  //  "#37c3f2",
-    //"#c70209",
-    "#feca00",
-    "#ADBCF2",
-    ...generateColors(labels_root_cwmp_GPON.length - 2),
+  // Process RXPower Chart Data
+  const rxPowerCounts = acsData.reduce(
+    (acc: { [key: string]: number }, item) => {
+      const rxPower = item.RXPower;
+      if (rxPower === null || rxPower === undefined) {
+        acc["Null"] = (acc["Null"] || 0) + 1;
+      } else if (rxPower >= RXPowerRange.min && rxPower <= RXPowerRange.max) {
+        acc["In Range"] = (acc["In Range"] || 0) + 1;
+      } else {
+        acc["Out of Range"] = (acc["Out of Range"] || 0) + 1;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  const ordered_RXPowerLabels = ["In Range", "Out of Range", "Null"];
+  const labels_RXPower = ordered_RXPowerLabels.filter((label) =>
+    Object.keys(rxPowerCounts).includes(label)
+  );
+  const series_RXPower = labels_RXPower.map(
+    (label) => rxPowerCounts[label] || 0
+  );
+
+  const predefinedColors = [
+    "#feca00", // Fixed color 1
+    "#ADBCF2", // Fixed color 2
+    "#4caf50",
+    "#673ab7",
+    "#ff9800",
+    "#37c3f2",
+    "#2196f3",
+    "#ff0003",
+    "#8bc34a",
+    "#00bcd4",
+
+    // Add more colors as needed
   ];
 
+  const assignColors = (labels: string[]) => {
+    const colors = predefinedColors.slice(0, labels.length);
+    while (colors.length < labels.length) {
+      const randomColor = `#${Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, "0")}`;
+      colors.push(randomColor);
+    }
+    return colors;
+  };
+
+  const colors_root_cwmp_GPON = assignColors(labels_root_cwmp_GPON);
+  const colors_RXPower = assignColors(labels_RXPower);
+
+  const unwantedModelNames = ["", "Unknown"];
+  const filteredModelNameData = acsData.filter(
+    (item) => !unwantedModelNames.includes(item.modelName)
+  );
+
+  const modelNameCounts = filteredModelNameData.reduce(
+    (acc: { [key: string]: number }, item) => {
+      const key = item.modelName;
+      if (acc[key]) {
+        acc[key]++;
+      } else {
+        acc[key] = 1;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  const sortedModelNames = Object.entries(modelNameCounts)
+    .sort(([, countA], [, countB]) => countB - countA)
+    .slice(0, 5);
+
+  const topModelNameCounts = Object.fromEntries(sortedModelNames);
+
+  const othersCount = Object.entries(modelNameCounts)
+    .filter(([key]) => !topModelNameCounts[key])
+    .reduce((sum, [, count]) => sum + count, 0);
+
+  if (othersCount > 0) {
+    topModelNameCounts["Others"] = othersCount;
+  }
+
+  const labels_modelName = Object.keys(topModelNameCounts);
+  const series_modelName = Object.values(topModelNameCounts);
+
+  const colors_modelName = assignColors(labels_modelName);
+
+  // Existing Chart Data
   const series = [
     dashboardData?.online_Count || 2,
     dashboardData?.offline_Count || 1,
@@ -121,9 +197,10 @@ const Dashboard = async () => {
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
+        {/* Existing Charts */}
         <div
           id="dashboard-step3"
-          className="col-span-12 md:col-span-6 lg:col-span-6"
+          className="col-span-12 md:col-span-6 lg:col-span-6 "
         >
           <ChartThree
             header="FTTH Modem Status"
@@ -134,9 +211,10 @@ const Dashboard = async () => {
             exportid="dashboard-step4"
           />
         </div>
+
         <div
           id="dashboard-step5"
-          className="col-span-12 md:col-span-6 lg:col-span-6"
+          className="col-span-12 md:col-span-6 lg:col-span-6 "
         >
           <ChartThree
             header="Payment Delivery Status"
@@ -146,6 +224,7 @@ const Dashboard = async () => {
             apiname="FTTHDashboardExportPreOrder"
           />
         </div>
+
         <div id="dashboard-step6" className="col-span-12 lg:col-span-4">
           <ChartThree
             header="Manufacturer"
@@ -155,16 +234,46 @@ const Dashboard = async () => {
             apiname="FTTHDashboardExportRootCwmpGpon"
             exportid="dashboard-step8"
           />
-        </div>{" "}
+        </div>
+
         <div
           id="dashboard-root-cwmp-gpon-chart"
-          className="col-span-8 "
+          className="col-span-12 lg:col-span-8 "
         >
           <ChartOne
             dailyData={dailyData}
             totalClosed={totalClosed}
             totalRunning={totalRunning}
             exportid="dashboard-step7"
+          />
+        </div>
+
+        <div
+          id="dashboard-step9"
+          className="col-span-12 md:col-span-4 lg:col-span-4 "
+        >
+          <ChartThree
+            header="RXPower Status"
+            series={series_RXPower}
+            colors={colors_RXPower}
+            labels={labels_RXPower}
+            apiname="FTTHDashboardExportRXPowerStatus"
+            exportid="dashboard-step9"
+          />
+        </div>
+
+        {/* **New Chart for modelName** */}
+        <div
+          id="dashboard-step10"
+          className="col-span-12 md:col-span-8 lg:col-span-8 "
+        >
+          <ChartThree
+            header="FTTH Modem Model Names"
+            series={series_modelName}
+            colors={colors_modelName}
+            labels={labels_modelName}
+            apiname="FTTHDashboardExportModelName"
+            exportid="dashboard-step10"
           />
         </div>
       </div>
