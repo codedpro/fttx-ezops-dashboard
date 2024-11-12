@@ -11,7 +11,7 @@ import {
 import RefreshButton from "@/components/Buttons/RefreshButton";
 import Link from "next/link";
 import DataGrid from "@/components/DataGrid";
-import ChartThree from "@/components/Charts/ChartThree"; // Make sure to import your chart component
+import ChartThree from "@/components/Charts/ChartThree";
 import moment from "moment-jalaali";
 
 const ModemPage = async ({ params }: { params: { id: string } }) => {
@@ -169,7 +169,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     const expTime = moment(pkg.Exp_Time, "jYYYY-jMM-jDD HH:mm:ss").toDate();
     const now = new Date();
 
-    const unusedValue = parseFloat(pkg.Unused_Value.replace(/,/g, ""));
+    const unusedValue = parseFloat(pkg.Value.replace(/,/g, ""));
 
     return expTime > now && unusedValue > 0;
   }).sort((a, b) => {
@@ -193,10 +193,10 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     const activePackage = activePackages[0];
     const unusedValue = parseFloat(
       (
-        parseFloat((activePackage?.Unused_Value ?? "50").replace(/,/g, "")) /
-        1024
+        parseFloat((activePackage?.Value ?? "50").replace(/,/g, "")) / 1024
       ).toFixed(3)
     );
+
     const initialValue = parseFloat(
       (
         parseFloat((activePackage?.Initial_Value ?? "100").replace(/,/g, "")) /

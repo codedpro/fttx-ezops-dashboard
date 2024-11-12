@@ -25,6 +25,7 @@ export const fetchModemDetails = async (
 
   try {
     const response = await axios.request(config);
+
     return response.data;
   } catch (error) {
     console.error("Error fetching modem details:", error);
@@ -143,7 +144,6 @@ export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
 
     return response.data as FTTHACS[];
   } catch (error) {
-    console.error("Error fetching FTTH ACS Data:", error);
     throw new Error("Failed to fetch FTTH ACS data");
   }
 };
