@@ -116,8 +116,8 @@ export const useLayerManager = (
     },
     FTTHPowerLayer: {
       ...useFTTHPowerLayer(),
-      label: "Power",
-      icon: "",
+      label: "RX Power",
+      icon: "/images/map/RXPower.png",
       type: "fill",
       visible: layerVisibility.FTTHPowerLayer,
       toggle: () => toggleLayerVisibility("FTTHPowerLayer"),
