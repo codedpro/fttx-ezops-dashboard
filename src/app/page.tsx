@@ -164,9 +164,8 @@ const Dashboard = async () => {
     dashboardData?.offline_Count || 1,
   ];
   const series_Paid_to_Modems = [
-    dashboardData?.online_Count + dashboardData?.offline_Count || 2,
-    dashboardData?.preorder_Paid -
-      (dashboardData?.online_Count + dashboardData?.offline_Count) || 1,
+    dashboardData.modem_Delivered || 2,
+    dashboardData.modem_Not_Delivered || 1,
   ];
   const colors = ["#feca00", "#ADBCF2"];
   const labels = ["Online", "Offline"];
