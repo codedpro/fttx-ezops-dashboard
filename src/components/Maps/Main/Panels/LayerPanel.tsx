@@ -66,7 +66,9 @@ const LayerPanel: React.FC<LayerPanelProps> = ({
           <div className="space-y-3 transition-all duration-100 ease-in-out transform">
             {visibleLayers.map((layer) => (
               <div className="flex items-center space-x-2" key={layer.id}>
-                {layer.type === "point" || layer.type === "heatmap" ? (
+                {layer.type === "point" ||
+                layer.type === "heatmap" ||
+                layer.type === "fill" ? (
                   <Image
                     src={layer.icon}
                     alt={layer.label}
