@@ -67,12 +67,40 @@ const useSearchPlaces = (
         data: {
           type: "FeatureCollection",
           features: features,
-        } as FeatureCollection,
+        } as FeatureCollection<Point, GeoJsonProperties>,
       });
     } else {
       const existingSource = map.getSource("places") as mapboxgl.GeoJSONSource;
-      const existingData = existingSource._data as FeatureCollection;
-      existingData.features.push(...features);
+      const existingData = existingSource._data as FeatureCollection<
+        Point,
+        GeoJsonProperties
+      >;
+
+      const existingKeys = new Set(
+        existingData.features
+          .map((feature) => {
+            if (feature.geometry.type === "Point") {
+              return getMarkerKey(
+                feature.geometry.coordinates[1],
+                feature.geometry.coordinates[0]
+              );
+            }
+            return null;
+          })
+          .filter((key): key is MarkerKey => key !== null)
+      );
+
+      const newFeatures = features.filter(
+        (feature) =>
+          !existingKeys.has(
+            getMarkerKey(
+              feature.geometry.coordinates[1],
+              feature.geometry.coordinates[0]
+            )
+          )
+      );
+
+      existingData.features.push(...newFeatures);
       existingSource.setData(existingData);
     }
 
@@ -85,24 +113,37 @@ const useSearchPlaces = (
           "icon-image": ["get", "icon"],
           "icon-size": 0.4,
           "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
         },
       });
-    }
 
-    places.forEach((place) => {
-      const latNum = parseFloat(place.lat);
-      const lonNum = parseFloat(place.lon);
-      if (!isNaN(latNum) && !isNaN(lonNum)) {
-        const key = getMarkerKey(latNum, lonNum);
-        if (!markersMap.current.has(key)) {
-          const marker = new mapboxgl.Marker()
-            .setLngLat([lonNum, latNum])
-            .setPopup(new mapboxgl.Popup().setText(place.display_name))
-            .addTo(map);
-          markersMap.current.set(key, marker);
+      map.on("click", "places", (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
+          layers: ["places"],
+        });
+
+        if (features.length) {
+          const feature = features[0] as Feature<Point, GeoJsonProperties>;
+          const coordinates = feature.geometry.coordinates.slice();
+          const title = feature.properties?.title;
+
+          if (title) {
+            new mapboxgl.Popup()
+              .setLngLat(coordinates as [number, number])
+              .setHTML(`<h3>${title}</h3>`)
+              .addTo(map);
+          }
         }
-      }
-    });
+      });
+
+      map.on("mouseenter", "places", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+
+      map.on("mouseleave", "places", () => {
+        map.getCanvas().style.cursor = "";
+      });
+    }
   };
 
   const handleSearchPlaces = async (query: string) => {
@@ -126,7 +167,6 @@ const useSearchPlaces = (
             viewbox,
             true
           );
-          console.log("Fetched places:", places);
 
           const icons: Record<string, string> = {
             "default-icon": "/images/map/marker.png",
@@ -160,9 +200,6 @@ const useSearchPlaces = (
       return;
     }
 
-    markersMap.current.forEach((marker) => marker.remove());
-    markersMap.current.clear();
-
     if (map.getLayer("places")) {
       map.removeLayer("places");
     }
@@ -182,6 +219,8 @@ const useSearchPlaces = (
         }
       });
     }
+
+    markersMap.current.clear();
 
     previousQuery.current = null;
   };
