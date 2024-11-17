@@ -184,7 +184,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
       </div>
 
       <div className="mx-auto w-full max-w-[350px]">
-        <div className="flex flex-wrap sm:flex-nowrap sm:flex-row  items-center justify-center gap-3 sm:gap-5">
+        <div className="flex flex-wrap sm:flex-nowrap sm:flex-row  items-center justify-center gap-1">
           {labels.map((label, index) => {
             const percentage = ((series[index] / total) * 100).toFixed(2);
 
@@ -198,11 +198,11 @@ const ChartThree: React.FC<ChartThreeProps> = ({
                     className="inline-block h-2 w-2 sm:h-3 sm:w-3 rounded-full"
                     style={{ backgroundColor: colors[index] }}
                   ></span>
-                  <p className="text-xs sm:text-base font-medium text-gray-800 dark:text-white">
+                  <p className="text-xs sm:text-xs font-medium text-gray-800 dark:text-white">
                     {label}
                   </p>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {series[index]} ({percentage}%)
                 </p>
               </div>
