@@ -211,7 +211,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     chartContent = (
       <div className=" h-full">
         <ChartThree
-          header={`Active Package (${modemDetails.IBSNG_Main[0].Charge})`}
+          header={`Active Package (${modemDetails.IBSNG_Main[0].Charge}/s)`}
           series={series}
           colors={colors}
           labels={labels}
