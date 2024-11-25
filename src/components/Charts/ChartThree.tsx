@@ -18,6 +18,7 @@ interface ChartThreeProps {
   header: string;
   apiname: string;
   exportid?: string;
+  suffix?: string;
 }
 
 const ChartThree: React.FC<ChartThreeProps> = ({
@@ -177,7 +178,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
               Total
             </p>
             <p className="text-gray-800 dark:text-white text-2xl sm:text-3xl font-bold">
-              {total % 1 === 0 ? total : total.toFixed(3).replace(/\.?0+$/, "")}
+              {total % 1 === 0 ? total : total.toFixed(3).replace(/\.?0+$/, "")}{" "} {suffix}
             </p>
           </div>
         </div>
