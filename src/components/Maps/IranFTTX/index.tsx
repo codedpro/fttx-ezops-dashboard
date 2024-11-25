@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import mapboxgl, {
   GeoJSONSourceSpecification,
+  Marker,
   StyleSpecification,
 } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -92,11 +93,22 @@ const IranFTTXMap = forwardRef<
         essential: true,
       });
 
+      const marker = new Marker()
+        .setLngLat([zoomLocation.lng, zoomLocation.lat])
+        .addTo(mapRef.current);
+
       const url = new URL(window.location.href);
       url.search = "";
       window.history.replaceState({}, "", url.toString());
+
+      return () => {
+        marker.remove();
+      };
     }
   }, [zoomLocation, isStyleloaded]);
+
+
+
   const addLayersToMap = () => {
     if (!mapRef.current) return;
 

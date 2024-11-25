@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
+import mapboxgl, { GeoJSONSourceSpecification, Marker } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Modal } from "./Panels/Modal";
 import { useEditFeature } from "@/hooks/useEditFeature";
@@ -198,9 +198,17 @@ const PreOrdersMap = forwardRef<
           essential: true,
         });
 
+        const marker = new Marker()
+          .setLngLat([zoomLocation.lng, zoomLocation.lat])
+          .addTo(mapRef.current);
+
         const url = new URL(window.location.href);
         url.search = "";
         window.history.replaceState({}, "", url.toString());
+
+        return () => {
+          marker.remove();
+        };
       }
     }, [zoomLocation, isStyleloaded]);
 

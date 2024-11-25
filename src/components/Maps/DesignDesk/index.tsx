@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import mapboxgl, { StyleSpecification } from "mapbox-gl";
+import mapboxgl, { Marker, StyleSpecification } from "mapbox-gl";
 import * as turf from "@turf/turf";
 
 import { dynamicZoom } from "@/utils/dynamicZoom";
@@ -127,9 +127,17 @@ const DesignDeskMap = forwardRef<
           essential: true,
         });
 
+        const marker = new Marker()
+          .setLngLat([zoomLocation.lng, zoomLocation.lat])
+          .addTo(mapRef.current);
+
         const url = new URL(window.location.href);
         url.search = "";
         window.history.replaceState({}, "", url.toString());
+
+        return () => {
+          marker.remove();
+        };
       }
     }, [zoomLocation, isStyleloaded]);
 

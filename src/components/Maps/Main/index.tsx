@@ -7,6 +7,7 @@ import React, {
   } from "react";
   import mapboxgl, {
     GeoJSONSourceSpecification,
+    Marker,
     StyleSpecification,
   } from "mapbox-gl";
   import "mapbox-gl/dist/mapbox-gl.css";
@@ -134,20 +135,27 @@ import React, {
     }, [mapStyle]);
   
     useEffect(() => {
-      if (mapRef.current && zoomLocation && isStyleloaded) {
-        mapRef.current.flyTo({
-          center: [zoomLocation.lng, zoomLocation.lat],
-          zoom: zoomLocation.zoom,
-          essential: true,
-        });
+        if (mapRef.current && zoomLocation && isStyleloaded) {
+          mapRef.current.flyTo({
+            center: [zoomLocation.lng, zoomLocation.lat],
+            zoom: zoomLocation.zoom,
+            essential: true,
+          });
   
-        const url = new URL(window.location.href);
-        url.search = "";
-        window.history.replaceState({}, "", url.toString());
-      }
-    }, [zoomLocation, isStyleloaded]);
+          const marker = new Marker()
+            .setLngLat([zoomLocation.lng, zoomLocation.lat])
+            .addTo(mapRef.current);
   
-    // Added useEffect for dynamic layer updates
+          const url = new URL(window.location.href);
+          url.search = "";
+          window.history.replaceState({}, "", url.toString());
+  
+          return () => {
+            marker.remove();
+          };
+        }
+      }, [zoomLocation, isStyleloaded]);
+  
     useEffect(() => {
       if (mapRef.current && mapIsLoaded) {
         layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
