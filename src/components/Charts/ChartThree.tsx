@@ -28,6 +28,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
   header,
   apiname,
   exportid,
+  suffix‎
 }) => {
   const [isClient, setIsClient] = useState(false);
 
