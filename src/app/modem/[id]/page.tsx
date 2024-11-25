@@ -216,6 +216,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
           colors={colors}
           labels={labels}
           apiname=""
+          suffix="GB"
         />
       </div>
     );
