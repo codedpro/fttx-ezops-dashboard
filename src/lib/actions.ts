@@ -50,6 +50,26 @@ export const performHardRefresh = async (modemId: string) => {
   return true;
 };
 
+export const fetchFTTHPayload = async (token: string) => {
+  const data = JSON.stringify(30);
+  const config = {
+    method: "post",
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadPerDay`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    data: data,
+  };
+
+  try {
+    const response = await axios.request(config);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching FTTH dashboard data:", error);
+    throw new Error("Failed to fetch FTTH dashboard data");
+  }
+};
 export const fetchFTTHDashboard = async (token: string) => {
   const config = {
     method: "get",
@@ -62,7 +82,6 @@ export const fetchFTTHDashboard = async (token: string) => {
 
   try {
     const response = await axios.request(config);
-
 
     return response.data;
   } catch (error) {
@@ -146,5 +165,29 @@ export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
     return response.data as FTTHACS[];
   } catch (error) {
     throw new Error("Failed to fetch FTTH ACS data");
+  }
+};
+
+export const fetchFTTHGetPayloadUseDaily = async (
+  token: string,
+  date: string
+) => {
+  const config = {
+    method: "post",
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadUseDaily`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    data: date,
+  };
+
+  try {
+    const response = await axios.request(config);
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching FTTH dashboard data:", error);
+    throw new Error("Failed to fetch FTTH dashboard data");
   }
 };

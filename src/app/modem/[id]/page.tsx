@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import TableThree from "@/components/Tables/TableThree";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-import { FaLightbulb, FaMap, FaWifi } from "react-icons/fa";
+import { FaMap, FaWifi } from "react-icons/fa";
 import { fetchModemDetails } from "@/lib/actions";
 import {
   ballancesColumns,

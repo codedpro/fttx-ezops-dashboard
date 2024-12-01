@@ -1,15 +1,26 @@
+// components/Tables/TableThree.tsx
+
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useMemo } from "react";
 import { FaLightbulb } from "react-icons/fa";
 import * as XLSX from "xlsx";
 
+interface Column {
+  key: string;
+  label: string;
+  isClickable?: boolean;
+  formatter?: (value: any) => string | JSX.Element;
+}
+
 interface TableThreeProps {
   data: any[];
-  columns: { key: string; label: string }[];
+  columns: Column[]; // Updated to use Column interface
   header: string;
   emoji: string;
   initialLimit?: number;
+  excludeFilterColumns?: string[]; // Columns to exclude from filtering
 }
 
 const TableThree: React.FC<TableThreeProps> = ({
@@ -18,34 +29,56 @@ const TableThree: React.FC<TableThreeProps> = ({
   header,
   emoji,
   initialLimit = 5,
+  excludeFilterColumns = ["ID", "FTTH_ID", "User_ID"], // Default excluded columns
 }) => {
   const [limit, setLimit] = useState(initialLimit);
   const [filters, setFilters] = useState<{ [key: string]: string }>({});
 
-  const filteredColumns = columns.filter(
-    (col) => col.key !== "ID" && col.key !== "FTTH_ID" && col.key !== "User_ID"
+  const renderCellContent = (col: Column, value: any) => {
+    if (col.formatter) {
+      return col.formatter(value);
+    } else if (col.isClickable) {
+      return (
+        <Link href={`/modem/${value}`} target="_blank" className="text-primary hover:underline">
+          {value}
+        </Link>
+      );
+    } else {
+      return value?.toString() || "N/A";
+    }
+  };
+
+  const filteredColumns = useMemo(
+    () => columns.filter((col) => !excludeFilterColumns.includes(col.key)),
+    [columns, excludeFilterColumns]
   );
 
-  const filteredData = data.filter((row) => {
-    return filteredColumns.every((col) => {
-      const value = row[col.key]?.toString().toLowerCase();
-      const filter = filters[col.key]?.toLowerCase();
-      if (!filter) return true;
-      return value.includes(filter);
+  const filteredData = useMemo(() => {
+    return data.filter((row) => {
+      return filteredColumns.every((col) => {
+        const value = row[col.key]?.toString().toLowerCase() || ""; // Ensure value is a string
+        const filter = filters[col.key]?.toLowerCase();
+        if (!filter) return true;
+        return value.includes(filter);
+      });
     });
-  });
+  }, [data, filteredColumns, filters]);
 
-  const displayedData = filteredData.slice(0, limit);
+  const displayedData = useMemo(
+    () => filteredData.slice(0, limit),
+    [filteredData, limit]
+  );
 
   const handleLoadMore = () => {
     setLimit(limit + 20);
   };
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(displayedData);
+    // Export all filtered data instead of just displayedData
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-    XLSX.writeFile(workbook, "table_data.xlsx");
+    XLSX.writeFile(workbook, `${header.replace(/\s+/g, "_")}.xlsx`);
   };
 
   const handleFilterChange = (key: string, value: string) => {
@@ -57,7 +90,7 @@ const TableThree: React.FC<TableThreeProps> = ({
 
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-[#1F2B37] dark:bg-[#122031] dark:shadow-card sm:p-7.5 hover:shadow-lg">
-      <div  className="flex flex-row items-center justify-between mb-4">
+      <div className="flex flex-row items-center justify-between mb-4">
         <h3 className="text-xl font-bold dark:text-[#E2E8F0] flex items-center">
           <span className="mr-2">{emoji}</span>
           {header}
@@ -71,7 +104,7 @@ const TableThree: React.FC<TableThreeProps> = ({
       </div>
 
       <div className="max-w-full overflow-x-auto custom-scrollbar">
-        <table className="w-full table-auto">
+        <table className="w-full table-auto border-collapse">
           <thead>
             <tr className="bg-[#F7F9FC] text-left dark:bg-[#1A2735] dark:border-b dark:border-[#1F2B37]">
               {filteredColumns.map((col) => (
@@ -87,7 +120,7 @@ const TableThree: React.FC<TableThreeProps> = ({
                       onChange={(e) =>
                         handleFilterChange(col.key, e.target.value)
                       }
-                      className="px-2 py-1 text-xs bg-transparent placeholder:text-center w-full placeholder:text-xs placeholder:ellipsis focus:outline-none focus:border-b focus:border-primary "
+                      className="px-2 py-1 text-xs bg-transparent placeholder:text-center w-full placeholder:text-xs placeholder:ellipsis focus:outline-none focus:border-b focus:border-primary"
                     />
                   </div>
                 </th>
@@ -97,7 +130,7 @@ const TableThree: React.FC<TableThreeProps> = ({
           <tbody>
             {displayedData.map((item, index) => (
               <tr
-                key={index}
+                key={item.ftth_id || index} // Prefer unique identifier
                 className="hover:bg-[#F1F5F9] dark:hover:bg-[#1C2C3A] transition-colors"
               >
                 {filteredColumns.map((col) => (
@@ -111,7 +144,7 @@ const TableThree: React.FC<TableThreeProps> = ({
                   >
                     <div className="text-dark text-center dark:text-[#E2E8F0] text-xs md:text-sm lg:text-base flex items-center justify-center space-x-2">
                       <p className="text-ellipsis text-nowrap overflow-hidden">
-                        {item[col.key]?.toString()}
+                        {renderCellContent(col, item[col.key])}
                       </p>
                       {col.key === "Sub_Service" && (
                         <FaLightbulb className="text-primary" />
@@ -125,7 +158,7 @@ const TableThree: React.FC<TableThreeProps> = ({
         </table>
       </div>
 
-      {limit < data.length && (
+      {limit < filteredData.length && (
         <div className="mt-4 flex justify-center">
           <button
             onClick={handleLoadMore}

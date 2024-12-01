@@ -5,12 +5,14 @@ import {
   fetchFTTHDashboard,
   fetchFTTHDailyChartData,
   fetchFTTHACS,
+  fetchFTTHPayload,
 } from "@/lib/actions";
 import { cookies } from "next/headers";
 import DashboardCards from "@/components/DataStats/DashboardCards";
 import ChartOne from "@/components/Charts/ChartOne";
 import Tutorial from "@/components/Tutorial";
 import { dashboardTutorialSteps } from "@/tutorials";
+import ChartFour from "@/components/Charts/ChartFour";
 
 const Dashboard = async () => {
   const cookieStore = cookies();
@@ -20,11 +22,12 @@ const Dashboard = async () => {
     return <div className="text-center text-red-600">Unauthorized</div>;
   }
 
-  let dashboardData, dailyData, acsData;
+  let dashboardData, dailyData, acsData, payloadData;
 
   try {
     dashboardData = await fetchFTTHDashboard(token);
     acsData = await fetchFTTHACS(token);
+    payloadData = await fetchFTTHPayload(token);
     dashboardData = dashboardData[0];
 
     dailyData = await fetchFTTHDailyChartData(token);
@@ -199,6 +202,12 @@ const Dashboard = async () => {
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
+      <div
+          id="dashboard-step11"
+          className="col-span-12 md:col-span-12 lg:col-span-12 "
+        >
+          <ChartFour dailyData={payloadData} exportid="" header="Network Payload Overview" />
+        </div>
         <div
           id="dashboard-step3"
           className="col-span-12 md:col-span-6 lg:col-span-6 "
@@ -279,6 +288,7 @@ const Dashboard = async () => {
             exportid="dashboard-step10"
           />
         </div>
+ 
       </div>
 
       {dashboardData && dailyData && (
