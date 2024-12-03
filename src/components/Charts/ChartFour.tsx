@@ -1,4 +1,3 @@
-// components/ChartFour.tsx
 "use client";
 
 import { ApexOptions } from "apexcharts";
@@ -6,7 +5,6 @@ import React, { useState, useMemo, useCallback } from "react";
 import ReactApexChart from "react-apexcharts";
 import DefaultSelectOption from "@/components/SelectOption/DefaultSelectOption";
 import { FaCloudDownloadAlt } from "react-icons/fa";
-import axios from "axios";
 import { exportToXLSX } from "@/utils/exportToExcel";
 import { UserService } from "@/services/userService";
 import PayloadDayModal from "@/components/PayloadDayModal";
@@ -173,39 +171,20 @@ const ChartFour: React.FC<ChartFourProps> = ({
     [dates, series, filteredData]
   );
 
-  const handleDownload = async () => {
-    const end = filter === "Week" ? 7 : 30;
-    const start = 0;
-
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportUTTicketDaily`,
-        {
-          Start: start,
-          End: end,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${userService.getToken()}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const data = response.data;
-
-      if (data.length === 0) {
-        alert("No data available to download.");
-        return;
-      }
-
-      exportToXLSX(data, "UT_Complains_Overview");
-    } catch (error) {
-      console.error("Error downloading data:", error);
-      alert("Failed to download data. Please try again.");
+  const handleDownload = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to download.");
+      return;
     }
+
+    const exportData = filteredData.map((item) => ({
+      Date: item.Date.split("T")[0],
+      Value: item.Value,
+    }));
+
+    exportToXLSX(exportData, `Filtered_Data_${filter}`);
   };
 
-  // Memoize handleCloseModal to prevent re-renders
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedDay(null);
