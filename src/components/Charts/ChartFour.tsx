@@ -96,7 +96,6 @@ const ChartFour: React.FC<ChartFourProps> = ({
           ) {
             const selectedData = series[seriesIndex].data[dataPointIndex];
             if (selectedData && selectedData.x) {
-              // Find the original date string from filteredData
               const originalDate = filteredData[dataPointIndex].Date;
               const formattedDate = formatDateForModal(originalDate);
               setSelectedDay(formattedDate);
