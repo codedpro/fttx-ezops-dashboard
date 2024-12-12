@@ -346,6 +346,23 @@ const config: Config = {
         5: "0px 1px 5px rgba(0, 0, 0, 0.2)",
       },
       keyframes: {
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.3" },
+        },
+        "rotate-shine": {
+          "0%": { transform: "rotate(0deg)", filter: "brightness(1)" },
+          "100%": { transform: "rotate(360deg)", filter: "brightness(1.5)" },
+        },
+        shine: {
+          "0%": { boxShadow: "0 0 5px rgba(255, 255, 255, 0.5)" },
+          "50%": { boxShadow: "0 0 20px rgba(255, 255, 255, 1)" },
+          "100%": { boxShadow: "0 0 5px rgba(255, 255, 255, 0.5)" },
+        },
+        rotate360: {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
         linspin: {
           "100%": { transform: "rotate(360deg)" },
         },
@@ -391,6 +408,11 @@ const config: Config = {
         },
       },
       animation: {
+        blink: "blink 1s ease-in-out infinite",
+        "rotate-shine": "rotate-shine 1s ease-in-out ",
+
+        shine: "shine 0.5s ease-in-out infinite",
+        rotate360: "rotate360 1s linear infinite",
         linspin: "linspin 1568.2353ms linear infinite",
         easespin: "easespin 5332ms cubic-bezier(0.4, 0, 0.2, 1) infinite both",
         "left-spin":
