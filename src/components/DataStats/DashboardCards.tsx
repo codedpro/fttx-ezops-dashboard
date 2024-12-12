@@ -29,18 +29,30 @@ interface DashboardCardsProps {
 const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
   const userService = new UserService();
   const [activeDownload, setActiveDownload] = useState<string | null>(null);
-  const [completedDownload, setCompletedDownload] = useState<string | null>(null);
+  const [completedDownload, setCompletedDownload] = useState<string | null>(
+    null
+  );
 
   const getIconById = (id: string) => {
     const iconMapping: Record<string, JSX.Element> = {
-      preorder_Notpaid: <FaExclamationCircle size={30} className="icon text-primary" />,
-      preorder_Paid: <FaMoneyCheckAlt size={30} className="icon text-primary" />,
-      purchase_But_Not_Delivered: <FaShippingFast size={30} className="icon text-primary" />,
+      preorder_Notpaid: (
+        <FaExclamationCircle size={30} className="icon text-primary" />
+      ),
+      preorder_Paid: (
+        <FaMoneyCheckAlt size={30} className="icon text-primary" />
+      ),
+      purchase_But_Not_Delivered: (
+        <FaShippingFast size={30} className="icon text-primary" />
+      ),
       rejected: <FaThumbsDown size={30} className="icon text-primary" />,
       canceled: <FaWindowClose size={30} className="icon text-primary" />,
-      confirmed_Waiting_For_Purchase: <FaHourglassHalf size={30} className="icon text-primary" />,
+      confirmed_Waiting_For_Purchase: (
+        <FaHourglassHalf size={30} className="icon text-primary" />
+      ),
     };
-    return iconMapping[id] || <FaTicketAlt size={30} className="icon text-primary" />;
+    return (
+      iconMapping[id] || <FaTicketAlt size={30} className="icon text-primary" />
+    );
   };
 
   const handleDownload = async (id: string) => {
@@ -95,12 +107,12 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
           key={item.id}
           className="relative p-6 overflow-hidden rounded-lg bg-white dark:bg-[#122031] bg-grid-black/[0.01] dark:bg-grid-white/[0.01] shadow-md hover:shadow-lg transform transition-transform hover:scale-105 group"
         >
-          {/* Icon Section */}
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-opacity-10 bg-primary-light dark:bg-secondary-dark mb-4 mx-auto transition-shadow duration-300">
-            <div className="group-hover:animate-rotate-shine">{getIconById(item.id)}</div>
+            <div className="group-hover:animate-rotate-shine">
+              {getIconById(item.id)}
+            </div>
           </div>
 
-          {/* Card Content */}
           <div className="relative z-10 text-center">
             <h4 className="mb-2 text-2xl font-bold text-gray-800 dark:text-gray-100 transition-colors">
               {item.value}
@@ -110,19 +122,22 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
             </span>
           </div>
 
-          {/* Download Button */}
           <div
             className={`absolute top-2 right-2 z-50 cursor-pointer text-2xl transition-transform ${
               activeDownload === item.id
                 ? "text-primary animate-blink"
                 : completedDownload === item.id
-                ? "text-primary animate-bounce"
-                : "text-gray-500 hover:text-primary"
+                  ? "text-primary animate-bounc"
+                  : "text-gray-500 hover:text-primary"
             }`}
             onClick={() => handleDownload(item.id)}
             title={`Export ${item.label} data`}
           >
-            {completedDownload === item.id ? <FaCheckCircle /> : <FaCloudDownloadAlt />}
+            {completedDownload === item.id ? (
+              <FaCheckCircle />
+            ) : (
+              <FaCloudDownloadAlt />
+            )}
           </div>
 
           {/* Hover Border Effect */}
