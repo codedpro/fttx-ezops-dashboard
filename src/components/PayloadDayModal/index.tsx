@@ -1,5 +1,3 @@
-// components/PayloadDayModal.tsx
-
 "use client";
 
 import React, {
@@ -16,7 +14,8 @@ import { fetchFTTHGetPayloadUseDaily } from "@/lib/actions";
 import TableThree from "../Tables/TableThree";
 
 interface PayloadDayModalProps {
-  date: string; // Format: "2024-12-01"
+  date: string;
+  city: string; // Added city prop
   onClose: () => void;
 }
 
@@ -26,39 +25,31 @@ interface Column {
   isClickable?: boolean;
   formatter?: (value: any) => string | JSX.Element;
 }
+
 interface PayloadData {
   City: string | null;
   Usage: number;
   ftth_id: number;
-  modem_id: string; // Assuming modem_id is a string; adjust type as necessary
-  // Add other fields as necessary
+  modem_id: string;
 }
 
-const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
+const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, city, onClose }) => {
   const [data, setData] = useState<PayloadData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Create a stable UserService instance using useRef
   const userServiceRef = useRef<UserService>(new UserService());
 
-  // Memoize the onClose handler to prevent unnecessary re-renders
   const handleClose = useCallback(() => {
     onClose();
   }, [onClose]);
 
-  // Manage focus for accessibility
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const triggerElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    // Store the element that triggered the modal
     triggerElementRef.current = document.activeElement as HTMLElement;
-
-    // Focus the close button when the modal opens
     closeButtonRef.current?.focus();
-
-    // Cleanup: Return focus to the triggering element when the modal closes
     return () => {
       triggerElementRef.current?.focus();
     };
@@ -69,7 +60,13 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
       setLoading(true);
       try {
         const token = userServiceRef.current.getToken() || "";
-        const payloadData = await fetchFTTHGetPayloadUseDaily(token, date);
+        let payloadData = await fetchFTTHGetPayloadUseDaily(token, date);
+
+        // If city is not "all", filter the payload data to only include that city
+        if (city !== "all") {
+          payloadData = payloadData.filter((item: PayloadData) => item.City === city);
+        }
+
         setData(payloadData);
       } catch (err: any) {
         setError(err.message || "An error occurred");
@@ -79,7 +76,7 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
     };
 
     fetchData();
-  }, [date]);
+  }, [date, city]);
 
   const formatNumberWithCommas = (value: number): string => {
     return new Intl.NumberFormat("fr-FR", {
@@ -94,7 +91,7 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
     () => [
       { key: "ftth_id", label: "FTTH ID", isClickable: true },
       { key: "City", label: "City" },
-      { key: "Usage", label: "Usage (MB)", formatter: formatNumberWithCommas }, //
+      { key: "Usage", label: "Usage (MB)", formatter: formatNumberWithCommas },
     ],
     []
   );
@@ -115,7 +112,6 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
       >
         {/* Modal Header */}
         <div className="sticky top-0 bg-white dark:bg-[#122031] z-10 p-6 border-b dark:border-[#1F2B37]">
-          {/* Close Icon */}
           <button
             onClick={handleClose}
             ref={closeButtonRef}
@@ -124,8 +120,6 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
           >
             <FaTimes size={20} />
           </button>
-
-          {/* Modal Title */}
           <h2
             id="payload-modal-title"
             className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100"
@@ -136,7 +130,6 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Content Rendering */}
           {loading && (
             <div className="flex justify-center items-center h-32">
               <svg
@@ -177,7 +170,7 @@ const PayloadDayModal: React.FC<PayloadDayModalProps> = ({ date, onClose }) => {
               columns={columns}
               header={tableHeader}
               emoji={tableEmoji}
-              initialLimit={10} // Display initial 10 items
+              initialLimit={10}
             />
           )}
         </div>

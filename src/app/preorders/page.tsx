@@ -11,7 +11,6 @@ import LegendPanel from "@/components/Maps/PreOrders/Panels/LegendPanel";
 import { useCustomFATLine } from "@/hooks/useCustomFATLine";
 import { LayerKeys } from "@/types/Layers";
 import { useLayerManager } from "@/utils/layerManager";
-import { FaDrawPolygon } from "react-icons/fa";
 import { usePolygonSelection } from "@/hooks/usePolygonSelection";
 import PolygonTool from "@/components/Polygon";
 import PolygonDetailModal from "@/components/Polygon/PolygonDetailModal";

@@ -50,8 +50,17 @@ export const performHardRefresh = async (modemId: string) => {
   return true;
 };
 
-export const fetchFTTHPayload = async (token: string) => {
-  const data = JSON.stringify(30);
+interface FTTHPayload {
+  Date: string;
+  Value: number;
+}
+
+export const fetchFTTHPayload = async (
+  token: string,
+  city: string = "all"
+): Promise<FTTHPayload[]> => {
+  const data = JSON.stringify({ Range: 30, city });
+
   const config = {
     method: "post",
     url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadPerDay`,
@@ -63,13 +72,20 @@ export const fetchFTTHPayload = async (token: string) => {
   };
 
   try {
-    const response = await axios.request(config);
+    const response = await axios.request<FTTHPayload[]>({ ...config });
+    if (response.data?.length === 0 && city !== "all") {
+      console.warn(`No data found for city "${city}". Falling back to "all".`);
+      return await fetchFTTHPayload(token, "all");
+    }
+    console.log(city)
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error("Error fetching FTTH dashboard data:", error);
     throw new Error("Failed to fetch FTTH dashboard data");
   }
 };
+
 export const fetchFTTHDashboard = async (token: string) => {
   const config = {
     method: "get",

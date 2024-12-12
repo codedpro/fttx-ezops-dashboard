@@ -9,3 +9,4 @@ export const useInitializeFTTHModems = (token: string) => {
     startFetching(token);
   }, [startFetching, token]);
 };
+

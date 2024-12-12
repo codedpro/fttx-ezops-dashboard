@@ -21,6 +21,7 @@ import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
 import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
 import { useFTTHBlockPolygonLayer } from "@/components/Maps/Main/Layers/BlockLayer";
 import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
+import { useAutoFATLayer } from "@/components/Maps/auto-plan/Layers/autoFATLayer";
 
 interface LayerConfig {
   id: string;
@@ -181,6 +182,14 @@ export const useLayerManager = (
       type: "point",
       visible: layerVisibility.ModemLayer,
       toggle: () => toggleLayerVisibility("ModemLayer"),
+    },
+    autoFATLayer: {
+      ...useAutoFATLayer(),
+      label: "Auto FAT",
+      icon: "/images/map/FAT.png",
+      type: "point",
+      visible: layerVisibility.autoFATLayer,
+      toggle: () => toggleLayerVisibility("autoFATLayer"),
     },
     OLTLayer: {
       ...useOLTLayer(),
