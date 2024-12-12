@@ -22,6 +22,7 @@ import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
 import { useFTTHBlockPolygonLayer } from "@/components/Maps/Main/Layers/BlockLayer";
 import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
 import { useAutoFATLayer } from "@/components/Maps/auto-plan/Layers/autoFATLayer";
+import { usePostBlockPolygonLayer } from "@/components/Maps/auto-plan/Layers/PostBlockLayer";
 
 interface LayerConfig {
   id: string;
@@ -115,6 +116,15 @@ export const useLayerManager = (
       visible: layerVisibility.BlockPolygonLayer,
       toggle: () => toggleLayerVisibility("BlockPolygonLayer"),
     },
+    postBlockLayer: {
+      ...usePostBlockPolygonLayer(),
+      label: "Blocks",
+      icon: "",
+      type: "fill",
+      visible: layerVisibility.postBlockLayer,
+      toggle: () => toggleLayerVisibility("postBlockLayer"),
+    },
+
     FTTHPowerLayer: {
       ...useFTTHPowerLayer(),
       label: "RX Power",

@@ -79,7 +79,7 @@ import React, {
               addFillLayer(mapRef, id, source, paint, visible);
               break;
             case "polygon":
-              addFillLayer(mapRef, id, source, paint, visible); // Corrected
+              addFillLayer(mapRef, id, source, paint, visible);
               break;
             default:
               console.error("Unknown layer type", type);

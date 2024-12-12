@@ -14,7 +14,11 @@ import Tutorial from "@/components/Tutorial";
 import { dashboardTutorialSteps } from "@/tutorials";
 import ChartFour from "@/components/Charts/ChartFour";
 
-const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: string } }) => {
+const Dashboard = async ({
+  searchParams,
+}: {
+  searchParams: { PayloadCity?: string };
+}) => {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value;
 
@@ -26,7 +30,6 @@ const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: strin
 
   try {
     PayloadCity = searchParams?.PayloadCity || "all";
-    console.log("PayloadCity:", PayloadCity);
 
     dashboardData = await fetchFTTHDashboard(token);
     acsData = await fetchFTTHACS(token);
@@ -173,7 +176,12 @@ const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: strin
     dashboardData.modem_Delivered || 2,
     dashboardData.modem_Not_Delivered || 1,
   ];
+  const series_Sold_Consumed = [
+    dashboardData.total_Sold || 2,
+    dashboardData.total_Consumed || 1,
+  ];
   const colors = ["#feca00", "#ADBCF2"];
+  const labels_Sold_Consumed = ["Package Sold", "Package Consumed"];
   const labels = ["Online", "Offline"];
   const labels_Paid_to_modems = ["Delivered", "Not Delivered"];
   const totalClosed = dashboardData?.uT_Closed || 0;
@@ -190,12 +198,26 @@ const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: strin
       value: dashboardData?.preorder_Paid || 0,
       id: "preorder_Paid",
     },
-    { label: "SFAT", value: dashboardData?.sfaT_Count || 0, id: "sfat" },
-    { label: "MFAT", value: dashboardData?.mfaT_Count || 0, id: "mfat" },
-    { label: "OLT", value: dashboardData?.olT_Count || 0, id: "olt" },
-    { label: "Hand Hole", value: dashboardData?.hH_Count || 0, id: "hh" },
-    { label: "ODC", value: dashboardData?.odC_Count || 0, id: "odc" },
-    { label: "TC", value: dashboardData?.tC_Count || 0, id: "tc" },
+    {
+      label: "Preorder Purchase But Not Delivered",
+      value: dashboardData?.purchase_But_Not_Delivered || 0,
+      id: "purchase_But_Not_Delivered",
+    },
+    {
+      label: "Preorder Rejected",
+      value: dashboardData?.rejected || 0,
+      id: "rejected",
+    },
+    {
+      label: "Preorder Canceled",
+      value: dashboardData?.canceled || 0,
+      id: "canceled",
+    },
+    {
+      label: "Preorder Confirmed Waiting For Purchese",
+      value: dashboardData?.confirmed_Waiting_For_Purchase || 0,
+      id: "confirmed_Waiting_For_Purchase",
+    },
   ];
 
   return (
@@ -218,7 +240,7 @@ const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: strin
         </div>
         <div
           id="dashboard-step3"
-          className="col-span-12 md:col-span-6 lg:col-span-6 "
+          className="col-span-12 md:col-span-4 lg:col-span-4"
         >
           <ChartThree
             header="FTTH Modem Status"
@@ -232,7 +254,7 @@ const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: strin
 
         <div
           id="dashboard-step5"
-          className="col-span-12 md:col-span-6 lg:col-span-6 "
+          className="col-span-12 md:col-span-4 lg:col-span-4"
         >
           <ChartThree
             header="Payment Delivery Status"
@@ -240,6 +262,19 @@ const Dashboard = async ({ searchParams }: { searchParams: { PayloadCity?: strin
             colors={colors}
             labels={labels_Paid_to_modems}
             apiname="FTTHDashboardExportPreOrder"
+          />
+        </div>
+        <div
+          id="dashboard-step15"
+          className="col-span-12 md:col-span-4 lg:col-span-4 "
+        >
+          <ChartThree
+            header="Package sold vs used"
+            series={series_Sold_Consumed}
+            colors={colors}
+            labels={labels_Sold_Consumed}
+            apiname=""
+            convert_to_HighValue={true}
           />
         </div>
 

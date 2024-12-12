@@ -6,6 +6,7 @@ import { FaCloudDownloadAlt } from "react-icons/fa";
 import axios from "axios";
 import { exportToXLSX } from "@/utils/exportToExcel";
 import { UserService } from "@/services/userService";
+import { convertValuesToHighUnit } from "@/utils/convertValues";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -19,6 +20,7 @@ interface ChartThreeProps {
   apiname: string;
   exportid?: string;
   suffix?: string;
+  convert_to_HighValue?: boolean; // indicates whether we should convert MB to a larger unit
 }
 
 const ChartThree: React.FC<ChartThreeProps> = ({
@@ -29,14 +31,19 @@ const ChartThree: React.FC<ChartThreeProps> = ({
   apiname,
   exportid,
   suffix,
+  convert_to_HighValue = false,
 }) => {
   const [isClient, setIsClient] = useState(false);
+
+  const { convertedValues, unitSuffix } = convert_to_HighValue
+    ? convertValuesToHighUnit(series)
+    : { convertedValues: series, unitSuffix: suffix || "MB" };
+
+  const total = convertedValues.reduce((a, b) => a + b, 0);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const total = series.reduce((a, b) => a + b, 0);
 
   const options: ApexOptions = {
     chart: {
@@ -72,8 +79,10 @@ const ChartThree: React.FC<ChartThreeProps> = ({
     tooltip: {
       enabled: true,
       y: {
-        formatter: (val, { seriesIndex }) =>
-          `${series[seriesIndex]} (${((val / total) * 100).toFixed(2)}%)`,
+        formatter: (val, { seriesIndex }) => {
+          const percentage = ((val / total) * 100).toFixed(2);
+          return `${convertedValues[seriesIndex].toLocaleString(undefined, { maximumFractionDigits: 3 })} ${unitSuffix} (${percentage}%)`;
+        },
       },
     },
     states: {
@@ -86,15 +95,15 @@ const ChartThree: React.FC<ChartThreeProps> = ({
     },
     responsive: [
       {
-        breakpoint: 640, // Small screens
+        breakpoint: 640,
         options: {
           chart: {
-            width: 300, // Increase chart size for small screens
+            width: 300,
           },
         },
       },
       {
-        breakpoint: 1024, // Medium screens
+        breakpoint: 1024,
         options: {
           chart: {
             width: 350,
@@ -102,7 +111,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
         },
       },
       {
-        breakpoint: 2600, // Large screens
+        breakpoint: 2600,
         options: {
           chart: {
             width: 415,
@@ -167,7 +176,11 @@ const ChartThree: React.FC<ChartThreeProps> = ({
 
       <div className="relative mb-6 md:mb-8">
         <div className="mx-auto flex justify-center">
-          <ReactApexChart options={options} series={series} type="donut" />
+          <ReactApexChart
+            options={options}
+            series={convertedValues}
+            type="donut"
+          />
         </div>
 
         <div
@@ -179,16 +192,19 @@ const ChartThree: React.FC<ChartThreeProps> = ({
               Total
             </p>
             <p className="text-gray-800 dark:text-white text-2xl sm:text-3xl font-bold">
-              {total % 1 === 0 ? total : total.toFixed(3).replace(/\.?0+$/, "")}{" "} {suffix}
+              {total % 1 === 0 ? total : total.toFixed(3).replace(/\.?0+$/, "")}{" "}
+              {unitSuffix}
             </p>
           </div>
         </div>
       </div>
 
       <div className="mx-auto w-full max-w-[350px]">
-        <div className="flex flex-wrap sm:flex-nowrap sm:flex-row  items-center justify-center gap-1">
+        <div className="flex flex-wrap sm:flex-nowrap sm:flex-row items-center justify-center gap-1">
           {labels.map((label, index) => {
-            const percentage = ((series[index] / total) * 100).toFixed(2);
+            const percentage = ((convertedValues[index] / total) * 100).toFixed(
+              2
+            );
 
             return (
               <div
@@ -205,7 +221,10 @@ const ChartThree: React.FC<ChartThreeProps> = ({
                   </p>
                 </div>
                 <p className="text-xs sm:text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {series[index]} ({percentage}%)
+                  {convertedValues[index].toLocaleString(undefined, {
+                    maximumFractionDigits: 3,
+                  })}{" "}
+                  {unitSuffix} ({percentage}%)
                 </p>
               </div>
             );

@@ -77,8 +77,7 @@ export const fetchFTTHPayload = async (
       console.warn(`No data found for city "${city}". Falling back to "all".`);
       return await fetchFTTHPayload(token, "all");
     }
-    console.log(city)
-    console.log(response.data)
+
     return response.data;
   } catch (error) {
     console.error("Error fetching FTTH dashboard data:", error);
@@ -98,7 +97,6 @@ export const fetchFTTHDashboard = async (token: string) => {
 
   try {
     const response = await axios.request(config);
-
     return response.data;
   } catch (error) {
     console.error("Error fetching FTTH dashboard data:", error);

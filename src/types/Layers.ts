@@ -18,6 +18,7 @@ export type LayerKeys =
   | "CPLayer"
   | "FTTHPowerLayer"
   | "TCLayer"
+  | "postBlockLayer"
   | "autoFATLayer"
   | "BlockPolygonLayer"
   | "IranFTTXAreasFill";

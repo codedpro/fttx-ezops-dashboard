@@ -1,18 +1,20 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 import axios from "axios";
-
 import {
   FaTicketAlt,
-  FaMoneyBillWave,
+  FaMoneyCheckAlt,
   FaExclamationTriangle,
+  FaCloudDownloadAlt,
+  FaCheckCircle,
+  FaThumbsDown,
+  FaWindowClose,
+  FaShippingFast,
+  FaHourglassHalf,
 } from "react-icons/fa";
-import { useFTTHComponentsOtherStore } from "@/store/FTTHComponentsOtherStore";
-import { useFTTHComponentsFatStore } from "@/store/FTTHComponentsFatStore";
-import { FaCloudDownloadAlt } from "react-icons/fa";
 import { UserService } from "@/services/userService";
 import { exportToXLSX } from "@/utils/exportToExcel";
+
 interface CardDataItem {
   label: string;
   value: number | string;
@@ -24,120 +26,61 @@ interface DashboardCardsProps {
 }
 
 const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
-  const others = useFTTHComponentsOtherStore((state) => state.others);
-  const fats = useFTTHComponentsFatStore((state) => state.fats);
-
-  const getIconOrImage = (label: string) => {
-    switch (label) {
-      case "Preorder Not Paid":
-        return <FaExclamationTriangle size={30} className="text-yellow-500" />;
-      case "Preorder Paid":
-        return <FaMoneyBillWave size={30} className="text-green-500" />;
-      case "UT Closed":
-        return <FaTicketAlt size={30} className="text-blue-500" />;
-      case "UT Open":
-        return <FaTicketAlt size={30} className="text-red-500" />;
-      case "OLT":
-        return (
-          <Image src="/images/map/OLT.png" alt="OLT" width={40} height={40} />
-        );
-      case "Hand Hole":
-        return (
-          <Image
-            src="/images/map/HandHole.png"
-            alt="Hand Hole"
-            width={40}
-            height={40}
-          />
-        );
-      case "ODC":
-        return (
-          <Image src="/images/map/ODC.png" alt="ODC" width={40} height={40} />
-        );
-      case "TC":
-        return (
-          <Image src="/images/map/TC.png" alt="TC" width={40} height={40} />
-        );
-      case "MFAT":
-        return (
-          <Image src="/images/map/MFAT.png" alt="MFAT" width={40} height={40} />
-        );
-      case "SFAT":
-        return (
-          <Image src="/images/map/SFAT.png" alt="SFAT" width={40} height={40} />
-        );
+  const getIconById = (id: string) => {
+    switch (id) {
+      case "preorder_Notpaid":
+        return <FaHourglassHalf size={30} className="text-yellow-500" />; 
+      case "preorder_Paid":
+        return <FaMoneyCheckAlt size={30} className="text-green-500" />;
+      case "purchase_But_Not_Delivered":
+        return <FaShippingFast size={30} className="text-orange-500" />;
+      case "rejected":
+        return <FaThumbsDown size={30} className="text-red-500" />;
+      case "canceled":
+        return <FaWindowClose size={30} className="text-gray-500" />;
+      case "confirmed_Waiting_For_Purchase":
+        return <FaCheckCircle size={30} className="text-blue-500" />;
       default:
         return <FaTicketAlt size={30} className="text-gray-500" />;
     }
   };
 
   const userservice = new UserService();
+
   const handleDownload = async (id: string) => {
     try {
-      let data: any[] = [];
-      let fileName: string = "";
+      const apiEndpoints: Record<string, string> = {
+        preorder_Notpaid: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreOrderNotPaid`,
+        preorder_Paid: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreorderPaid`,
+        purchase_But_Not_Delivered: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPurchaseButNotDelivered`,
+        rejected: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportRejected`,
+        canceled: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportCanceled`,
+        confirmed_Waiting_For_Purchase: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportConfirmedWaitingForPurchase`,
+      };
 
-      switch (id) {
-        case "preorder_Notpaid":
-          const responseNotPaid = await axios.get(
-            `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreOrderNotPaid`,
-            {
-              headers: {
-                Authorization: `Bearer ${userservice.getToken()}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          data = responseNotPaid.data;
-          fileName = "preorder_not_paid";
-          break;
-        case "preorder_Paid":
-          const responsePaid = await axios.get(
-            `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreorderPaid`,
-            {
-              headers: {
-                Authorization: `Bearer ${userservice.getToken()}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-          data = responsePaid.data;
-          fileName = "preorder_paid";
-          break;
-        case "sfat":
-          data = fats.filter((fat) => fat.Type === "SFAT");
-          fileName = "sfat";
-          break;
-        case "mfat":
-          data = data = fats.filter((fat) => fat.Type === "MFAT");
-          fileName = "mfat";
-          break;
-        case "olt":
-          data = others.filter((component) => component.Type === "OLT");
-          fileName = "olt";
-          break;
-        case "hh":
-          data = others.filter((component) => component.Type === "HH");
-          fileName = "hand_hole";
-          break;
-        case "odc":
-          data = others.filter((component) => component.Type === "ODC");
-          fileName = "odc";
-          break;
-        case "tc":
-          data = others.filter((component) => component.Type === "TC");
-          fileName = "tc";
-          break;
-        default:
-          console.error("No handler for this card ID");
-          return;
+      const apiUrl = apiEndpoints[id];
+
+      if (!apiUrl) {
+        console.error(`No API endpoint configured for ID: ${id}`);
+        alert("Invalid option selected.");
+        return;
       }
 
-      if (data.length === 0) {
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${userservice.getToken()}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = response.data;
+
+      if (!data || data.length === 0) {
         alert("No data available to download.");
         return;
       }
 
+      const fileName = id.replace(/_/g, "-").toLowerCase();
       exportToXLSX(data, fileName);
     } catch (error) {
       console.error("Error downloading data:", error);
@@ -146,14 +89,14 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
   };
 
   return (
-    <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4 2xl:gap-8">
+    <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:gap-8">
       {cardData.map((item: CardDataItem, idx: number) => (
         <div
           key={idx}
           className="relative p-6 overflow-hidden rounded-lg bg-white dark:bg-[#122031] bg-grid-black/[0.01] dark:bg-grid-white/[0.01] shadow-md transition-transform transform hover:scale-105 hover:shadow-lg group"
         >
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-opacity-10 bg-white dark:bg-primary-dark mb-4 transition-shadow duration-300 mx-auto">
-            {getIconOrImage(item.label)}
+            {getIconById(item.id)}
           </div>
 
           <div className="z-10 relative text-center">
@@ -166,7 +109,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
           </div>
 
           <div
-            className="absolute top-2 z-50  right-2 cursor-pointer text-gray-500 dark:text-gray-300 text-2xl"
+            className="absolute top-2 z-50 right-2 cursor-pointer text-gray-500 dark:text-gray-300 text-2xl"
             onClick={() => handleDownload(item.id)}
             title={`Export ${item.label} data`}
             id={item.label === "Preorder Paid" ? "dashboard-step2" : ""}

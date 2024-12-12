@@ -67,7 +67,7 @@ const FTTHModemsMap: React.FC = () => {
     "SFATLayer",
     "OLTLayer",
     "autoFATLayer",
-    "BlockPolygonLayer",
+    "postBlockLayer",
 
     //Lines
     "ODCLineLayer",
@@ -81,7 +81,7 @@ const FTTHModemsMap: React.FC = () => {
     SFATLayer: true,
     OLTLayer: true,
     autoFATLayer: true,
-    BlockPolygonLayer: true,
+    postBlockLayer: true,
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,
@@ -192,7 +192,7 @@ const FTTHModemsMap: React.FC = () => {
               )}
             </>
           )}
-          (
+        
           <>
             <LayerPanel
               title=""
@@ -217,7 +217,7 @@ const FTTHModemsMap: React.FC = () => {
               selectedStyleId={selectedStyleId}
             />
           </>
-          )
+       
           <div className="w-full z-0">
             <FTTHMap
               ref={ftthMapRef}
