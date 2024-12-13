@@ -20,7 +20,7 @@ interface ChartThreeProps {
   apiname: string;
   exportid?: string;
   suffix?: string;
-  convert_to_HighValue?: boolean; // indicates whether we should convert MB to a larger unit
+  convert_to_HighValue?: boolean; 
 }
 
 const ChartThree: React.FC<ChartThreeProps> = ({
@@ -37,7 +37,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
 
   const { convertedValues, unitSuffix } = convert_to_HighValue
     ? convertValuesToHighUnit(series)
-    : { convertedValues: series, unitSuffix: suffix || "MB" };
+    : { convertedValues: series, unitSuffix: suffix || "" };
 
   const total = convertedValues.reduce((a, b) => a + b, 0);
 
