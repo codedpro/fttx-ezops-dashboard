@@ -181,7 +181,7 @@ const Dashboard = async ({
     dashboardData.total_Consumed || 1,
   ];
   const colors = ["#feca00", "#ADBCF2"];
-  const labels_Sold_Consumed = ["Package Sold", "Package Consumed"];
+  const labels_Sold_Consumed = ["Package Sold", "Package Used"];
   const labels = ["Online", "Offline"];
   const labels_Paid_to_modems = ["Delivered", "Not Delivered"];
   const totalClosed = dashboardData?.uT_Closed || 0;
@@ -240,10 +240,10 @@ const Dashboard = async ({
         </div>
         <div
           id="dashboard-step3"
-          className="col-span-12 md:col-span-4 lg:col-span-4"
+          className="col-span-12 md:col-span-6 lg:col-span-4"
         >
           <ChartThree
-            header="FTTH Modem Status"
+            header="Modem Status"
             series={series}
             colors={colors}
             labels={labels}
@@ -254,10 +254,10 @@ const Dashboard = async ({
 
         <div
           id="dashboard-step5"
-          className="col-span-12 md:col-span-4 lg:col-span-4"
+          className="col-span-12 md:col-span-6 lg:col-span-4"
         >
           <ChartThree
-            header="Payment Delivery Status"
+            header="Payment vs Delivery"
             series={series_Paid_to_Modems}
             colors={colors}
             labels={labels_Paid_to_modems}
@@ -266,7 +266,7 @@ const Dashboard = async ({
         </div>
         <div
           id="dashboard-step15"
-          className="col-span-12 md:col-span-4 lg:col-span-4 "
+          className="col-span-12 md:col-span-6 lg:col-span-4 "
         >
           <ChartThree
             header="Package sold vs used"
@@ -280,7 +280,7 @@ const Dashboard = async ({
 
         <div
           id="dashboard-root-cwmp-gpon-chart"
-          className="col-span-12 md:col-span-12 lg:col-span-4"
+          className="col-span-12 md:col-span-6 lg:col-span-4"
         >
           <ChartThree
             header="Manufacturer"

@@ -153,7 +153,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
   }
 
   return (
-    <div className="col-span-12 relative rounded-[12px] bg-white dark:bg-gray-dark p-4 sm:p-6 md:p-8 shadow-lg dark:shadow-dark-lg xl:col-span-5 hover:shadow-2xl">
+    <div className="col-span-12 relative rounded-[12px] bg-white dark:bg-gray-dark p-4 sm:p-6 md:p-4 shadow-lg dark:shadow-dark-lg xl:col-span-5 hover:shadow-2xl">
       <div className="mb-4 md:mb-6 flex  flex-row justify-between gap-2 sm:gap-4">
         <div>
           <h4 className="text-md sm:text-xl font-bold text-gray-800 dark:text-white">
@@ -164,11 +164,11 @@ const ChartThree: React.FC<ChartThreeProps> = ({
         {apiname !== "" && (
           <button
             id={exportid}
-            className="flex items-center justify-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
+            className="flex items-center justify-center  bg-primary text-white px-2 py-1 rounded-md text-xs  hover:bg-primaryhover"
             onClick={handleDownload}
             title="Download"
           >
-            <FaCloudDownloadAlt size={16} className="sm:mr-2" />
+            <FaCloudDownloadAlt size={12} className="sm:mr-1" />
             <span className=" sm:inline">Export</span>
           </button>
         )}

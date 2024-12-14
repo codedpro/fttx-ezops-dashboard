@@ -127,7 +127,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
               activeDownload === item.id
                 ? "text-primary animate-blink"
                 : completedDownload === item.id
-                  ? "text-primary animate-bounc"
+                  ? "text-primary animate-bounce"
                   : "text-gray-500 hover:text-primary"
             }`}
             onClick={() => handleDownload(item.id)}
