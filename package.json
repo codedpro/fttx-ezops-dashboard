@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "3d": "link:@amcharts/amcharts5/3d",
     "@amcharts/amcharts5": "^5.10.7",
     "@amcharts/amcharts5-geodata": "^5.1.4",
+    "@handsontable/react": "^15.0.0",
     "@mapbox/mapbox-gl-draw": "^1.4.3",
     "@mapbox/mapbox-gl-language": "^1.0.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -34,6 +36,9 @@
     "flatpickr": "^4.6.13",
     "framer-motion": "^11.5.2",
     "gsap": "^3.12.5",
+    "handsontable": "^15.0.0",
+    "highcharts": "^12.1.0",
+    "highcharts-react-official": "^3.2.1",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jsvectormap": "^1.6.0",
@@ -47,6 +52,7 @@
     "mongodb": "^6.8.0",
     "mssql": "^11.0.1",
     "next": "^14.2.7",
+    "percent": "link:@amcharts/amcharts5/percent",
     "qs": "^6.13.0",
     "react": "^18.3.1",
     "react-apexcharts": "^1.4.1",

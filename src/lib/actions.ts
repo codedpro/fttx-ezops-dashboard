@@ -1,9 +1,13 @@
 import axios from "axios";
 import { ModemDetails } from "@/types/ModemDetails";
 import qs from "qs";
-
 import { ExportItemType, ExportData } from "@/types/exports";
 import { FTTHACS } from "@/types/FTTHACS";
+interface FTTHPayload {
+  Date: string;
+  Value: number;
+}
+
 export const fetchModemDetails = async (
   id: string,
   token: string
@@ -49,11 +53,6 @@ export const performHardRefresh = async (modemId: string) => {
 
   return true;
 };
-
-interface FTTHPayload {
-  Date: string;
-  Value: number;
-}
 
 export const fetchFTTHPayload = async (
   token: string,
