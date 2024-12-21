@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ExportItemType, ExportResponse } from "@/types/exports";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { Select } from "../FormElements/Select";
 import { UserService } from "@/services/userService";
@@ -104,22 +104,77 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
   };
 
   const generateXLSX = (data: any[]): string => {
+    if (data.length === 0) {
+      console.error("No data provided for export.");
+      return "";
+    }
+  
+    // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
-
+  
+    // Calculate column widths dynamically
     const columns = Object.keys(data[0] || {});
     const columnWidths = columns.map((col) => ({
-      wch:
-        Math.max(
-          ...data.map((row) => (row[col] ? row[col].toString().length : 10))
-        ) + 5,
+      wch: Math.max(
+        ...data.map((row) => (row[col] ? row[col].toString().length : 10)),
+        col.length
+      ) + 5, // Add padding
     }));
     ws["!cols"] = columnWidths;
-
+  
+    // Apply styles to all cells
+    Object.keys(ws).forEach((key) => {
+      if (key.startsWith("!")) return; // Skip metadata
+      ws[key].s = {
+        alignment: { horizontal: "center", vertical: "center" },
+        font: { bold: false, sz: 11, color: { rgb: "333333" } },
+        fill: {
+          fgColor: { rgb: "FFFFFF" }, // Standard row background
+        },
+        border: {
+          top: { style: "thin", color: { rgb: "CCCCCC" } },
+          bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+          left: { style: "thin", color: { rgb: "CCCCCC" } },
+          right: { style: "thin", color: { rgb: "CCCCCC" } },
+        },
+      };
+    });
+  
+    // Apply styles to header row
+    const range = XLSX.utils.decode_range(ws["!ref"] || "A1:A1");
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const headerCell = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (ws[headerCell]) {
+        ws[headerCell].s = {
+          alignment: { horizontal: "center", vertical: "center" },
+          font: { bold: true, sz: 14, color: { rgb: "333333" } }, // Dark text on brand color
+          fill: { fgColor: { rgb: "FECA00" } }, // Brand color for header
+        };
+      }
+    }
+  
+    // Apply alternating row colors
+    for (let row = 1; row <= range.e.r; row++) {
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+        if (ws[cellRef]) {
+          ws[cellRef].s.fill = {
+            fgColor: {
+              rgb: row % 2 === 0 ? "F8F8F2" : "FFFFFF", // Cool complementary colors
+            },
+          };
+        }
+      }
+    }
+  
+    // Append worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
+  
+    // Return the binary string
     return XLSX.write(wb, { bookType: "xlsx", type: "binary" });
   };
+  
   const s2ab = (s: string) => {
     const buf = new ArrayBuffer(s.length);
     const view = new Uint8Array(buf);

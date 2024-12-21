@@ -23,6 +23,7 @@
     "@turf/turf": "^7.1.0",
     "@turf/union": "^7.1.0",
     "@types/mapbox-gl": "^3.4.0",
+    "@types/prop-types": "^15.7.14",
     "apexcharts": "^3.53.0",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
@@ -53,6 +54,7 @@
     "mssql": "^11.0.1",
     "next": "^14.2.7",
     "percent": "link:@amcharts/amcharts5/percent",
+    "prop-types": "^15.8.1",
     "qs": "^6.13.0",
     "react": "^18.3.1",
     "react-apexcharts": "^1.4.1",
@@ -77,6 +79,7 @@
     "universal-cookie": "^7.2.0",
     "uuid": "^10.0.0",
     "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0",
     "xlsx-style": "^0.8.13",
     "zustand": "^4.5.5"
   },

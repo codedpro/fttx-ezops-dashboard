@@ -37,7 +37,16 @@ const config: Config = {
         secondary: { DEFAULT: "#122031", 2: "#021223" },
         stroke: "#E6EBF1",
         "stroke-dark": "#27303E",
-
+   dark: {
+          DEFAULT: "#111928",
+          2: "#1F2A37",
+          3: "#374151",
+          4: "#4B5563",
+          5: "#6B7280",
+          6: "#9CA3AF",
+          7: "#D1D5DB",
+          8: "#E5E7EB",
+        },
         darkgray: {
           DEFAULT: "#0a0a0a", // Base black
           2: "#0c0c0c", // Slightly lighter than DEFAULT
@@ -48,16 +57,7 @@ const config: Config = {
           7: "#4d4d4d", // Medium-dark, hinting at gray
           8: "#696969", // Still dark but lighter gray
         },
-        dark: {
-          DEFAULT: "#111928",
-          2: "#1F2A37",
-          3: "#374151",
-          4: "#4B5563",
-          5: "#6B7280",
-          6: "#9CA3AF",
-          7: "#D1D5DB",
-          8: "#E5E7EB",
-        },
+     
 
         gray: {
           DEFAULT: "#EFF4FB",

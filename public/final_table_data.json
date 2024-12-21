@@ -1,0 +1,152 @@
+[
+    {
+        "City": "Tehran",
+        "Request": 18103.0,
+        "Confirmed": {
+            "Main Value": 842,
+            "Paid & installation": 144,
+            "Paid (Pending)": 295,
+            "Unpaid": 401
+        },
+        "Install / Confirmed": "17%",
+        "Install / Request": 0.01,
+        "Pending": 5503.0,
+        "Cancelled (customer's request)": 90.0,
+        "Rejected": 11668.0
+    },
+    {
+        "City": "Babol",
+        "Request": 7132.0,
+        "Confirmed": {
+            "Main Value": 5700,
+            "Paid & installation": 2060,
+            "Paid (Pending)": 305,
+            "Unpaid": 3335
+        },
+        "Install / Confirmed": 0.36,
+        "Install / Request": 0.29,
+        "Pending": 414.0,
+        "Cancelled (customer's request)": 44.0,
+        "Rejected": 974.0
+    },
+    {
+        "City": "Shiraz",
+        "Request": 5663.0,
+        "Confirmed": {
+            "Main Value": 463,
+            "Paid & installation": 269,
+            "Paid (Pending)": 93,
+            "Unpaid": 101
+        },
+        "Install / Confirmed": 0.58,
+        "Install / Request": 0.05,
+        "Pending": 2263.0,
+        "Cancelled (customer's request)": 4.0,
+        "Rejected": 2933.0
+    },
+    {
+        "City": "Sadra",
+        "Request": 2230.0,
+        "Confirmed": {
+            "Main Value": 708,
+            "Paid & installation": 197,
+            "Paid (Pending)": 72,
+            "Unpaid": 439
+        },
+        "Install / Confirmed": 0.28,
+        "Install / Request": 0.09,
+        "Pending": 540.0,
+        "Cancelled (customer's request)": 11.0,
+        "Rejected": 971.0
+    },
+    {
+        "City": "Arak",
+        "Request": 1537.0,
+        "Confirmed": {
+            "Main Value": 107,
+            "Paid & installation": 3,
+            "Paid (Pending)": 72,
+            "Unpaid": 32
+        },
+        "Install / Confirmed": 0.03,
+        "Install / Request": 0.0,
+        "Pending": 660.0,
+        "Cancelled (customer's request)": 0.0,
+        "Rejected": 770.0
+    },
+    {
+        "City": "Karaj",
+        "Request": 3.0,
+        "Confirmed": {
+            "Main Value": 0,
+            "Paid & installation": 0,
+            "Paid (Pending)": 0,
+            "Unpaid": 0
+        },
+        "Install / Confirmed": 0.03,
+        "Install / Request": 0.0,
+        "Pending": 660.0,
+        "Cancelled (customer's request)": 0.0,
+        "Rejected": 770.0
+    },
+    {
+        "City": "Mahdasht",
+        "Request": 296.0,
+        "Confirmed": {
+            "Main Value": 2,
+            "Paid & installation": 2,
+            "Paid (Pending)": 0,
+            "Unpaid": 0
+        },
+        "Install / Confirmed": "-",
+        "Install / Request": 0.0,
+        "Pending": 0.0,
+        "Cancelled (customer's request)": 0.0,
+        "Rejected": 3.0
+    },
+    {
+        "City": "Golestan",
+        "Request": 1006.0,
+        "Confirmed": {
+            "Main Value": 407,
+            "Paid & installation": 30,
+            "Paid (Pending)": 136,
+            "Unpaid": 241
+        },
+        "Install / Confirmed": 0.07,
+        "Install / Request": 0.03,
+        "Pending": 580.0,
+        "Cancelled (customer's request)": 0.0,
+        "Rejected": 19.0
+    },
+    {
+        "City": "Chahardongeh",
+        "Request": 360.0,
+        "Confirmed": {
+            "Main Value": 166,
+            "Paid & installation": 6,
+            "Paid (Pending)": 74,
+            "Unpaid": 86
+        },
+        "Install / Confirmed": 0.04,
+        "Install / Request": 0.02,
+        "Pending": 91.0,
+        "Cancelled (customer's request)": 0.0,
+        "Rejected": 103.0
+    },
+    {
+        "City": "Total",
+        "Request": 36330.0,
+        "Confirmed": {
+            "Main Value": 8395,
+            "Paid & installation": 2711,
+            "Paid (Pending)": 1047,
+            "Unpaid": 4635
+        },
+        "Install / Confirmed": 0.32,
+        "Install / Request": 0.07,
+        "Pending": 10172.0,
+        "Cancelled (customer's request)": 149.0,
+        "Rejected": 17614.0
+    }
+]
