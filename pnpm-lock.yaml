@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      3d:
-        specifier: link:@amcharts/amcharts5/3d
-        version: link:@amcharts/amcharts5/3d
       '@amcharts/amcharts5':
         specifier: ^5.10.7
         version: 5.10.7
@@ -140,9 +137,6 @@ importers:
       next:
         specifier: ^14.2.7
         version: 14.2.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.78.0)
-      percent:
-        specifier: link:@amcharts/amcharts5/percent
-        version: link:@amcharts/amcharts5/percent
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
