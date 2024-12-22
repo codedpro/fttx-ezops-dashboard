@@ -153,7 +153,7 @@ const FTTHModemsMap: React.FC = () => {
     <DefaultLayout className="p-0 md:p-0">
       {loading ? (
         <div className="flex items-center justify-center w-full h-[80vh] dark:bg-gray-800 dark:text-white">
-          <div className="text-2xl font-bold">Loading Map...</div>
+          <div className="text-2xl font-bold">Downloading Data...</div>
         </div>
       ) : (
         <div className="w-full h-[80vh] z-0 relative overflow-hidden">

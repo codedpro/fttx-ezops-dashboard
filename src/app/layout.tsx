@@ -22,6 +22,7 @@ import { useInitializeFTTHBlocks } from "@/hooks/useInitializeFTTHBlocks";
 import { useInitializeFTTHACSRXPower } from "@/hooks/useInitializeFTTHACSRXPower";
 import { useInitializeFATData } from "@/hooks/useInitializeFTTHFATauto";
 import { useInitializePostBlocks } from "@/hooks/useInitializePostBlocks";
+import { useInitializeAlarms } from "@/hooks/useInitializeAlarms";
 
 export default function RootLayout({
   children,
@@ -41,6 +42,7 @@ export default function RootLayout({
     useInitializeFTTHBlocks(token);
     useInitializeFTTHACSRXPower(token);
     useInitializeFATData(token);
+    useInitializeAlarms(token);
     useInitializePostBlocks(token);
   }
   const [loading, setLoading] = useState(true);

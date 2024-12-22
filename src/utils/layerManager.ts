@@ -9,7 +9,6 @@ import { useFTTHPreorderLayer } from "@/components/Maps/PreOrders/Layers/FTTHPre
 import { useFTTHPreorderHMLayer } from "@/components/Maps/PreOrders/Layers/FTTHPreorderHeatMap";
 import { useFTTHSuggestedFATLayer } from "@/components/Maps/PreOrders/Layers/FTTHSuggestedFAT";
 import { useFTTHModemLayer } from "@/components/Maps/Main/Layers/FTTHModem";
-
 import { useOLTLayer } from "@/components/Maps/Main/Layers/OLTLayer";
 import { useHHLayer } from "@/components/Maps/Main/Layers/HHLayer";
 import { LayerKeys } from "@/types/Layers";
@@ -23,6 +22,8 @@ import { useFTTHBlockPolygonLayer } from "@/components/Maps/Main/Layers/BlockLay
 import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
 import { useAutoFATLayer } from "@/components/Maps/auto-plan/Layers/autoFATLayer";
 import { usePostBlockPolygonLayer } from "@/components/Maps/auto-plan/Layers/PostBlockLayer";
+import { useOLTPowerAlarmLayer } from "@/components/Maps/Main/Layers/OLTPowerAlarmLayer";
+import { useOLTDownSiteAlarmLayer } from "@/components/Maps/Main/Layers/OLTDownSiteAlarmLayer";
 
 interface LayerConfig {
   id: string;
@@ -107,6 +108,22 @@ export const useLayerManager = (
       type: "line",
       visible: layerVisibility.ODCLineLayer,
       toggle: () => toggleLayerVisibility("ODCLineLayer"),
+    },
+    DownSiteAlarmLayer: {
+      ...useOLTDownSiteAlarmLayer(),
+      label: "Down Site Alarm",
+      icon: "/images/map/DownSiteAlarm.png",
+      type: "point",
+      visible: layerVisibility.DownSiteAlarmLayer,
+      toggle: () => toggleLayerVisibility("DownSiteAlarmLayer"),
+    },
+    PowerAlarmLayer: {
+      ...useOLTPowerAlarmLayer(),
+      label: "Power Alarm",
+      icon: "/images/map/PowerAlarm.png",
+      type: "point",
+      visible: layerVisibility.PowerAlarmLayer,
+      toggle: () => toggleLayerVisibility("PowerAlarmLayer"),
     },
     BlockPolygonLayer: {
       ...useFTTHBlockPolygonLayer(),
@@ -254,14 +271,12 @@ export const useLayerManager = (
   const activeLayers: LayerConfig[] = selectedLayers
     .map((layerName) => {
       const layer = layers[layerName];
-      // If `loading` exists, check both loading and source
       if (layer.loading !== undefined) {
         return !layer.loading && layer.source !== null ? layer : null;
       }
-      // If `loading` doesn't exist, return the layer as is
       return layer;
     })
-    .filter((layer): layer is LayerConfig => layer !== null); // Filter out any null layers
+    .filter((layer): layer is LayerConfig => layer !== null);
 
   return { activeLayers };
 };

@@ -1083,7 +1083,7 @@ const DesignDesk: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center w-full h-[80vh] dark:bg-gray-800 dark:text-white">
-          <div className="text-2xl font-bold">Loading Map...</div>
+          <div className="text-2xl font-bold">Downloading Data...</div>
         </div>
       ) : (
         <div className="w-full h-[80vh] relative overflow-hidden z-0">

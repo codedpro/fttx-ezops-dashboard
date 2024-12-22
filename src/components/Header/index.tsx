@@ -76,15 +76,15 @@ const Header = (props: {
               src={"/images/logo/logo-dark.png"}
               alt="Logo"
             />
-          </Link> */}
-        </div>
-
-        {/* Title for the dashboard */}
-        <div className="hidden xl:block">
+          </Link> */}   <div className="hidden xl:block">
           <h1 className="text-heading-5 font-bold text-dark dark:text-white">
             FTTX Dashboard
           </h1>
         </div>
+        </div>
+
+        {/* Title for the dashboard */}
+     
 
         {/* Search input and other elements */}
         <div className="flex items-center justify-normal gap-2 2xsm:gap-4 lg:w-full lg:justify-between xl:w-auto xl:justify-normal">
