@@ -3,33 +3,14 @@ import fs from "fs/promises";
 import path from "path";
 import TableAdvanced from "@/components/Tables/Table-Advanced";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
-
-interface Confirmed {
-  "Main Value": number;
-  "Paid & installation": number;
-  "Paid (Pending)": number;
-  Unpaid: number;
-}
-
-interface TableData {
-  City: string;
-  Request: number;
-  Confirmed: Confirmed;
-  "Install / Confirmed": number | string;
-  "Install / Request": number | string;
-  Pending: number;
-  "Cancelled (customer's request)": number;
-  Rejected: number;
-}
-
-async function fetchTableData(): Promise<TableData[]> {
-  const filePath = path.join(process.cwd(), "public", "final_table_data.json");
-  const jsonData = await fs.readFile(filePath, "utf-8");
-  return JSON.parse(jsonData) as TableData[];
-}
+import { fetchFTTHSalesDetails } from "@/lib/actions";
+import { cookies } from "next/headers";
 
 const ParentTable: React.FC = async () => {
-  const data = await fetchTableData();
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value;
+
+  const data = await fetchFTTHSalesDetails(token ?? "unAuthorized");
 
   return (
     <DefaultLayout>

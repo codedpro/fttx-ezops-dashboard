@@ -1,27 +1,12 @@
 "use client";
 
+import { TableData } from "@/types/SalesDetails";
 import React, { useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 
 import XLSX from "xlsx-js-style";
 
-interface Confirmed {
-  "Main Value": number | string;
-  "Paid & installation": number | string;
-  "Paid (Pending)": number | string;
-  Unpaid: number | string;
-}
 
-export interface TableData {
-  City: string | number;
-  Request: string | number;
-  Confirmed: Confirmed;
-  "Install / Confirmed": number | string;
-  "Install / Request": number | string;
-  Pending: number | string;
-  "Cancelled (customer's request)": number | string;
-  Rejected: number | string;
-}
 
 interface TableAdvancedProps {
   data: TableData[];
@@ -326,13 +311,13 @@ const TableAdvanced: React.FC<TableAdvancedProps> = ({ data, header }) => {
                     onMouseLeave={() => setHoveredIndex(null)}
                     className={`transition-colors ${hoverClass}`}
                   >
-                    <td className="border-b border-[#eee] px-3 py-2 text-center dark:border-[#2F3A47]">
+                    <td className="border border-[#eee] px-3 py-2 text-center dark:border-[#2F3A47]">
                       {row.Confirmed["Paid & installation"]}
                     </td>
-                    <td className="border-b border-[#eee] px-3 py-2 text-center dark:border-[#2F3A47]">
+                    <td className="border border-[#eee] px-3 py-2 text-center dark:border-[#2F3A47]">
                       {row.Confirmed["Paid (Pending)"]}
                     </td>
-                    <td className="border-b border-[#eee] px-3 py-2 text-center dark:border-[#2F3A47]">
+                    <td className="border border-[#eee] px-3 py-2 text-center dark:border-[#2F3A47]">
                       {row.Confirmed.Unpaid}
                     </td>
                   </tr>
