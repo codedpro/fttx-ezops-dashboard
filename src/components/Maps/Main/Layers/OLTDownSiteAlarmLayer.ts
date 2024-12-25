@@ -29,7 +29,7 @@ export const useOLTDownSiteAlarmLayer = () => {
               Alarm_Time: alarm.Alarm_Time,
               Alarm_Type: alarm.Alarm_Type,
               icon: "DownSiteIcon",
-              iconSize: 1.0,
+              iconSize: 0.05,
             },
           })
         ),
