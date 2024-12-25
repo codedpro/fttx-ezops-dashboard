@@ -29,7 +29,7 @@ export const useOLTPowerAlarmLayer = () => {
               Lat: alarm.Lat,
               Long: alarm.Long,
               icon: "PowerIcon",
-              iconSize: 1.0,
+              iconSize: 0.05,
             },
           })
         ),
