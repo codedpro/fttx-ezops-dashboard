@@ -111,7 +111,7 @@ export const useLayerManager = (
     },
     DownSiteAlarmLayer: {
       ...useOLTDownSiteAlarmLayer(),
-      label: "Down Site Alarm",
+      label: "OLT Down Alarm",
       icon: "/images/map/DownSiteAlarm.png",
       type: "point",
       visible: layerVisibility.DownSiteAlarmLayer,
@@ -119,7 +119,7 @@ export const useLayerManager = (
     },
     PowerAlarmLayer: {
       ...useOLTPowerAlarmLayer(),
-      label: "Power Alarm",
+      label: "OLT Power Alarm",
       icon: "/images/map/PowerAlarm.png",
       type: "point",
       visible: layerVisibility.PowerAlarmLayer,

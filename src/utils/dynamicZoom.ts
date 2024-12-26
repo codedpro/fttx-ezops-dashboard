@@ -15,6 +15,8 @@ export const dynamicZoom = (mapRef: any, layers: LayerType[]) => {
   layers.forEach(({ id, type }) => {
     if (
       type === "point" &&
+      id !== "olt-power-alarm-layer" &&
+      id !== "olt-down-site-alarm-layer" &&
       id !== "OLTLayer" &&
       id !== "olt-layer" &&
       id !== "odc-layer" &&
