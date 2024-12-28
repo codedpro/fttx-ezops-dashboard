@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   if (pathname !== "/api/VerifyToken") {
     try {
       const verifyResponse = await fetch(
-        `${request.nextUrl.origin}/api/VerifyToken`,
+        `{process.env.NEXT_PUBLIC_LNM_API_URL}/VerifyToken`,
         {
           method: "GET",
           headers: {
