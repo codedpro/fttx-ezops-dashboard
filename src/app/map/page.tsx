@@ -66,8 +66,9 @@ const FTTHModemsMap: React.FC = () => {
     "OLTLayer",
     "ODCLayer",
     "TCLayer",
-    "DownSiteAlarmLayer",
     "PowerAlarmLayer",
+    "DownSiteAlarmLayer",
+
     "FTTHPowerLayer",
     //Lines
     "ODCLineLayer",
