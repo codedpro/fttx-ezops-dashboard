@@ -7,11 +7,10 @@ export async function middleware(request: NextRequest) {
     "/api/register",
     "/login",
     "/register",
-    "/backend", // Added /backend to public paths
+    "/backend",
   ];
   const { pathname } = request.nextUrl;
 
-  // Allow public paths and any subpaths under /backend
   if (publicPaths.includes(pathname) || pathname.startsWith("/backend")) {
     return NextResponse.next();
   }
@@ -72,6 +71,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/((?!_next/static|favicon.ico|public|api/VerifyToken).*)", 
-    "/backend(.*)", // Added /backend and subpaths to matcher
+    "/backend(.*)",
   ],
 };
