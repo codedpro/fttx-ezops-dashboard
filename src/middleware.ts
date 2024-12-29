@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
     try {
       console.log("step 2");
       const verifyResponse = await fetch(
-        `http://127.0.0.1:8080/api/VerifyToken`,
+        `http://fttx-backend:8080/api/VerifyToken`,
         {
           method: "GET",
           headers: {
@@ -62,9 +62,12 @@ export async function middleware(request: NextRequest) {
 
         return response;
       }
-    } catch (error) {
-      console.log(error)
-      console.error("Error during token verification:", error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error during token verification:", error.message);
+      }
+      console.log(error);
+
       const response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete("AccessToken");
       response.cookies.delete("Email");
