@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
 
   const tokenCookie = request.cookies.get("AccessToken");
   const token = tokenCookie?.value;
-  console.log(token)
-  console.log(pathname)
+  console.log(token);
+  console.log(pathname);
 
   if (!token) {
     const response = NextResponse.redirect(new URL("/login", request.url));
@@ -31,9 +31,10 @@ export async function middleware(request: NextRequest) {
 
     return response;
   }
-
-  if (pathname !== "/api/VerifyToken"  ) {
+  console.log("step 1");
+  if (pathname !== "/api/VerifyToken") {
     try {
+      console.log("step 2");
       const verifyResponse = await fetch(
         `https:/fttx.mtnirancell.ir/backend/api/VerifyToken`,
         {
@@ -43,6 +44,11 @@ export async function middleware(request: NextRequest) {
           },
         }
       );
+      console.log(verifyResponse);
+      console.log("-------");
+      console.log(verifyResponse.status);
+      console.log("-------");
+      console.log(verifyResponse.url);
 
       if (verifyResponse.status === 200) {
         return NextResponse.next();
@@ -73,7 +79,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|favicon.ico|public|api/VerifyToken).*)", 
+    "/((?!_next/static|favicon.ico|public|api/VerifyToken).*)",
     "/backend(.*)",
   ],
 };
