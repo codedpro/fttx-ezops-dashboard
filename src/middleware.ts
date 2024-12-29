@@ -64,6 +64,7 @@ export async function middleware(request: NextRequest) {
       }
     } catch (error) {
       console.log(error)
+      console.error("Error during token verification:", error.message);
       const response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete("AccessToken");
       response.cookies.delete("Email");
