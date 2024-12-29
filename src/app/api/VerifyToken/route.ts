@@ -20,6 +20,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
 async function verifyToken(token: string): Promise<boolean> {
   try {
+    console.log(`${process.env.NEXT_PUBLIC_LNM_API_URL}/VerifyToken`)
     const response = await axios.get(
       `${process.env.NEXT_PUBLIC_LNM_API_URL}/VerifyToken`,
 

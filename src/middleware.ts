@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (pathname !== "/api/VerifyToken") {
+  if (pathname !== "/api/VerifyToken" && pathname !== "backend/api/VerifyToken" ) {
     try {
       const verifyResponse = await fetch(
         `https:/fttx.mtnirancell.ir/api/VerifyToken`,
