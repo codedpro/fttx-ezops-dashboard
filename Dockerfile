@@ -16,8 +16,11 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the application code
 COPY . .
 
-# Build the Next.js app
-RUN pnpm build
+# Copy the .env.production file for build-time usage
+COPY .env.production .env.production
+
+# Build the Next.js app using production environment variables
+RUN NODE_ENV=production pnpm build
 
 # Stage 2: Production Runner Stage
 FROM node:23-alpine AS runner
@@ -34,6 +37,9 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/next.config.mjs ./
+
+# Copy .env.production for runtime environment
+COPY .env.production .env.production
 
 # Set environment variables
 ENV NODE_ENV=production
