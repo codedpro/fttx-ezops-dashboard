@@ -21,7 +21,7 @@ export const fetchModemDetails = async (
   const config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/ModemDetails`,
+    url: `${process.env.FTTXBACKEND}/ModemDetails`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export const fetchFTTHPayload = async (
 
   const config = {
     method: "post",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadPerDay`,
+    url: `${process.env.FTTXBACKEND}/FTTHGetPayloadPerDay`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -89,7 +89,7 @@ export const fetchFTTHPayload = async (
 export const fetchFTTHDashboard = async (token: string) => {
   const config = {
     method: "get",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboard`,
+    url: `${process.env.FTTXBACKEND}/FTTHDashboard`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Authorization: `Bearer ${token}`,
@@ -114,7 +114,7 @@ export const fetchFTTHDailyChartData = async (token: string) => {
 
     const config = {
       method: "post",
-      url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/GetFTTHDashboardUTDailyChart`,
+      url: `${process.env.FTTXBACKEND}/GetFTTHDashboardUTDailyChart`,
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -135,7 +135,7 @@ export const fetchFTTHDynamicExportList = async (
 ): Promise<ExportData> => {
   const config = {
     method: "get",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDynamicExportList`,
+    url: `${process.env.FTTXBACKEND}/FTTHDynamicExportList`,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -167,7 +167,7 @@ export const fetchFTTHDynamicExportList = async (
 export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
   const config = {
     method: "get",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHACS`,
+    url: `${process.env.FTTXBACKEND}/FTTHACS`,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -188,7 +188,7 @@ export const fetchFTTHSalesDetails = async (
 ): Promise<TableData[]> => {
   const config = {
     method: "get",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/GetFTTHDashboardSalesDetails`,
+    url: `${process.env.FTTXBACKEND}/GetFTTHDashboardSalesDetails`,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -210,7 +210,7 @@ export const fetchFTTHGetPayloadUseDaily = async (
 ) => {
   const config = {
     method: "post",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadUseDaily`,
+    url: `${process.env.FTTXBACKEND}/FTTHGetPayloadUseDaily`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
