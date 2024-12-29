@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
     try {
       console.log("step 2");
       const verifyResponse = await fetch(
-        `https:/fttx.mtnirancell.ir/backend/api/VerifyToken`,
+        `http://fttx-backend:8080/api/VerifyToken`,
         {
           method: "GET",
           headers: {
