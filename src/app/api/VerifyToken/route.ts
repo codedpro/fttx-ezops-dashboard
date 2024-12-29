@@ -32,7 +32,7 @@ async function verifyToken(token: string): Promise<boolean> {
         httpsAgent: new https.Agent({ rejectUnauthorized: false }),
       }
     );
-
+    console.log(response.status)
     return response.status === 200;
   } catch (error) {
     return false;
