@@ -63,6 +63,7 @@ export async function middleware(request: NextRequest) {
         return response;
       }
     } catch (error) {
+      console.log(error)
       const response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete("AccessToken");
       response.cookies.delete("Email");
