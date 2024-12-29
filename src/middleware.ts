@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
     try {
       console.log("step 2");
       const verifyResponse = await fetch(
-        `http://fttx-backend:8080/api/VerifyToken`,
+        `http://localhost:8080/api/VerifyToken`,
         {
           method: "GET",
           headers: {
