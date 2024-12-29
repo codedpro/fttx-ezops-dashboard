@@ -17,6 +17,9 @@ export async function middleware(request: NextRequest) {
 
   const tokenCookie = request.cookies.get("AccessToken");
   const token = tokenCookie?.value;
+  console.log(token)
+  console.log(pathname)
+
   if (!token) {
     const response = NextResponse.redirect(new URL("/login", request.url));
 
