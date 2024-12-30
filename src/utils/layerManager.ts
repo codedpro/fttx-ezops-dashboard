@@ -213,7 +213,7 @@ export const useLayerManager = (
     autoFATLayer: {
       ...useAutoFATLayer(),
       label: "Auto FAT",
-      icon: "/images/map/FAT.png",
+      icon: "/images/map/Auto-FAT.png",
       type: "point",
       visible: layerVisibility.autoFATLayer,
       toggle: () => toggleLayerVisibility("autoFATLayer"),

@@ -23,7 +23,7 @@ export const useAutoFATLayer = () => {
               Customer_Count: fat.Modem_Count,
               Max_Distance_Covered_m: fat.Max_Distance_Covered_m,
               icon: "fatIcon",
-              iconSize: 1.0,
+              iconSize: 0.2,
               Long: fat.Long,
               Lat: fat.Lat,
               LayerID: "autoFATLayer",
@@ -45,7 +45,7 @@ export const useAutoFATLayer = () => {
     visible: true,
     type: "point" as const,
     icons: {
-      fatIcon: "/images/map/FAT.png",
+      fatIcon: "/images/map/Auto-FAT.png",
     },
   };
 };
