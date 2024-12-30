@@ -31,10 +31,8 @@ export async function middleware(request: NextRequest) {
 
     return response;
   }
-  console.log("step 1");
   if (pathname !== "/api/VerifyToken") {
     try {
-      console.log("step 2");
       const verifyResponse = await fetch(
         `${process.env.FTTXBACKEND}/VerifyToken`,
         {
@@ -44,11 +42,6 @@ export async function middleware(request: NextRequest) {
           },
         }
       );
-      console.log(verifyResponse);
-      console.log("-------");
-      console.log(verifyResponse.status);
-      console.log("-------");
-      console.log(verifyResponse.url);
 
       if (verifyResponse.status === 200) {
         return NextResponse.next();

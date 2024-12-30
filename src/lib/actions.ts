@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ModemDetails } from "@/types/ModemDetails";
+import { ModemDetails, ModemPacketDetails } from "@/types/ModemDetails";
 import qs from "qs";
 import { ExportItemType, ExportData } from "@/types/exports";
 import { FTTHACS } from "@/types/FTTHACS";
@@ -33,6 +33,35 @@ export const fetchModemDetails = async (
     const response = await axios.request(config);
 
     return response.data;
+  } catch (error) {
+    console.error("Error fetching modem details:", error);
+    throw new Error("Failed to fetch modem details");
+  }
+};
+
+export const fetchModemPacketRemaining = async (
+  id: string,
+  token: string
+): Promise<ModemPacketDetails[] | null> => {
+  const data = JSON.stringify({
+    FTTH_ID: id,
+  });
+
+  const config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: `${process.env.FTTXBACKEND}/getftthuserremainingtraffic`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    data: data,
+  };
+
+  try {
+    const response = await axios.request(config);
+    return response.data
+   // return response.data;
   } catch (error) {
     console.error("Error fetching modem details:", error);
     throw new Error("Failed to fetch modem details");

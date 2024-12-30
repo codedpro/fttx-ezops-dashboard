@@ -97,3 +97,8 @@ export interface ModemDetails {
   IBSNG_Ballances: IBSNG_Ballances[];
   ACS_Main: ACS_Main[];
 }
+export interface ModemPacketDetails {
+  Total: number;
+  Remained: number;
+  Used: number;
+}

@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import TableThree from "@/components/Tables/TableThree";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { FaMap, FaWifi } from "react-icons/fa";
-import { fetchModemDetails } from "@/lib/actions";
+import { fetchModemDetails, fetchModemPacketRemaining } from "@/lib/actions";
 import {
   ballancesColumns,
   connectionHistoryColumns,
@@ -24,6 +24,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
   const modemId = params.id;
   const modemDetails = await fetchModemDetails(modemId, token);
+  const modemPacketDetails = await fetchModemPacketRemaining(modemId, token);
 
   if (
     !modemDetails ||
@@ -205,19 +206,50 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
     );
     const usedValue = parseFloat((initialValue - unusedValue).toFixed(3));
 
-    const series = [unusedValue, usedValue];
     const colors = ["#feca00", "#ADBCF2"];
     const labels = ["Remaining (GB)", "Used (GB)"];
     chartContent = (
       <div className=" h-full">
-        <ChartThree
-          header={`Active Package (${modemDetails.IBSNG_Main[0].Charge}/s)`}
-          series={series}
-          colors={colors}
-          labels={labels}
-          apiname=""
-          suffix="GB"
-        />
+        {modemPacketDetails ? (
+          <ChartThree
+            header={`Active Package (${modemDetails.IBSNG_Main[0].Charge}/s)`}
+            series={[
+              modemPacketDetails[0].Remained / 1024,
+              modemPacketDetails[0].Used / 1024,
+            ]}
+            colors={colors}
+            labels={labels}
+            apiname=""
+            suffix="GB"
+          />
+        ) : (
+          <div
+            className="
+      w-full 
+      col-span-12 
+      relative 
+      rounded-[12px] 
+      bg-white 
+      dark:bg-gray-dark 
+      p-4 
+      sm:p-6 
+      md:p-4 
+      shadow-lg 
+      dark:shadow-dark-lg 
+      xl:col-span-5 
+      hover:shadow-2xl 
+      flex 
+      flex-col 
+      items-center 
+      justify-center 
+      min-h-[350px]
+    "
+          >
+            <p className="text-gray-800 dark:text-white text-center font-semibold">
+              There is no active package available for this user.
+            </p>
+          </div>
+        )}
       </div>
     );
   }
