@@ -32,7 +32,7 @@ export const useFATLayer = () => {
               Chain_ID: fat.Chain_ID,
               Type: fat.Type,
               icon: "FATIcon",
-              iconSize: 0.8,
+              iconSize: 0.05,
               Long: fat.Long,
               Lat: fat.Lat,
             },
