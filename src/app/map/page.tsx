@@ -81,6 +81,10 @@ const FTTHModemsMap: React.FC = () => {
     ModemLayer: true,
     MFATLayer: false,
     SFATLayer: false,
+    ODCLayer: false,
+    TCLayer: false,
+    PowerAlarmLayer: false,
+    DownSiteAlarmLayer: false,
     HHLayer: false,
     OLTLayer: false,
     ODCLineLayer: true,
@@ -89,6 +93,9 @@ const FTTHModemsMap: React.FC = () => {
     DropCableLineLayer: true,
     FTTHPowerLayer: false,
   };
+
+  const layersThatCanBeNull = ["olt-power-alarm-layer", "olt-down-site-alarm-layer"];
+
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
   const pointLayers = activeLayers.filter(
     (layer) => layer.type === "point" || layer.type === "fill"
@@ -163,10 +170,20 @@ const FTTHModemsMap: React.FC = () => {
   } = usePolygonSelection(ftthMapRef.current?.mapRef ?? { current: null });
 
   useEffect(() => {
-    const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
+    const areVisibleLayersLoaded = activeLayers.every((layer) => {
+
+      if (layersThatCanBeNull.includes(layer.id)) {
+        return true; 
+      }
+      return layer.source !== null;
+    });
+  
     if (areVisibleLayersLoaded) {
       setLoading(false);
     }
+    console.log(areVisibleLayersLoaded)
+    console.log(activeLayers)
+  
   }, [activeLayers]);
 
   return (

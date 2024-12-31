@@ -3,7 +3,6 @@ import * as mapboxgl from 'mapbox-gl';
 
 declare module 'mapbox-gl' {
   export interface Map {
-    // Mapbox Draw Events
     on(
       type: 'draw.create' | 'draw.delete' | 'draw.update',
       listener: (e: DrawEvent) => void
@@ -12,6 +11,10 @@ declare module 'mapbox-gl' {
       type: 'draw.create' | 'draw.delete' | 'draw.update',
       listener: (e: DrawEvent) => void
     ): this;
+  }
+
+  export interface Marker {
+    // Add custom Marker extensions here if needed
   }
 }
 
