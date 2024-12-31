@@ -23,7 +23,7 @@ export const useAutoFATLayer = () => {
               Customer_Count: fat.Modem_Count,
               Max_Distance_Covered_m: fat.Max_Distance_Covered_m,
               icon: "fatIcon",
-              iconSize: 0.05,
+              iconSize: 1,
               Long: fat.Long,
               Lat: fat.Lat,
               LayerID: "autoFATLayer",
