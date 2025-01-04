@@ -66,9 +66,14 @@ const FTTHModemsMap: React.FC = () => {
   const userservice = new UserService();
   const token = userservice.getToken();
 
-  useEffect(() => {
-    if (token) useInitializePostBlocks(token);
-  }, [token]);
+  const initializePostBlocks = (token: string) => {
+    useInitializePostBlocks(token);
+  };
+
+  if (token) {
+    initializePostBlocks(token); // Call it as a utility function
+  }
+
   const selectedLayers = [
     //Points
     "MFATLayer",

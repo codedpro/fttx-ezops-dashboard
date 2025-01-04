@@ -21,7 +21,7 @@ import { useInitializeFTTHCities } from "@/hooks/useInitializeFTTHCities";
 import { useInitializeFTTHBlocks } from "@/hooks/useInitializeFTTHBlocks";
 import { useInitializeFTTHACSRXPower } from "@/hooks/useInitializeFTTHACSRXPower";
 import { useInitializeFATData } from "@/hooks/useInitializeFTTHFATauto";
-import { useInitializePostBlocks } from "@/hooks/useInitializePostBlocks";
+//import { useInitializePostBlocks } from "@/hooks/useInitializePostBlocks";
 import { useInitializeAlarms } from "@/hooks/useInitializeAlarms";
 
 export default function RootLayout({
