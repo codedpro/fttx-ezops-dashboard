@@ -18,6 +18,8 @@ import {
 import ScreenshotEditorModal from "@/components/ScreenshotEditorModal";
 import useSearchPlaces from "@/hooks/useSearchPlaces";
 import FTTHMap from "@/components/Maps/auto-plan";
+import { UserService } from "@/services/userService";
+import { useInitializePostBlocks } from "@/hooks/useInitializePostBlocks";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -61,6 +63,12 @@ const FTTHModemsMap: React.FC = () => {
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
 
+  const userservice = new UserService();
+  const token = userservice.getToken();
+
+  useEffect(() => {
+    if (token) useInitializePostBlocks(token);
+  }, [token]);
   const selectedLayers = [
     //Points
     "MFATLayer",
@@ -192,7 +200,7 @@ const FTTHModemsMap: React.FC = () => {
               )}
             </>
           )}
-        
+
           <>
             <LayerPanel
               title=""
@@ -217,7 +225,7 @@ const FTTHModemsMap: React.FC = () => {
               selectedStyleId={selectedStyleId}
             />
           </>
-       
+
           <div className="w-full z-0">
             <FTTHMap
               ref={ftthMapRef}

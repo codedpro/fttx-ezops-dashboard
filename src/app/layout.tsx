@@ -43,7 +43,7 @@ export default function RootLayout({
     useInitializeFTTHACSRXPower(token);
     useInitializeFATData(token);
     useInitializeAlarms(token);
-    useInitializePostBlocks(token);
+   // useInitializePostBlocks(token);
   }
   const [loading, setLoading] = useState(true);
 
