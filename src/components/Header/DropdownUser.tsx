@@ -11,6 +11,7 @@ const DropdownUser = () => {
   const router = useRouter();
 
   const handleLogout = () => {
+    userservice.logout();
     router.push("/login");
   };
   return (
