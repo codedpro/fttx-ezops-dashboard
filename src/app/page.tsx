@@ -26,14 +26,14 @@ const Dashboard = async ({
     return <div className="text-center text-red-600">Unauthorized</div>;
   }
 
-  let dashboardData, dailyData, acsData, payloadData, PayloadCity;
+  let dashboardData, dailyData, acsData,  PayloadCity;
 
   try {
     PayloadCity = searchParams?.PayloadCity || "all";
 
     dashboardData = await fetchFTTHDashboard(token);
     acsData = await fetchFTTHACS(token);
-    payloadData = await fetchFTTHPayload(token, PayloadCity);
+  
     dashboardData = dashboardData[0];
 
     dailyData = await fetchFTTHDailyChartData(token);
@@ -233,7 +233,7 @@ const Dashboard = async ({
         >
           <ChartFour
             defaultCity={PayloadCity}
-            dailyData={payloadData}
+    
             exportid=""
             header="Network Payload Overview"
           />
