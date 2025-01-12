@@ -17,8 +17,6 @@ export async function middleware(request: NextRequest) {
 
   const tokenCookie = request.cookies.get("AccessToken");
   const token = tokenCookie?.value;
-  console.log(token);
-  console.log(pathname);
 
   if (!token) {
     const response = NextResponse.redirect(new URL("/login", request.url));
@@ -59,7 +57,7 @@ export async function middleware(request: NextRequest) {
       if (error instanceof Error) {
         console.error("Error during token verification:", error.message);
       }
-      console.log(error);
+ 
 
       const response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete("AccessToken");

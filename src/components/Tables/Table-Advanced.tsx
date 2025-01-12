@@ -41,9 +41,10 @@ const TableAdvanced: React.FC<TableAdvancedProps> = ({ data, header }) => {
       null,
       null,
     ];
-
+  
     const wsData: (string | number | null)[][] = [headerRow1, headerRow2];
-
+  
+    // Push data rows
     data.forEach((row) => {
       const row1: (string | number | null)[] = [
         row.City,
@@ -69,26 +70,28 @@ const TableAdvanced: React.FC<TableAdvancedProps> = ({ data, header }) => {
         null,
         null,
       ];
-
       wsData.push(row1, row2);
     });
-
+  
+    // Create worksheet from AOA
     const worksheet = XLSX.utils.aoa_to_sheet(wsData);
-
+  
+    // Define merges
     const merges: XLSX.Range[] = [];
-    merges.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }); // City rowSpan=2
-    merges.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }); // Request rowSpan=2
-    merges.push({ s: { r: 0, c: 2 }, e: { r: 0, c: 4 } }); // Confirmed colSpan=3
-    merges.push({ s: { r: 0, c: 5 }, e: { r: 1, c: 5 } }); // Install / Confirmed rowSpan=2
-    merges.push({ s: { r: 0, c: 6 }, e: { r: 1, c: 6 } }); // Install / Request rowSpan=2
-    merges.push({ s: { r: 0, c: 7 }, e: { r: 1, c: 7 } }); // Pending rowSpan=2
-    merges.push({ s: { r: 0, c: 8 }, e: { r: 1, c: 8 } }); // Cancelled rowSpan=2
-    merges.push({ s: { r: 0, c: 9 }, e: { r: 1, c: 9 } }); // Rejected rowSpan=2
-
+    merges.push({ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }); // City
+    merges.push({ s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }); // Request
+    merges.push({ s: { r: 0, c: 2 }, e: { r: 0, c: 4 } }); // Confirmed
+    merges.push({ s: { r: 0, c: 5 }, e: { r: 1, c: 5 } }); // Install / Confirmed
+    merges.push({ s: { r: 0, c: 6 }, e: { r: 1, c: 6 } }); // Install / Request
+    merges.push({ s: { r: 0, c: 7 }, e: { r: 1, c: 7 } }); // Pending
+    merges.push({ s: { r: 0, c: 8 }, e: { r: 1, c: 8 } }); // Cancelled
+    merges.push({ s: { r: 0, c: 9 }, e: { r: 1, c: 9 } }); // Rejected
+  
+    // Merges for data rows
     data.forEach((_, i) => {
       const rowTop = 2 + i * 2;
       const rowBottom = rowTop + 1;
-
+  
       merges.push({ s: { r: rowTop, c: 0 }, e: { r: rowBottom, c: 0 } }); // City
       merges.push({ s: { r: rowTop, c: 1 }, e: { r: rowBottom, c: 1 } }); // Request
       merges.push({ s: { r: rowTop, c: 2 }, e: { r: rowTop, c: 4 } }); // Confirmed (Main Value)
@@ -98,9 +101,10 @@ const TableAdvanced: React.FC<TableAdvancedProps> = ({ data, header }) => {
       merges.push({ s: { r: rowTop, c: 8 }, e: { r: rowBottom, c: 8 } }); // Cancelled
       merges.push({ s: { r: rowTop, c: 9 }, e: { r: rowBottom, c: 9 } }); // Rejected
     });
-
+  
     worksheet["!merges"] = merges;
-
+  
+    // Column widths
     worksheet["!cols"] = [
       { wch: 16 },
       { wch: 16 },
@@ -113,31 +117,58 @@ const TableAdvanced: React.FC<TableAdvancedProps> = ({ data, header }) => {
       { wch: 30 },
       { wch: 16 },
     ];
-
-    Object.keys(worksheet).forEach((key) => {
-      if (key[0] === "!") return;
-      worksheet[key].s = {
-        alignment: { horizontal: "center", vertical: "center" },
-      };
-    });
-
+  
+    // First, set header styles (rows 0 and 1)
     for (let r = 0; r < 2; r++) {
       for (let c = 0; c < 10; c++) {
         const cellRef = XLSX.utils.encode_cell({ r, c });
-        if (worksheet[cellRef]) {
-          worksheet[cellRef].s = {
-            alignment: { horizontal: "center", vertical: "center" },
-            fill: { fgColor: { rgb: "FECA00" } },
-            font: { bold: true, sz: 12 },
-          };
-        }
+        if (!worksheet[cellRef]) continue; // Skip if cell doesn't exist
+        const existingStyle = worksheet[cellRef].s || {};
+  
+        worksheet[cellRef].s = {
+          ...existingStyle,
+          alignment: { horizontal: "center", vertical: "center" },
+          fill: { fgColor: { rgb: "FECA00" } },
+          font: { bold: true, sz: 12 },
+        };
       }
     }
-
+  
+    // Apply border & center alignment to all cells in the data range
+    // so that merged cells also get an outer border.
+    const totalRows = wsData.length;      // total rows in sheet
+    const totalCols = wsData[0].length;   // total columns in sheet
+  
+    for (let r = 0; r < totalRows; r++) {
+      for (let c = 0; c < totalCols; c++) {
+        const cellRef = XLSX.utils.encode_cell({ r, c });
+  
+        // Create the cell if it doesn't exist (important for merged “empty” cells)
+        if (!worksheet[cellRef]) {
+          worksheet[cellRef] = { t: "s", v: "" };
+        }
+  
+        // Merge existing style with border & alignment
+        const existingStyle = worksheet[cellRef].s || {};
+        worksheet[cellRef].s = {
+          ...existingStyle,
+          alignment: { horizontal: "center", vertical: "center" },
+          border: {
+            top:    { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left:   { style: "thin", color: { rgb: "000000" } },
+            right:  { style: "thin", color: { rgb: "000000" } },
+          },
+        };
+      }
+    }
+  
+    // Finally, create the workbook and export
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
     XLSX.writeFile(workbook, `Report.xlsx`);
   };
+  
 
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 sm:p-7.5 hover:shadow-lg transition-all duration-300 dark:border-[#1F2B37] dark:bg-[#122031] dark:shadow-card">
