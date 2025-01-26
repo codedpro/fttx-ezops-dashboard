@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   if (pathname !== "/api/VerifyToken") {
     try {
       const verifyResponse = await fetch(
-        `${process.env.FTTXBACKEND}/VerifyToken`,
+        `${process.env.FTTXBACKEND_ORIGINS}/VerifyToken`,
         {
           method: "GET",
           headers: {

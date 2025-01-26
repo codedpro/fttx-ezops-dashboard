@@ -26,7 +26,7 @@ const DropdownUser = () => {
             <Image
               width={112}
               height={112}
-              src={userservice.getProfile() ?? "/images/user/user-03.png"}
+              src={userservice.getProfile() ?? "/images/user/no-profile.png"}
               style={{
                 width: "auto",
                 height: "auto",

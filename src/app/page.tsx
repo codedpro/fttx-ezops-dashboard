@@ -33,7 +33,7 @@ const Dashboard = async ({
 
     dashboardData = await fetchFTTHDashboard(token);
     acsData = await fetchFTTHACS(token);
-  
+    console.log(acsData)
     dashboardData = dashboardData[0];
 
     dailyData = await fetchFTTHDailyChartData(token);
