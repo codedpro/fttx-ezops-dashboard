@@ -211,7 +211,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
             Interval:
           </p>
           <DefaultSelectOption
-            options={["1m", "10m", "30m", "1H", "1d", "1w"]}
+            options={["1m", "10m", "30m", "1H"]} //1d 1w
             onChange={(val: string) => setInterval(val)}
             defaultValue={interval}
           />
