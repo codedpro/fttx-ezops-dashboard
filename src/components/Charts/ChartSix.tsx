@@ -62,7 +62,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   // STATE & REFS
   // --------------------
   const [interval, setIntervalState] = useState<string>("1m");
-  const [rowLimit, setRowLimit] = useState<number>(10);
+  const [rowLimit, setRowLimit] = useState<number>(50);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [payloadData, setPayloadData] = useState<OnlineCountPayload[] | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -110,13 +110,12 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   }, [fetchData]);
 
   // --------------------
-  // BACKGROUND POLLING FOR LIVE UPDATES (every 1 minute)
+  // BACKGROUND POLLING FOR LIVE UPDATES
   // --------------------
   useEffect(() => {
     const pollingInterval = setInterval(() => {
       fetchData(false);
     }, 60000); // 60000 ms = 1 minute
-
     return () => clearInterval(pollingInterval);
   }, [fetchData]);
 
@@ -130,7 +129,6 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
     );
   }, [payloadData]);
 
-  // Format the datetime to include both date and time
   const formatDateForDisplay = (datetime: string) => {
     const date = new Date(datetime);
     return date.toLocaleString("en-US", {
@@ -168,6 +166,8 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
         fontFamily: "Satoshi, sans-serif",
         type: "area",
         toolbar: { show: false },
+        // Ensure the chart doesn’t impose a high z-index:
+        background: "transparent",
       },
       fill: { gradient: { opacityFrom: 0.55, opacityTo: 0 } },
       stroke: { curve: "smooth", width: 2 },
@@ -237,28 +237,48 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   // RENDER
   // --------------------
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8">
-      <div className="col-span-12 rounded-lg bg-white dark:bg-gray-dark p-6 shadow-md xl:col-span-7">
+    <div className="w-full ">
+      {/* Top-level container */}
+      <div
+        className="
+          col-span-12 
+          rounded-lg 
+          bg-white 
+          dark:bg-gray-dark 
+          p-6 
+          shadow-md 
+          relative        /* Make parent container position relative */
+          xl:col-span-7
+        "
+      >
         {/* HEADER + FILTERS */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h4 className="text-xl font-bold text-dark dark:text-white">{header}</h4>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 z-10">
+            {/* Interval dropdown container */}
             <div className="flex items-center gap-2">
               <p className="font-medium uppercase text-dark dark:text-dark-6">Interval:</p>
-              <DefaultSelectOption
-                options={["1m", "10m", "30m", "1H"]}
-                onChange={(val: string) => setIntervalState(val)}
-                defaultValue={interval}
-              />
+              <div className="relative z-50"> 
+                {/* Ensures the dropdown is above the chart */}
+                <DefaultSelectOption
+                  options={["1m", "10m", "30m", "1H"]}
+                  onChange={(val: string) => setIntervalState(val)}
+                  defaultValue={interval}
+                />
+              </div>
             </div>
+            {/* RowLimit dropdown container */}
             <div className="flex items-center gap-2">
               <p className="font-medium uppercase text-dark dark:text-dark-6">Row Limit:</p>
-              <DefaultSelectOption
-                options={["10", "50", "100", "200", "1000"]}
-                onChange={(val: string) => setRowLimit(Number(val))}
-                defaultValue={rowLimit.toString()}
-              />
+              <div className="relative z-50">
+                <DefaultSelectOption
+                  options={["10", "50", "100", "200", "1000"]}
+                  onChange={(val: string) => setRowLimit(Number(val))}
+                  defaultValue={rowLimit.toString()}
+                />
+              </div>
             </div>
+            {/* DOWNLOAD BUTTON */}
             <button
               className="flex items-center gap-1 bg-primary text-white px-3 py-1 rounded hover:bg-primaryhover"
               onClick={handleDownload}
@@ -271,7 +291,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
         </div>
 
         {/* CONTENT / CHART */}
-        <div className="w-full">
+        <div className="w-full overflow-visible">
           {errorMessage ? (
             <div className="text-center text-red-600 font-medium">{errorMessage}</div>
           ) : isSearching && (!payloadData || payloadData.length === 0) ? (
@@ -299,6 +319,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
             </div>
           ) : payloadData && payloadData.length > 0 ? (
             <ReactApexChart
+              className="relative z-0"
               options={options as ApexCharts.ApexOptions}
               series={series}
               type="area"
