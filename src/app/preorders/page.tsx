@@ -23,8 +23,13 @@ import ScreenshotEditorModal from "@/components/ScreenshotEditorModal";
 import useSearchPlaces from "@/hooks/useSearchPlaces";
 import { useFTTHPreordersStore } from "@/store/FTTHPreordersStore";
 
+// 1) Import useTiles
+import { useTiles } from "@/hooks/useTiles";
+
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
+
+  // Base style (Dark) as your initial style:
   const [mapStyle, setMapStyle] = useState<StyleSpecification>({
     version: 8,
     sources: {
@@ -47,6 +52,14 @@ const FTTHModemsMap: React.FC = () => {
       } as RasterLayerSpecification,
     ],
   });
+
+  // 2) Manage tile overlays (for multiple tile layers on top of base)
+  //    Here we define we want 2 tile layers: "stadiaDark" and "stadiaLight"
+  //    and their default visibilities.
+  const { activeTiles } = useTiles(["blocks"], {
+    blocks: true,
+  });
+
   const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -63,17 +76,16 @@ const FTTHModemsMap: React.FC = () => {
     lng: number;
     zoom: number;
   } | null>(null);
+
   const searchParams = useSearchParams();
-  const handleCityClick = (city: {
-    lat: number;
-    lng: number;
-    zoom: number;
-  }) => {
+  const handleCityClick = (city: { lat: number; lng: number; zoom: number }) => {
     setZoomLocation(city);
   };
+
   const [isPointPanelMinimized, setIsPointPanelMinimized] = useState(false);
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
 
+  // Vector layers we want to manage
   const selectedLayers = [
     //Points
     "FTTHPreorderLayer",
@@ -84,7 +96,6 @@ const FTTHModemsMap: React.FC = () => {
     "FTTHSuggestedFATLayer",
     "FTTHSuggestedFATSmallFillLayer",
     "BlockPolygonLayer",
-
     //Lines
     "ODCLineLayer",
     "FATLineLayer",
@@ -92,6 +103,7 @@ const FTTHModemsMap: React.FC = () => {
     "DropCableLineLayer",
   ] as LayerKeys[];
 
+  // Default visibility for those vector layers
   const defaultVisibility = {
     FTTHPreorderLayer: false,
     MFATLayer: true,
@@ -107,7 +119,10 @@ const FTTHModemsMap: React.FC = () => {
     DropCableLineLayer: true,
   };
 
+  // 3) Use our vector layer manager
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
+
+  // For display grouping in the panel:
   const pointLayers = activeLayers.filter(
     (layer) =>
       layer.type === "point" ||
@@ -116,16 +131,13 @@ const FTTHModemsMap: React.FC = () => {
   );
   const lineLayers = activeLayers.filter((layer) => layer.type === "line");
 
-  const handleStyleChange = (
-    newStyle: StyleSpecification,
-    newStyleId: string
-  ) => {
+  // For changing base style in StylePanel
+  const handleStyleChange = (newStyle: StyleSpecification, newStyleId: string) => {
     setMapStyle(newStyle);
     setSelectedStyleId(newStyleId);
   };
-  const handleCoordinatesChange = (
-    coordinates: { lat: number; lng: number } | null
-  ) => {
+
+  const handleCoordinatesChange = (coordinates: { lat: number; lng: number } | null) => {
     setCurrentCoordinates(coordinates);
   };
 
@@ -135,6 +147,7 @@ const FTTHModemsMap: React.FC = () => {
   };
 
   const preorders = useFTTHPreordersStore((state) => state.preorders);
+
   useEffect(() => {
     const search = searchParams.get("search");
     if (!search) return;
@@ -146,9 +159,7 @@ const FTTHModemsMap: React.FC = () => {
       }
     }
     if (search.startsWith("FTH")) {
-      const preorder = preorders.find(
-        (preorder) => preorder.Tracking_Code === search
-      );
+      const preorder = preorders.find((p) => p.Tracking_Code === search);
       if (preorder) {
         setZoomLocation({ lat: preorder.Lat, lng: preorder.Long, zoom: 20 });
       }
@@ -161,6 +172,7 @@ const FTTHModemsMap: React.FC = () => {
     setEditData(data);
   };
 
+  // The map ref
   const ftthMapRef = useRef<{
     handleEditPoint: (data: any) => void;
     handleSubmitPointEdit: () => void;
@@ -169,28 +181,23 @@ const FTTHModemsMap: React.FC = () => {
     handleSaveSuggestedPath: () => void;
     handleCancelSuggestedPath: () => void;
     handleCancelEditPath: () => void;
-    handlemoveEditPoint: (newCoordinates: { lat: number; lng: number }) => void;
+    handlemoveEditPoint: (coords: { lat: number; lng: number }) => void;
     mapRef: React.MutableRefObject<mapboxgl.Map | null>;
   } | null>(null);
 
+  // Various editing logic
   const handleEditPosition = () => {
-    if (ftthMapRef.current) {
+    if (ftthMapRef.current && editData) {
       setIsEditingPosition(true);
       ftthMapRef.current.handleCancelEditPath();
       setZoomLocation({ lat: editData.Lat, lng: editData.Long, zoom: 20 });
       ftthMapRef.current.handleEditPoint(editData);
     }
   };
-  const handleSaveEditPointCoordinates = (newCoordinates: {
-    lat: number;
-    lng: number;
-  }) => {
+
+  const handleSaveEditPointCoordinates = (newCoordinates: { lat: number; lng: number }) => {
     if (ftthMapRef.current) {
-      setZoomLocation({
-        lat: newCoordinates.lat,
-        lng: newCoordinates.lng,
-        zoom: 20,
-      });
+      setZoomLocation({ lat: newCoordinates.lat, lng: newCoordinates.lng, zoom: 20 });
       ftthMapRef.current.handlemoveEditPoint(newCoordinates);
     }
   };
@@ -211,17 +218,15 @@ const FTTHModemsMap: React.FC = () => {
   };
 
   const handleSuggestFATLine = () => {
-    if (ftthMapRef.current) {
+    if (ftthMapRef.current && editData) {
       ftthMapRef.current.handleCancelEditPath();
 
+      // Toggle off some lines if they're visible
       activeLayers.forEach((layer) => {
         if (
-          [
-            "FATLineLayer",
-            "MetroLineLayer",
-            "ODCLineLayer",
-            "DropCableLineLayer",
-          ].includes(layer.id) &&
+          ["FATLineLayer", "MetroLineLayer", "ODCLineLayer", "DropCableLineLayer"].includes(
+            layer.id
+          ) &&
           layer.visible
         ) {
           layer.toggle();
@@ -241,16 +246,15 @@ const FTTHModemsMap: React.FC = () => {
       ftthMapRef.current.handleCancelEditPath();
     }
   };
+
   const handleCancelSuggesting = () => {
     if (ftthMapRef.current) {
+      // Toggle back on lines that were turned off, if needed
       activeLayers.forEach((layer) => {
         if (
-          [
-            "FATLineLayer",
-            "MetroLineLayer",
-            "ODCLineLayer",
-            "DropCableLineLayer",
-          ].includes(layer.id) &&
+          ["FATLineLayer", "MetroLineLayer", "ODCLineLayer", "DropCableLineLayer"].includes(
+            layer.id
+          ) &&
           !layer.visible
         ) {
           layer.toggle();
@@ -258,10 +262,10 @@ const FTTHModemsMap: React.FC = () => {
       });
       ftthMapRef.current.handleCancelSuggestedPath();
       ftthMapRef.current.handleCancelEditPath();
-
       setIsSuggestingLine(false);
     }
   };
+
   const handleSubmitEdit = () => {
     if (ftthMapRef.current) {
       setIsEditingPosition(false);
@@ -277,6 +281,7 @@ const FTTHModemsMap: React.FC = () => {
     }
   };
 
+  // Hook for custom FAT line drawing
   const {
     isDrawing,
     lineColor,
@@ -300,6 +305,8 @@ const FTTHModemsMap: React.FC = () => {
   const FTTHSuggestedFATLayer = activeLayers.find(
     (layer) => layer.id === "suggestedFATSGrayFill"
   );
+
+  // Polygon selection hook
   const {
     isPolygonMode,
     togglePolygonMode,
@@ -314,6 +321,7 @@ const FTTHModemsMap: React.FC = () => {
     setIsScreenShotModalOpen,
   } = usePolygonSelection(ftthMapRef.current?.mapRef ?? { current: null });
 
+  // Once all visible layers are loaded, remove "Loading..."
   useEffect(() => {
     const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
     if (areVisibleLayersLoaded) {
@@ -321,9 +329,11 @@ const FTTHModemsMap: React.FC = () => {
     }
   }, [activeLayers]);
 
+  // Searching
   const { handleSearchPlaces, removeAllMarkers } = useSearchPlaces(
     ftthMapRef.current?.mapRef ?? { current: null }
   );
+
   return (
     <DefaultLayout className="p-0 md:p-0">
       {loading ? (
@@ -332,14 +342,12 @@ const FTTHModemsMap: React.FC = () => {
         </div>
       ) : (
         <div className="w-full h-[80vh] z-0 relative overflow-hidden">
-          <CityPanel
-            onCityClick={handleCityClick}
-            onSearch={handleSearchPlaces}
-            onClear={removeAllMarkers}
-          />
+          {/* City search panel, top-left */}
+          <CityPanel onCityClick={handleCityClick} onSearch={handleSearchPlaces} onClear={removeAllMarkers} />
+
+          {/* Polygon selection UI */}
           {isPolygonMode && (
             <>
-              {" "}
               <PolygonTool
                 startPolygonMode={startPolygonMode}
                 deleteLastPolygon={deleteLastPolygon}
@@ -359,41 +367,46 @@ const FTTHModemsMap: React.FC = () => {
                   onClose={() => setIsScreenShotModalOpen(false)}
                   screenshotData={screenshotData}
                 />
-              ) : (
-                <></>
-              )}
+              ) : null}
             </>
           )}
 
+          {/* Show panels unless in edit mode */}
           {!isEditMode && (
             <>
+              {/* Panel for point-type layers, plus tile overlays */}
               <LayerPanel
                 title=""
                 layers={pointLayers}
+                tiles={activeTiles} // <--- Pass tile overlays here
                 isMinimized={isPointPanelMinimized}
-                toggleMinimized={() =>
-                  setIsPointPanelMinimized((prev) => !prev)
-                }
+                toggleMinimized={() => setIsPointPanelMinimized((prev) => !prev)}
                 customPosition="top-left"
                 isPolygonMode={isPolygonMode}
                 togglePolygonMode={togglePolygonMode}
               />
+
+              {/* Panel for line layers (separate) */}
               <LayerPanel
                 title=""
                 layers={lineLayers}
+                tiles={undefined}
                 isMinimized={isLinePanelMinimized}
                 toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
                 customPosition="bottom-left"
                 isPolygonMode={isPolygonMode}
                 togglePolygonMode={togglePolygonMode}
               />
-              <StylePanel
-                onStyleChange={handleStyleChange}
-                selectedStyleId={selectedStyleId}
-              />
+
+              {/* Style selector for base style */}
+              <StylePanel onStyleChange={handleStyleChange} selectedStyleId={selectedStyleId} />
+
+              {/* If user toggles the suggestedFAT layer on, show legend */}
               {FTTHSuggestedFATLayer?.visible ? <LegendPanel /> : null}
             </>
           )}
+
+          {/* If editing is on, show the EditPanel */}
           {isEditMode && ftthMapRef.current && (
             <EditPanel
               onEditPosition={handleEditPosition}
@@ -419,16 +432,16 @@ const FTTHModemsMap: React.FC = () => {
               handleSaveEditCoordinates={handleSaveEditPointCoordinates}
             />
           )}
+
+          {/* The actual map component */}
           <div className="w-full z-0">
             <FTTHMap
               ref={ftthMapRef}
               layers={activeLayers}
+              tileLayers={activeTiles} // <--- Pass tile overlays to the map
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
-              onEdit={handleEdit}
-              isEditMode={isEditMode}
-              onCoordinatesChange={handleCoordinatesChange}
-              onPathPanelChange={handlePathPanelChange}
+              // onEdit, isEditMode, onCoordinatesChange, etc. omitted if not used
             />
           </div>
         </div>

@@ -13,6 +13,7 @@ import ChartOne from "@/components/Charts/ChartOne";
 import Tutorial from "@/components/Tutorial";
 import { dashboardTutorialSteps } from "@/tutorials";
 import ChartFour from "@/components/Charts/ChartFour";
+import ChartSix from "@/components/Charts/ChartSix";
 
 const Dashboard = async ({
   searchParams,
@@ -231,9 +232,17 @@ const Dashboard = async ({
           id="dashboard-step11"
           className="col-span-12 md:col-span-12 lg:col-span-12 "
         >
+          <ChartSix
+            exportid=""
+            header="Modem Online Status"
+          />
+        </div>
+        <div
+          id="dashboard-step12"
+          className="col-span-12 md:col-span-12 lg:col-span-12 "
+        >
           <ChartFour
             defaultCity={PayloadCity}
-    
             exportid=""
             header="Network Payload Overview"
           />
