@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import axios from "axios";
 import ReactApexChart from "react-apexcharts";
 import { FaCloudDownloadAlt } from "react-icons/fa";
@@ -58,23 +58,23 @@ async function fetchIBSNGOnlineCount(
 // MAIN COMPONENT
 // --------------------
 const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
- 
-
   // --------------------
   // STATE & REFS
   // --------------------
-  const [interval, setInterval] = useState<string>("1m");
+  const [interval, setIntervalState] = useState<string>("1m");
   const [rowLimit, setRowLimit] = useState<number>(10);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [payloadData, setPayloadData] = useState<OnlineCountPayload[] | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // --------------------
-  // FETCH DATA WHEN PARAMETERS CHANGE
+  // DATA FETCH FUNCTION
   // --------------------
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsSearching(true);
+  const fetchData = useCallback(
+    async (showLoading: boolean = true) => {
+      if (showLoading) {
+        setIsSearching(true);
+      }
       setErrorMessage(null);
 
       try {
@@ -83,7 +83,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
         if (!token) {
           setErrorMessage("No AccessToken found in localStorage.");
           setPayloadData(null);
-          setIsSearching(false);
+          if (showLoading) setIsSearching(false);
           return;
         }
 
@@ -94,12 +94,31 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
         setErrorMessage(err.message || "Failed to fetch online count data");
         setPayloadData(null);
       } finally {
-        setIsSearching(false);
+        if (showLoading) {
+          setIsSearching(false);
+        }
       }
-    };
+    },
+    [interval, rowLimit]
+  );
 
-    fetchData();
-  }, [interval, rowLimit]);
+  // --------------------
+  // INITIAL DATA FETCH ON PARAMETER CHANGE
+  // --------------------
+  useEffect(() => {
+    fetchData(true);
+  }, [fetchData]);
+
+  // --------------------
+  // BACKGROUND POLLING FOR LIVE UPDATES (every 1 minute)
+  // --------------------
+  useEffect(() => {
+    const pollingInterval = setInterval(() => {
+      fetchData(false);
+    }, 60000); // 60000 ms = 1 minute
+
+    return () => clearInterval(pollingInterval);
+  }, [fetchData]);
 
   // --------------------
   // DATA PREPARATION
@@ -122,10 +141,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
     });
   };
 
-  const dates = useMemo(
-    () => sortedData.map((item) => formatDateForDisplay(item.datetime)),
-    [sortedData]
-  );
+  const dates = useMemo(() => sortedData.map((item) => formatDateForDisplay(item.datetime)), [sortedData]);
 
   const series = useMemo(
     () => [
@@ -150,7 +166,6 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
       colors: ["#feca00", "#fff18a"],
       chart: {
         fontFamily: "Satoshi, sans-serif",
-        height: 310,
         type: "area",
         toolbar: { show: false },
       },
@@ -165,7 +180,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
       xaxis: {
         type: "category",
         categories: dates,
-        labels: { style: { fontSize: "20px" } },
+        labels: { style: { fontSize: "16px" } },
         axisBorder: { show: false },
         axisTicks: { show: false },
       },
@@ -175,11 +190,35 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
         },
         title: { style: { fontSize: "0px" } },
       },
+      responsive: [
+        {
+          breakpoint: 768,
+          options: {
+            chart: {
+              height: 250,
+            },
+            xaxis: {
+              labels: { style: { fontSize: "12px" } },
+            },
+          },
+        },
+        {
+          breakpoint: 480,
+          options: {
+            chart: {
+              height: 220,
+            },
+            xaxis: {
+              labels: { style: { fontSize: "10px" } },
+            },
+          },
+        },
+      ],
     };
   }, [dates]);
 
   // --------------------
-  // DOWNLOAD
+  // DOWNLOAD HANDLER
   // --------------------
   const handleDownload = () => {
     if (!sortedData || sortedData.length === 0) {
@@ -187,7 +226,6 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
       return;
     }
 
-    // Export the full datetime string along with count
     const exportData = sortedData.map((item) => ({
       datetime: item.datetime,
       count: item.count,
@@ -199,84 +237,79 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   // RENDER
   // --------------------
   return (
-    <div className="col-span-12 rounded-[10px] bg-white dark:bg-gray-dark px-7.5 pb-12.5 pt-7.5 shadow-1 dark:shadow-card xl:col-span-7">
-      {/* HEADER + FILTERS */}
-      <div className="mb-3.5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between relative z-10">
-        <div>
-          <h4 className="text-body-2xlg font-bold text-dark dark:text-white">
-            {header}
-          </h4>
-        </div>
-        <div className="relative flex flex-col gap-2.5 sm:flex-row sm:items-center w-full sm:w-auto">
-          <p className="font-medium uppercase text-dark dark:text-dark-6">
-            Interval:
-          </p>
-          <DefaultSelectOption
-            options={["1m", "10m", "30m", "1H"]} //1d 1w
-            onChange={(val: string) => setInterval(val)}
-            defaultValue={interval}
-          />
-
-          <p className="font-medium uppercase text-dark dark:text-dark-6">
-            Row Limit:
-          </p>
-          <DefaultSelectOption
-            options={["10", "50", "100", "200", "1000"]}
-            onChange={(val: string) => setRowLimit(Number(val))}
-            defaultValue={rowLimit.toString()}
-          />
-
-          {/* DOWNLOAD BUTTON */}
-          <button
-            className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
-            onClick={handleDownload}
-            title="Download"
-          >
-            <FaCloudDownloadAlt size={14} />
-            <span className="hidden sm:inline">Export</span>
-          </button>
-        </div>
-      </div>
-
-      {/* CONTENT / CHART */}
-      <div>
-        {errorMessage ? (
-          <div className="text-red-600 font-medium">{errorMessage}</div>
-        ) : isSearching ? (
-          <div className="flex justify-center items-center h-32">
-            <svg
-              className="animate-spin h-10 w-10 text-primary"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+    <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="col-span-12 rounded-lg bg-white dark:bg-gray-dark p-6 shadow-md xl:col-span-7">
+        {/* HEADER + FILTERS */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h4 className="text-xl font-bold text-dark dark:text-white">{header}</h4>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <p className="font-medium uppercase text-dark dark:text-dark-6">Interval:</p>
+              <DefaultSelectOption
+                options={["1m", "10m", "30m", "1H"]}
+                onChange={(val: string) => setIntervalState(val)}
+                defaultValue={interval}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <p className="font-medium uppercase text-dark dark:text-dark-6">Row Limit:</p>
+              <DefaultSelectOption
+                options={["10", "50", "100", "200", "1000"]}
+                onChange={(val: string) => setRowLimit(Number(val))}
+                defaultValue={rowLimit.toString()}
+              />
+            </div>
+            <button
+              className="flex items-center gap-1 bg-primary text-white px-3 py-1 rounded hover:bg-primaryhover"
+              onClick={handleDownload}
+              title="Download"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
-            </svg>
+              <FaCloudDownloadAlt size={16} />
+              <span className="hidden sm:inline">Export</span>
+            </button>
           </div>
-        ) : payloadData && payloadData.length > 0 ? (
-          <ReactApexChart
-            options={options as ApexCharts.ApexOptions}
-            series={series}
-            type="area"
-            height={310}
-          />
-        ) : (
-          <div className="mt-4 text-center text-gray-500">
-            No online count data available.
-          </div>
-        )}
+        </div>
+
+        {/* CONTENT / CHART */}
+        <div className="w-full">
+          {errorMessage ? (
+            <div className="text-center text-red-600 font-medium">{errorMessage}</div>
+          ) : isSearching && (!payloadData || payloadData.length === 0) ? (
+            <div className="flex justify-center items-center h-32">
+              <svg
+                className="animate-spin h-10 w-10 text-primary"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+            </div>
+          ) : payloadData && payloadData.length > 0 ? (
+            <ReactApexChart
+              options={options as ApexCharts.ApexOptions}
+              series={series}
+              type="area"
+              height={310}
+            />
+          ) : (
+            <div className="mt-4 text-center text-gray-500">
+              No online count data available.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
