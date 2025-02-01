@@ -59,6 +59,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
         "Content-Type": "application/json",
       },
       data: exportDto,
+      timeout: 600000,
     };
 
     try {

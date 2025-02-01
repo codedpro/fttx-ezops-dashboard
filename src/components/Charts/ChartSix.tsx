@@ -42,6 +42,7 @@ async function fetchIBSNGOnlineCount(
       Authorization: `Bearer ${token}`,
     },
     data: data,
+    timeout: 150000,
   };
 
   try {
