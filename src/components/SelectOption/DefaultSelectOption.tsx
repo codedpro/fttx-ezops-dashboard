@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import ClickOutside from "@/components/ClickOutside";
 
-const DefaultSelectOption = ({ options, onChange }: any) => {
-  const [selectedOption, setSelectedOption] = useState(options[0]);
+const DefaultSelectOption = ({ defaultValue, options, onChange }: any) => {
+  const [selectedOption, setSelectedOption] = useState(
+    defaultValue ?? options[0]
+  );
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOptionSelect = (option: string) => {
@@ -15,7 +17,7 @@ const DefaultSelectOption = ({ options, onChange }: any) => {
 
   return (
     <ClickOutside onClick={() => setIsOpen(false)}>
-      <div className="relative z-20 inline-flex cursor-pointer appearance-none rounded-[5px] border border-stroke bg-white text-sm font-medium outline-none dark:border-dark-3 dark:bg-dark-2">
+      <div className="relative z-20 inline-flex cursor-pointer appearance-none  rounded-[5px] border border-stroke bg-white text-sm font-medium outline-none dark:border-dark-3 dark:bg-dark-2">
         <div
           className={`py-[5px] pl-[9px] pr-[35px] text-sm font-medium text-dark dark:text-white ${isOpen ? "open" : ""}`}
           onClick={() => setIsOpen(!isOpen)}

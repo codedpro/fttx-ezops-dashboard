@@ -115,13 +115,14 @@ export default function Signin() {
       const data = response.data;
 
       if (response.status === 200) {
-        Cookies.set("AccessToken", data.AcessToken, { expires: 1 });
+        console.log(response.data)
+        Cookies.set("AccessToken", data.AccessToken, { expires: 1 });
         Cookies.set("Name", data.Name, { expires: 1 });
         Cookies.set("Email", data.Email, { expires: 1 });
         Cookies.set("Role", JSON.stringify(data.Role), { expires: 1 });
         Cookies.set("UserName", data.Username, { expires: 1 });
 
-        window.location.href = "/";
+       window.location.href = "/";
       } else {
         console.error("Failed to login:", data.message);
       }
