@@ -432,6 +432,23 @@ const IranMap: React.FC<IranMapProps> = ({
   const citylist = useFTTHCitiesStore((state) => state.cities);
   const router = useRouter();
 
+ 
+
+  const updateQueryParams = (updates: Record<string, string | undefined>) => {
+    const url = new URL(window.location.href);
+    const currentParams = new URLSearchParams(url.search);
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === undefined) {
+        currentParams.delete(key); // Remove parameter
+      } else {
+        currentParams.set(key, value); // Update or add parameter
+      }
+    });
+
+    router.replace(`${url.pathname}?${currentParams.toString()}`);
+  };
+
   // -----------------------------------------------
   // Initialize the map (only once)
   // -----------------------------------------------
@@ -595,7 +612,8 @@ const IranMap: React.FC<IranMapProps> = ({
         if (inCityMode) return;
         deselectAll(chartRef.current, polygonSeriesRef.current);
         setSelectedRegion(null);
-        router.replace("/IranMap");
+        updateQueryParams({ city: undefined, region: undefined, regionName: undefined });
+
         previousSelectedItemRef.current = null;
       });
     }
@@ -715,8 +733,7 @@ const IranMap: React.FC<IranMapProps> = ({
           chartRef.current?.zoomToGeoPoint(center, 200, true);
         }
       }
-      setSelectedRegion({ id: cityName, name: cityName });
-      router.replace(`/IranMap?city=${cityName}`);
+      updateQueryParams({ city: cityName, region: undefined, regionName: undefined });
     }
   }, [mapReady, initialCity]);
 
@@ -761,7 +778,8 @@ const IranMap: React.FC<IranMapProps> = ({
       chart.goHome();
       setSelectedRegion(null);
       previousSelectedItemRef.current = null;
-      router.replace("/IranMap");
+      updateQueryParams({ city: undefined, region: undefined, regionName: undefined });
+
       applyDarkModeStyling(
         polygonSeriesRef.current,
         regionLabelSeriesRef.current,
@@ -800,7 +818,8 @@ const IranMap: React.FC<IranMapProps> = ({
       chart.zoomToGeoBounds(geoBounds, 1000);
     }
     setSelectedRegion({ id, name });
-    router.replace(`/IranMap?region=${id}`);
+    updateQueryParams({ city: undefined, region: id, regionName: name });
+
     applyDarkModeStyling(
       polygonSeriesRef.current,
       regionLabelSeriesRef.current,
@@ -847,7 +866,7 @@ const IranMap: React.FC<IranMapProps> = ({
       }
       setSelectedRegion({ id: cityName, name: cityName });
       setInCityMode(true);
-      router.replace(`/IranMap?city=${cityName}`);
+      updateQueryParams({ city: cityName, region: undefined, regionName: undefined });
     }
   };
 
@@ -857,6 +876,7 @@ const IranMap: React.FC<IranMapProps> = ({
     if (cityPolygonSeriesRef.current) {
       cityPolygonSeriesRef.current.set("visible", false);
     }
+    updateQueryParams({ city: undefined, region: undefined, regionName: undefined });
     polygonSeriesRef.current?.set("visible", true);
     pointSeriesRef.current?.set("visible", true);
     regionLabelSeriesRef.current?.set("visible", true);
@@ -876,48 +896,45 @@ const IranMap: React.FC<IranMapProps> = ({
         poly.set("fill", fill);
       });
     }
+
     previousSelectedItemRef.current = null;
     setSelectedRegion(null);
     setInCityMode(false);
-    router.replace("/IranMap");
   };
 
   return (
     <div className="relative w-full h-[500px]">
-    <div id="chartdiv" className="w-full h-full"></div>
-
-    {inCityMode && (
-      <button
-        className="absolute top-2 left-2 z-20 bg-white dark:bg-gray-dark dark:text-white p-2 rounded shadow-md"
-        onClick={handleBackButtonClick}
-      >
-        Back
-      </button>
-    )}
-
-    {/* Top-Left: Province, City, Mega City Stats */}
-    <div className="absolute top-2 left-2 z-10 bg-white dark:bg-gray-dark p-4 rounded-lg shadow-xl border border-gray-300 dark:border-gray-700">
-      <h5 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">
-        Region Statistics
-      </h5>
-      <div className="space-y-2">
-        <p className="flex items-center text-blue-700 dark:text-blue-400 font-medium">
-          <MdLocationCity className="mr-2 text-blue-600 dark:text-blue-300" />
-          Province: <span className="ml-1 font-bold">18</span>
-        </p>
-        <p className="flex items-center text-purple-700 dark:text-purple-400 font-medium">
-          <FaCity className="mr-2 text-purple-600 dark:text-purple-300" />
-          City: <span className="ml-1 font-bold">436</span>
-        </p>
-        <p className="flex items-center text-teal-700 dark:text-teal-400 font-medium">
-          <GiModernCity className="mr-2 text-teal-600 dark:text-teal-300" />
-          Mega City: <span className="ml-1 font-bold">7</span>
-        </p>
+      <div id="chartdiv" className="w-full h-full"></div>
+      {inCityMode && (
+        <button
+          className="absolute top-50 left-2 z-20 bg-white dark:bg-gray-dark dark:text-white p-2 rounded shadow-md"
+          onClick={handleBackButtonClick}
+        >
+          Back
+        </button>
+      )}
+      {/* Top-Left: Province, City, Mega City Stats */}
+      <div className="absolute top-2 left-2 z-10 bg-white dark:bg-gray-dark p-4 rounded-lg shadow-xl border border-gray-300 dark:border-gray-700">
+        <h5 className="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">
+          Region Statistics
+        </h5>
+        <div className="space-y-2">
+          <p className="flex items-center text-blue-700 dark:text-blue-400 font-medium">
+            <MdLocationCity className="mr-2 text-blue-600 dark:text-blue-300" />
+            Province: <span className="ml-1 font-bold">18</span>
+          </p>
+          <p className="flex items-center text-purple-700 dark:text-purple-400 font-medium">
+            <FaCity className="mr-2 text-purple-600 dark:text-purple-300" />
+            City: <span className="ml-1 font-bold">436</span>
+          </p>
+          <p className="flex items-center text-teal-700 dark:text-teal-400 font-medium">
+            <GiModernCity className="mr-2 text-teal-600 dark:text-teal-300" />
+            Mega City: <span className="ml-1 font-bold">7</span>
+          </p>
+        </div>
       </div>
-    </div>
-
-    {/* Top-Right: Household Obligation & Coverage */}
- {/** 
+      {/* Top-Right: Household Obligation & Coverage */}
+      {/** 
   <div className="absolute top-2 right-2 z-10 bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
     <h5 className="font-bold text-lg text-gray-dark dark:text-gray-100 text-center">
       Household Obligation &amp; Coverage
@@ -939,52 +956,58 @@ const IranMap: React.FC<IranMapProps> = ({
     </div>
   </div> 
 
- */} <div className="absolute top-2 right-2 z-10 bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
-    <h5 className="font-semibold text-center text-sm text-gray-800 dark:text-gray-100">
-      Household Obligation &amp; Coverage
-    </h5>
-    <div className="mt-2 flex items-center justify-around">
-      <div className="flex flex-col items-center">
-        <FaChartPie className="text-red-500 dark:text-red-400 text-2xl" />
-        <p className="text-red-600 dark:text-red-300 text-base font-semibold">5.07M</p>
-        <p className="text-xs text-red-500 dark:text-red-400">Obligation</p>
-      </div>
-      <div className="w-px h-10 bg-gray-300 dark:bg-gray-600 mx-3" />
-      <div className="flex flex-col items-center">
-        <FaCheckCircle className="text-green-500 dark:text-green-400 text-2xl" />
-        <p className="text-green-600 dark:text-green-300 text-base font-semibold">1.87M</p>
-        <p className="text-xs text-green-500 dark:text-green-400 text-center">Coverage</p>
-      </div>
-    </div>
-  </div>
-
-    {/* Bottom-Left: Selected Region & HH Legend */}
-    <div className="absolute bottom-2 left-2 z-10 mt-2">
-      <div className="bg-white dark:bg-gray-dark p-4 rounded-lg shadow-xl border border-gray-300 dark:border-gray-700">
-        <h5 className="font-bold text-lg text-gray-800 dark:text-gray-100">
-          {selectedRegion ? selectedRegion.name : "Iran"}
+ */}{" "}
+      <div className="absolute top-2 right-2 z-10 bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
+        <h5 className="font-semibold text-center text-sm text-gray-800 dark:text-gray-100">
+          Household Obligation &amp; Coverage
         </h5>
-        <div className="mt-3 space-y-2">
-          <p className="flex items-center text-sm text-red-600 dark:text-red-400 font-medium">
-            <FaCircle className="mr-2 text-red-500 dark:text-red-300" />
-            HH ongoing &lt; 25%
-          </p>
-          <p className="flex items-center text-sm text-orange-500 dark:text-orange-300 font-medium">
-            <FaCircle className="mr-2 text-orange-400 dark:text-orange-200" />
-            25% &lt; HH ongoing &lt; 50%
-          </p>
-          <p className="flex items-center text-sm text-yellow-500 dark:text-yellow-300 font-medium">
-            <FaCircle className="mr-2 text-yellow-400 dark:text-yellow-200" />
-            50% &lt; HH ongoing &lt; 75%
-          </p>
-          <p className="flex items-center text-sm text-green-600 dark:text-green-400 font-medium">
-            <FaCircle className="mr-2 text-green-500 dark:text-green-300" />
-            HH ongoing &gt; 75%
-          </p>
+        <div className="mt-2 flex items-center justify-around">
+          <div className="flex flex-col items-center">
+            <FaChartPie className="text-red-500 dark:text-red-400 text-2xl" />
+            <p className="text-red-600 dark:text-red-300 text-base font-semibold">
+              5.07M
+            </p>
+            <p className="text-xs text-red-500 dark:text-red-400">Obligation</p>
+          </div>
+          <div className="w-px h-10 bg-gray-300 dark:bg-gray-600 mx-3" />
+          <div className="flex flex-col items-center">
+            <FaCheckCircle className="text-green-500 dark:text-green-400 text-2xl" />
+            <p className="text-green-600 dark:text-green-300 text-base font-semibold">
+              1.87M
+            </p>
+            <p className="text-xs text-green-500 dark:text-green-400 text-center">
+              Coverage
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* Bottom-Left: Selected Region & HH Legend */}
+      <div className="absolute bottom-2 left-2 z-10 mt-2">
+        <div className="bg-white dark:bg-gray-dark p-4 rounded-lg shadow-xl border border-gray-300 dark:border-gray-700">
+          <h5 className="font-bold text-lg text-gray-800 dark:text-gray-100">
+            {selectedRegion ? selectedRegion.name : "Iran"}
+          </h5>
+          <div className="mt-3 space-y-2">
+            <p className="flex items-center text-sm text-red-600 dark:text-red-400 font-medium">
+              <FaCircle className="mr-2 text-red-500 dark:text-red-300" />
+              HH ongoing &lt; 25%
+            </p>
+            <p className="flex items-center text-sm text-orange-500 dark:text-orange-300 font-medium">
+              <FaCircle className="mr-2 text-orange-400 dark:text-orange-200" />
+              25% &lt; HH ongoing &lt; 50%
+            </p>
+            <p className="flex items-center text-sm text-yellow-500 dark:text-yellow-300 font-medium">
+              <FaCircle className="mr-2 text-yellow-400 dark:text-yellow-200" />
+              50% &lt; HH ongoing &lt; 75%
+            </p>
+            <p className="flex items-center text-sm text-green-600 dark:text-green-400 font-medium">
+              <FaCircle className="mr-2 text-green-500 dark:text-green-300" />
+              HH ongoing &gt; 75%
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 };
 

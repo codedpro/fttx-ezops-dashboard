@@ -3,11 +3,20 @@ import Link from "next/link";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import IranMap from "@/components/Maps/Iran";
 
+import FTTXProgress from "@/components/FTTX-Progress/FTTXProgress";
+import FTTXOperation from "@/components/FTTX-Progress/FTTXOperation";
+import FTTXSales from "@/components/FTTX-Progress/FTTXSales";
+import FTTXCRAApproval from "@/components/FTTX-Progress/FTTXCRAApproval";
+import FTTXCustomerRelations from "@/components/FTTX-Progress/FTTXCustomerRelations";
+import SiteEntryProgress from "@/components/FTTX-Progress/SiteEntryProgress";
+import OSSProgress from "@/components/FTTX-Progress/OSSProgress";
+import FTTXContractsMunicipality from "@/components/FTTX-Progress/FTTXContractsMunicipality";
+import FTTXUsageReport from "@/components/FTTX-Progress/FTTXUsageReport";
+
 interface DashboardProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-// List of available tabs (default active: "FTTX Progress")
 const availableTabs = [
   "FTTX Progress",
   "FTTX Operation",
@@ -20,29 +29,43 @@ const availableTabs = [
   "FTTX Usage Report",
 ];
 
-const Dashboard = async ({ searchParams }: DashboardProps) => {
-  // Determine activeTab from searchParams; default to "FTTX Progress" if invalid.
+const tabComponents: { [key: string]: React.FC<any> } = {
+  "FTTX Progress": FTTXProgress,
+  "FTTX Operation": FTTXOperation,
+  "FTTX Sales": FTTXSales,
+  "FTTX CRA Approval": FTTXCRAApproval,
+  "FTTX Customer Relations": FTTXCustomerRelations,
+  "Site Entry Progress": SiteEntryProgress,
+  "OSS Progress": OSSProgress,
+  "FTTX Contracts municipality": FTTXContractsMunicipality,
+  "FTTX Usage Report": FTTXUsageReport,
+};
+
+const Dashboard = ({ searchParams }: DashboardProps) => {
   const activeTab =
     typeof searchParams.activeTab === "string" &&
     availableTabs.includes(searchParams.activeTab)
       ? searchParams.activeTab
       : "FTTX Progress";
 
-  // Prepare search parameters for tab links (only activeTab is used here)
-  const baseParams = new URLSearchParams();
+  const initialCity =
+    typeof searchParams.city === "string" ? searchParams.city : undefined;
+  const initialRegion =
+    typeof searchParams.region === "string" ? searchParams.region : undefined;
+    const regionName =
+    typeof searchParams.regionName === "string" ? searchParams.regionName : undefined;
+
+
+  const ActiveComponent = tabComponents[activeTab] || FTTXProgress;
 
   return (
     <DefaultLayout className="p-0 md:p-0">
-      {/* Render the IranMap */}
-      <IranMap />
+      <IranMap initialRegion={initialRegion} initialCity={initialCity} />
 
-      {/* Tabs Section */}
       <div className="mt-6">
-        {/* Tab Navigation */}
         <div className="tab-list flex flex-wrap gap-4 mb-4">
           {availableTabs.map((tab) => {
-            // Create URL search parameters for each tab link.
-            const params = new URLSearchParams(baseParams);
+            const params = new URLSearchParams();
             params.set("activeTab", tab);
             return (
               <Link
@@ -61,16 +84,7 @@ const Dashboard = async ({ searchParams }: DashboardProps) => {
           })}
         </div>
 
-        {/* Tab Content */}
-        <div className="tab-content p-4 border rounded shadow 
-          bg-white dark:bg-gray-dark border-gray-300 dark:border-gray-700">
-          <h2 className="text-2xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-            {activeTab}
-          </h2>
-          <p className="text-gray-700 dark:text-gray-300">
-            Content for <strong>{activeTab}</strong> goes here.
-          </p>
-        </div>
+        <ActiveComponent region={regionName ?? initialCity ?? "Iran"} />
       </div>
     </DefaultLayout>
   );

@@ -40,11 +40,16 @@ async function fetchFTTHPayload(
   token: string,
   city: string = "all"
 ): Promise<FTTHPayload[]> {
-  const data = JSON.stringify({ Range: 30, city });
+  const data = JSON.stringify({
+    "StartDay": 1,
+    "EndDay": 30,
+    "City": city
+  });
+  
 
   const config = {
     method: "post",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadPerDay`,
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadPerDayV2`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

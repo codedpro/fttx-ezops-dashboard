@@ -89,11 +89,16 @@ export const fetchFTTHPayload = async (
   token: string,
   city: string = "all"
 ): Promise<FTTHPayload[]> => {
-  const data = JSON.stringify({ Range: 30, city });
+  const data = JSON.stringify({
+    "StartDay": 1,
+    "EndDay": 30,
+    "City": "All"
+  });
+  
 
   const config = {
     method: "post",
-    url: `${process.env.FTTXBACKEND}/FTTHGetPayloadPerDay`,
+    url: `${process.env.FTTXBACKEND}/FTTHGetPayloadPerDayV2`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -107,7 +112,7 @@ export const fetchFTTHPayload = async (
       console.warn(`No data found for city "${city}". Falling back to "all".`);
       return await fetchFTTHPayload(token, "all");
     }
-
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error("Error fetching FTTH dashboard data:", error);
@@ -226,7 +231,6 @@ export const fetchFTTHSalesDetails = async (
 
   try {
     const response = await axios.request(config);
-    console.log(response);
     return response.data as TableData[];
   } catch (error) {
     throw new Error("Failed to fetch FTTH ACS data");
@@ -239,7 +243,7 @@ export const fetchFTTHGetPayloadUseDaily = async (
 ) => {
   const config = {
     method: "post",
-    url: `${process.env.FTTXBACKEND}/FTTHGetPayloadUseDaily`,
+    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadUseDaily`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
