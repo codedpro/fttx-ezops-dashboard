@@ -66,8 +66,9 @@ const FTTHModemsMap: React.FC = () => {
     "OLTLayer",
     "ODCLayer",
     "TCLayer",
-    "PowerAlarmLayer",
     "DownSiteAlarmLayer",
+
+    "PowerAlarmLayer",
 
     "FTTHPowerLayer",
     //Lines
@@ -83,8 +84,9 @@ const FTTHModemsMap: React.FC = () => {
     SFATLayer: false,
     ODCLayer: false,
     TCLayer: false,
-    PowerAlarmLayer: false,
     DownSiteAlarmLayer: false,
+
+    PowerAlarmLayer: false,
     HHLayer: false,
     OLTLayer: false,
     ODCLineLayer: true,
@@ -94,7 +96,10 @@ const FTTHModemsMap: React.FC = () => {
     FTTHPowerLayer: false,
   };
 
-  const layersThatCanBeNull = ["olt-power-alarm-layer", "olt-down-site-alarm-layer"];
+  const layersThatCanBeNull = [
+    "olt-power-alarm-layer",
+    "olt-down-site-alarm-layer",
+  ];
 
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
   const pointLayers = activeLayers.filter(
@@ -171,19 +176,17 @@ const FTTHModemsMap: React.FC = () => {
 
   useEffect(() => {
     const areVisibleLayersLoaded = activeLayers.every((layer) => {
-
       if (layersThatCanBeNull.includes(layer.id)) {
-        return true; 
+        return true;
       }
       return layer.source !== null;
     });
-  
+
     if (areVisibleLayersLoaded) {
       setLoading(false);
     }
-    console.log(areVisibleLayersLoaded)
-    console.log(activeLayers)
-  
+    console.log(areVisibleLayersLoaded);
+    console.log(activeLayers);
   }, [activeLayers]);
 
   return (

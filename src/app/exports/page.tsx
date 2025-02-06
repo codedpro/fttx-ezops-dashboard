@@ -31,7 +31,7 @@ const ExportsPage = async () => {
 
   return (
     <DefaultLayout>
-      <div className="container mx-auto ">
+      <div className="w-full">
         <h1 className="text-3xl font-bold text-dark dark:text-white mb-6">
           Exports
         </h1>

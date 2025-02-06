@@ -1,8 +1,5 @@
 import React from "react";
-import FTTXProgressCards from "./FTTXProgressCards";
-import Excavation from "./Excavation";
-import ProgressTable from "./ProgressTable";
-import WeeklyProgressChart from "./WeeklyProgressChart";
+
 
 interface FTTXProgressProps {
   region: string;
@@ -12,20 +9,20 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({ region }) => {
   return (
     <div>
       <h2 className="text-4xl mb-8 text-center font-bold text-gray-800 dark:text-gray-100">
-        FTTX Progress of {region}
+        FTTX Operation Progress of {region}
       </h2>
-      <FTTXProgressCards />
+
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12">
-          <Excavation />
+    
         </div>
     
         <div className="col-span-12 mt-4">
           {" "}
-          <WeeklyProgressChart />
+       
         </div>    <div className="col-span-12 mt-4">
           {" "}
-          <ProgressTable />
+      
         </div>
       </div>
     </div>

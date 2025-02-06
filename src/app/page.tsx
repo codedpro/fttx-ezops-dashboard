@@ -295,7 +295,7 @@ const Dashboard = async ({
             series={series_root_cwmp_GPON}
             colors={colors_root_cwmp_GPON}
             labels={labels_root_cwmp_GPON}
-            apiname="FTTHDashboardExportRootCwmpGpon"
+            apiname="FTTHDashboardExportManufacturer"
             exportid=""
           />
         </div>
@@ -321,7 +321,7 @@ const Dashboard = async ({
             series={series_RXPower}
             colors={colors_RXPower}
             labels={labels_RXPower}
-            apiname="FTTHDashboardExportRXPowerStatus"
+            apiname="FTTHACSRXPower"
             exportid="dashboard-step9"
           />
         </div>

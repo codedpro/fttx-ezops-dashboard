@@ -38,7 +38,7 @@ const deploymentIcons: { [key: string]: React.ElementType } = {
 
 const FTTXDeploymentCards: React.FC = () => {
   return (
-    <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className=" grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {Object.entries(FTTX_PROGRESS_DATA.Deployment).map(([key, value]) => {
         const data = value as DeploymentData;
         const IconComponent = deploymentIcons[key] || FiActivity;

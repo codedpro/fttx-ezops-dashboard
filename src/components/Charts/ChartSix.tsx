@@ -64,7 +64,9 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   const [interval, setIntervalState] = useState<string>("1m");
   const [rowLimit, setRowLimit] = useState<number>(50);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [payloadData, setPayloadData] = useState<OnlineCountPayload[] | null>(null);
+  const [payloadData, setPayloadData] = useState<OnlineCountPayload[] | null>(
+    null
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // --------------------
@@ -139,7 +141,10 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
     });
   };
 
-  const dates = useMemo(() => sortedData.map((item) => formatDateForDisplay(item.datetime)), [sortedData]);
+  const dates = useMemo(
+    () => sortedData.map((item) => formatDateForDisplay(item.datetime)),
+    [sortedData]
+  );
 
   const series = useMemo(
     () => [
@@ -237,28 +242,21 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   // RENDER
   // --------------------
   return (
-    <div className="w-full ">
+    <div className="col-span-12 rounded-[10px] bg-white dark:bg-gray-dark px-7.5 pb-12.5 pt-7.5 shadow-1 dark:shadow-card xl:col-span-7">
       {/* Top-level container */}
-      <div
-        className="
-          col-span-12 
-          rounded-lg 
-          bg-white 
-          dark:bg-gray-dark 
-          p-6 
-          shadow-md 
-          relative        /* Make parent container position relative */
-          xl:col-span-7
-        "
-      >
+      <div>
         {/* HEADER + FILTERS */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h4 className="text-xl font-bold text-dark dark:text-white">{header}</h4>
+          <h4 className="text-xl font-bold text-dark dark:text-white">
+            {header}
+          </h4>
           <div className="flex flex-wrap items-center gap-3 z-10">
             {/* Interval dropdown container */}
             <div className="flex items-center gap-2">
-              <p className="font-medium uppercase text-dark dark:text-dark-6">Interval:</p>
-              <div className="relative z-50"> 
+              <p className="font-medium uppercase text-dark dark:text-dark-6">
+                Interval:
+              </p>
+              <div className="relative z-50">
                 {/* Ensures the dropdown is above the chart */}
                 <DefaultSelectOption
                   options={["1m", "10m", "30m", "1H"]}
@@ -269,7 +267,9 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
             </div>
             {/* RowLimit dropdown container */}
             <div className="flex items-center gap-2">
-              <p className="font-medium uppercase text-dark dark:text-dark-6">Row Limit:</p>
+              <p className="font-medium uppercase text-dark dark:text-dark-6">
+                Row Limit:
+              </p>
               <div className="relative z-50">
                 <DefaultSelectOption
                   options={["10", "50", "100", "200", "1000"]}
@@ -293,7 +293,9 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
         {/* CONTENT / CHART */}
         <div className="w-full overflow-visible">
           {errorMessage ? (
-            <div className="text-center text-red-600 font-medium">{errorMessage}</div>
+            <div className="text-center text-red-600 font-medium">
+              {errorMessage}
+            </div>
           ) : isSearching && (!payloadData || payloadData.length === 0) ? (
             <div className="flex justify-center items-center h-32">
               <svg

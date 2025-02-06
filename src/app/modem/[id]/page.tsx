@@ -256,7 +256,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
 
   return (
     <DefaultLayout>
-      <div className="container mx-auto p-4 space-y-8">
+      <div className=" space-y-8">
         <div className="space-y-2">
           <div className="flex items-center justify-between ">
             <div className="flex items-center justify-center space-x-2">
@@ -297,16 +297,21 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
             </div>
           </div>
           <div className="space-y-4">
-            <div className=" md:flex md:flex-col lg:flex-row items-center  justify-around  gap-4">
-              <DataGrid
-                title="Modem Details (IBSNG)"
-                data={modemdetailsData}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-6"
-                emoji="📡"
-              />
+            <div className="grid grid-cols-12 gap-4  md:gap-6  mt-1 2xl:gap-7.5">
+              <div className="col-span-12 md:col-span-12  xl:col-span-8 2xl:col-span-9">
+                <DataGrid
+                  title="Modem Details (IBSNG)"
+                  data={modemdetailsData}
+                  className="grid grid-cols-2 sm:grid-cols-3 gap-6"
+                  emoji="📡"
+                />
+              </div>
+              <div className="col-span-12 md:col-span-12 xl:col-span-4 2xl:col-span-3">
+                {" "}
+                {chartContent && <>{chartContent}</>}
+              </div>
+            </div>
 
-              {chartContent && <>{chartContent}</>}
-            </div>{" "}
             <DataGrid
               title="ACS"
               data={acsdata}

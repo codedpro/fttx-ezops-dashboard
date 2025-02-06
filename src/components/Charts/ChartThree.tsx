@@ -153,7 +153,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
   }
 
   return (
-    <div className="col-span-12 relative rounded-[12px] bg-white dark:bg-gray-dark p-4 sm:p-6 md:p-4 shadow-lg dark:shadow-dark-lg xl:col-span-5 hover:shadow-2xl">
+    <div className="col-span-12 h-full relative rounded-[12px] bg-white dark:bg-gray-dark p-4 sm:p-6 md:p-4 shadow-lg dark:shadow-dark-lg xl:col-span-5 hover:shadow-2xl">
       <div className="mb-4 md:mb-6 flex  flex-row justify-between gap-2 sm:gap-4">
         <div>
           <h4 className="text-md sm:text-xl font-bold text-gray-800 dark:text-white">
