@@ -28,35 +28,53 @@ export const provinceData: ProvinceData[] = [
     id: "IR-02",
     persian_name: "آذربایجان غربی",
     value: "286.787k",
-    region_color: "#ff0000",
+    region_color: "#00cc00",  
   },
   {
-    id: "IR-03",
+    id: "IR-01",
     persian_name: "آذربایجان شرقی",
     value: "100k",
-    region_color: "#ffa500",
+    region_color: "#00cc00",
   },
   {
     id: "IR-11",
     persian_name: "زنجان",
-    value: "221.773k",
-    region_color: "#00cc00",
+    value: "217.773k",
+    region_color: "#ffff99",
   },
   {
     id: "IR-28",
     persian_name: "قزوین",
     value: "177.102k",
-    region_color: "#ffff99",
+    region_color: "#00cc00",
+  },
+  {
+    id: "IR-19",
+    persian_name: "گیلان",
+    value: "20.014k",
+    region_color: "#00cc00",
+  },
+  {
+    id: "IR-21",
+    persian_name: "مازندران",
+    value: "177.102k",
+    region_color: "#00cc00",
   },
   {
     id: "IR-07",
     persian_name: "تهران",
     value: "813.163k",
-    region_color: "#00cc00",
-  }, // no special color → use theme default
+    region_color: "#ffa500",
+  },
   {
-    id: "IR-26",
-    persian_name: "قم",
+    id: "IR-32",
+    persian_name: "البرز",
+    value: "388.827k",
+    region_color: "#ffa500",
+  }, 
+  {
+    id: "IR-22",
+    persian_name: "مرکزی",
     value: "254.912k",
     region_color: "#00cc00",
   },
@@ -76,11 +94,17 @@ export const provinceData: ProvinceData[] = [
     id: "IR-04",
     persian_name: "اصفهان",
     value: "478.137k",
-    region_color: "#ffa500",
+    region_color: "#ffff99",
   },
   {
-    id: "IR-08",
-    persian_name: "چهارمحال و بختیاری",
+    id: "IR-20",
+    persian_name: "لرستان",
+    value: "111.326k",
+    region_color: "#00cc00",
+  },
+  {
+    id: "IR-18",
+    persian_name: "کهگیلویه و بویراحمد",
     value: "111.326k",
     region_color: "#00cc00",
   },
@@ -88,7 +112,7 @@ export const provinceData: ProvinceData[] = [
     id: "IR-10",
     persian_name: "خوزستان",
     value: "490.938k",
-    region_color: "#00cc00",
+    region_color: "#ffff99",
   },
   {
     id: "IR-14",
@@ -106,20 +130,10 @@ export const provinceData: ProvinceData[] = [
     id: "IR-23",
     persian_name: "هرمزگان",
     value: "33.944k",
-    region_color: "#00cc00",
+    region_color: "#ffa500",
   },
-  {
-    id: "IR-06",
-    persian_name: "بوشهر (غربی)",
-    value: "103.27k",
-    region_color: "#00cc00",
-  },
-  {
-    id: "IR-27",
-    persian_name: "گلستان",
-    value: "388.827k",
-    region_color: "#ff0000",
-  },
+ 
+
 ];
 
 /** Interfaces for region/city data. */
@@ -432,8 +446,6 @@ const IranMap: React.FC<IranMapProps> = ({
   const citylist = useFTTHCitiesStore((state) => state.cities);
   const router = useRouter();
 
- 
-
   const updateQueryParams = (updates: Record<string, string | undefined>) => {
     const url = new URL(window.location.href);
     const currentParams = new URLSearchParams(url.search);
@@ -612,7 +624,11 @@ const IranMap: React.FC<IranMapProps> = ({
         if (inCityMode) return;
         deselectAll(chartRef.current, polygonSeriesRef.current);
         setSelectedRegion(null);
-        updateQueryParams({ city: undefined, region: undefined, regionName: undefined });
+        updateQueryParams({
+          city: undefined,
+          region: undefined,
+          regionName: undefined,
+        });
 
         previousSelectedItemRef.current = null;
       });
@@ -733,7 +749,11 @@ const IranMap: React.FC<IranMapProps> = ({
           chartRef.current?.zoomToGeoPoint(center, 200, true);
         }
       }
-      updateQueryParams({ city: cityName, region: undefined, regionName: undefined });
+      updateQueryParams({
+        city: cityName,
+        region: undefined,
+        regionName: undefined,
+      });
     }
   }, [mapReady, initialCity]);
 
@@ -778,7 +798,11 @@ const IranMap: React.FC<IranMapProps> = ({
       chart.goHome();
       setSelectedRegion(null);
       previousSelectedItemRef.current = null;
-      updateQueryParams({ city: undefined, region: undefined, regionName: undefined });
+      updateQueryParams({
+        city: undefined,
+        region: undefined,
+        regionName: undefined,
+      });
 
       applyDarkModeStyling(
         polygonSeriesRef.current,
@@ -866,7 +890,11 @@ const IranMap: React.FC<IranMapProps> = ({
       }
       setSelectedRegion({ id: cityName, name: cityName });
       setInCityMode(true);
-      updateQueryParams({ city: cityName, region: undefined, regionName: undefined });
+      updateQueryParams({
+        city: cityName,
+        region: undefined,
+        regionName: undefined,
+      });
     }
   };
 
@@ -876,7 +904,11 @@ const IranMap: React.FC<IranMapProps> = ({
     if (cityPolygonSeriesRef.current) {
       cityPolygonSeriesRef.current.set("visible", false);
     }
-    updateQueryParams({ city: undefined, region: undefined, regionName: undefined });
+    updateQueryParams({
+      city: undefined,
+      region: undefined,
+      regionName: undefined,
+    });
     polygonSeriesRef.current?.set("visible", true);
     pointSeriesRef.current?.set("visible", true);
     regionLabelSeriesRef.current?.set("visible", true);
