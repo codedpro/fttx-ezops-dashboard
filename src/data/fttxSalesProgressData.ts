@@ -1,0 +1,41 @@
+export const FTTX_SALES_PROGRESS_DATA = {
+  Stats: {
+    TotalConnectedUsers: 3537,
+    WeeklyConnected: 139,
+    ActiveFAT: 2345,
+  },
+  ChartData: {
+    TotalRequests: 48072,
+    RequestConfirmed: 5761,
+    RejectedRequests: 29721,
+    ActiveUsers: 3537,
+    ReadyToInstall: 2100,
+    PendingPayment: 124,
+  },
+  WeeklyProgress: {
+    W1_Dey: 52,
+    W2_Dey: 138,
+    W3_Dey: 75,
+    W4_Dey: 106,
+    W1_Bahman: 131,
+    W2_Bahman: 139,
+  },
+  Schools: {
+    TotalConnected: 65,
+    ReadyToInstall: 4,
+  },
+  Cities: [
+    "Tehran",
+    "Shiraz",
+    "Babol",
+    "Karaj",
+    "Sadra",
+    "Arak",
+    "Golestan",
+    "Mahdasht",
+    "Mohammadshahr",
+    "Chahardangeh",
+    "Abrisham",
+    "Boein Miandasht",
+  ],
+} as const;

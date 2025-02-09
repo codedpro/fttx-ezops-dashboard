@@ -94,6 +94,7 @@ const ChartComponent: React.FC<{ title: string; sectionData: SectionData }> = ({
         },
       },
     },
+    
     dataLabels: {
       enabled: true,
       offsetY: -18,
