@@ -22,5 +22,4 @@ export type LayerKeys =
   | "autoFATLayer"
   | "PowerAlarmLayer"
   | "DownSiteAlarmLayer"
-  | "BlockPolygonLayer"
   | "IranFTTXAreasFill";

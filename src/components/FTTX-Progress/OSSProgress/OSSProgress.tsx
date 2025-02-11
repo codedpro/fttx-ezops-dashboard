@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { OSS_PROGRESS_DATA } from "@/data/ossProgressData";
-import { FaDatabase, FaLink, FaClipboardList, FaCheckCircle } from "react-icons/fa";
+import {
+  FaDatabase,
+  FaLink,
+  FaClipboardList,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 // Your Primary Color
 const PRIMARY_COLOR = "#FFCC00"; // Yellow for totals
@@ -32,7 +37,10 @@ const AnimatedNumber: React.FC<{ target: number; duration?: number }> = ({
 };
 
 interface AnimatedIconFillProps {
-  Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  Icon: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
   percentage: number; // value from 0 to 100
   size?: number;
   overrideColor?: string;
@@ -58,10 +66,10 @@ const AnimatedIconFill: React.FC<AnimatedIconFillProps> = ({
   const fillColor = overrideColor
     ? overrideColor
     : fill < 50
-    ? "#f87171"
-    : fill < 75
-    ? "#fbbf24"
-    : "#22c55e";
+      ? "#f87171"
+      : fill < 75
+        ? "#fbbf24"
+        : "#22c55e";
 
   const containerStyle: React.CSSProperties = {
     width: size,
@@ -76,7 +84,6 @@ const AnimatedIconFill: React.FC<AnimatedIconFillProps> = ({
 
   return (
     <div style={containerStyle}>
-      {/* Base icon in light gray */}
       <Icon
         style={{
           ...iconStyle,
@@ -114,21 +121,19 @@ const AnimatedIconFill: React.FC<AnimatedIconFillProps> = ({
 };
 
 const OSSProgress: React.FC = () => {
-  // Progress metrics (displayed as percentages)
   const progressData = [
     {
       label: "Overall Data Entry",
-      value: OSS_PROGRESS_DATA.Progress.DataEntry, // assumed percentage
+      value: OSS_PROGRESS_DATA.Progress.DataEntry,
       icon: FaDatabase,
     },
     {
       label: "Overall Fusion Splicing",
-      value: OSS_PROGRESS_DATA.Progress.FusionSplicing, // assumed percentage
+      value: OSS_PROGRESS_DATA.Progress.FusionSplicing,
       icon: FaLink,
     },
   ];
 
-  // Request stats (totals)
   const requestStats = [
     {
       label: "Total Requests on OSS",
@@ -142,28 +147,32 @@ const OSSProgress: React.FC = () => {
     },
   ];
 
-  // Compute the completion rate (percentage of requests completed)
   const totalRequests = OSS_PROGRESS_DATA.Requests.TotalRequests;
   const totalCompleted = OSS_PROGRESS_DATA.Requests.Completed;
   const completionRate =
     totalRequests > 0 ? Math.round((totalCompleted / totalRequests) * 100) : 0;
 
-  // Card container classes with hover border animation (using primary color)
-  const cardClass = `p-6 bg-white dark:bg-[#122031] rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 flex flex-col items-center hover:border-[${PRIMARY_COLOR}] transition-all duration-300`;
+  const cardClass = `relative overflow-hidden p-6 bg-white dark:bg-[#122031] rounded-xl shadow-lg border border-gray-300 dark:border-gray-700 flex flex-col items-center hover:border-[${PRIMARY_COLOR}] transition-all duration-300 animate-grid-move bg-grid-black/[0.1] dark:bg-grid-white/[0.05]`;
+
+  const overlay = (
+    <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-[#122031] bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+  );
 
   return (
     <div className="space-y-8">
-      {/* Progress Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {progressData.map(({ label, value, icon: Icon }) => (
           <div key={label} className={cardClass}>
-            <AnimatedIconFill Icon={Icon} percentage={value} size={48} />
-            <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-white text-center">
-              {label}
-            </h3>
-            <div className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
-              <AnimatedNumber target={value} duration={800} />
-              <span className="ml-1">%</span>
+            {overlay}
+            <div className="relative z-10 flex flex-col items-center">
+              <AnimatedIconFill Icon={Icon} percentage={value} size={48} />
+              <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-white text-center">
+                {label}
+              </h3>
+              <div className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
+                <AnimatedNumber target={value} duration={800} />
+                <span className="ml-1">%</span>
+              </div>
             </div>
           </div>
         ))}
@@ -172,35 +181,40 @@ const OSSProgress: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
         {requestStats.map(({ label, value, icon: Icon }) => (
           <div key={label} className={cardClass}>
-            {/* For these cards, the icon is fully filled with the primary color */}
-            <AnimatedIconFill
-              Icon={Icon}
-              percentage={100}
-              size={48}
-              overrideColor={PRIMARY_COLOR}
-            />
-            <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-white text-center">
-              {label}
-            </h3>
-            <div className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
-              <AnimatedNumber target={value} duration={800} />
+            {overlay}
+            <div className="relative z-10 flex flex-col items-center">
+              <AnimatedIconFill
+                Icon={Icon}
+                percentage={100}
+                size={48}
+                overrideColor={PRIMARY_COLOR}
+              />
+              <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-white text-center">
+                {label}
+              </h3>
+              <div className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
+                <AnimatedNumber target={value} duration={800} />
+              </div>
             </div>
           </div>
         ))}
         {/* Additional Card: Completion Rate */}
         <div className={cardClass}>
-          <AnimatedIconFill
-            Icon={FaCheckCircle}
-            percentage={completionRate}
-            size={48}
-            overrideColor={COMPLETION_COLOR} // Use red for Completion Rate
-          />
-          <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-white text-center">
-            Completion Rate
-          </h3>
-          <div className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
-            <span>{completionRate}</span>
-            <span className="ml-1">%</span>
+          {overlay}
+          <div className="relative z-10 flex flex-col items-center">
+            <AnimatedIconFill
+              Icon={FaCheckCircle}
+              percentage={completionRate}
+              size={48}
+              overrideColor={COMPLETION_COLOR} // Use red for Completion Rate
+            />
+            <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-white text-center">
+              Completion Rate
+            </h3>
+            <div className="mt-4 text-3xl font-bold text-gray-800 dark:text-white">
+              <span>{completionRate}</span>
+              <span className="ml-1">%</span>
+            </div>
           </div>
         </div>
       </div>

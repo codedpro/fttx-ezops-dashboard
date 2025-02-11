@@ -18,7 +18,6 @@ import { useODCLayer } from "@/components/Maps/Main/Layers/ODCLayer";
 import { useIranFTTXAreaLayer } from "@/components/Maps/IranFTTX/Layers/IranFTTXAreastsx";
 import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
 import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
-import { useFTTHBlockPolygonLayer } from "@/components/Maps/Main/Layers/BlockLayer";
 import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
 import { useAutoFATLayer } from "@/components/Maps/auto-plan/Layers/autoFATLayer";
 import { usePostBlockPolygonLayer } from "@/components/Maps/auto-plan/Layers/PostBlockLayer";
@@ -125,18 +124,11 @@ export const useLayerManager = (
       visible: layerVisibility.PowerAlarmLayer,
       toggle: () => toggleLayerVisibility("PowerAlarmLayer"),
     },
-    BlockPolygonLayer: {
-      ...useFTTHBlockPolygonLayer(),
-      label: "Block",
-      icon: "",
-      type: "fill",
-      visible: layerVisibility.BlockPolygonLayer,
-      toggle: () => toggleLayerVisibility("BlockPolygonLayer"),
-    },
+ 
     postBlockLayer: {
       ...usePostBlockPolygonLayer(),
       label: "Blocks",
-      icon: "",
+      icon: "/images/map/blocks.png",
       type: "fill",
       visible: layerVisibility.postBlockLayer,
       toggle: () => toggleLayerVisibility("postBlockLayer"),
@@ -177,7 +169,7 @@ export const useLayerManager = (
     FTTHSuggestedFATLayer: {
       ...useFTTHSuggestedFATLayer().fillLayer,
       label: "Suggested FAT Areas",
-      icon: "",
+      icon: "/images/map/Auto-FAT.png",
       type: "fill",
       visible: layerVisibility.FTTHSuggestedFATLayer,
       toggle: () => {
