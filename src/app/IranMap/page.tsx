@@ -10,7 +10,6 @@ import FTTXCRAApproval from "@/components/FTTX-Progress/FTTXCRAApproval";
 import FTTXCustomerRelations from "@/components/FTTX-Progress/FTTXCustomerRelations";
 import SiteEntryProgress from "@/components/FTTX-Progress/SiteEntryProgress";
 import OSSProgress from "@/components/FTTX-Progress/OSSProgress";
-import FTTXContractsMunicipality from "@/components/FTTX-Progress/FTTXContractsMunicipality";
 import FTTXUsageReport from "@/components/FTTX-Progress/FTTXUsageReport";
 
 interface DashboardProps {
@@ -37,7 +36,6 @@ const tabComponents: { [key: string]: React.FC<any> } = {
   "FTTX Customer Relations": FTTXCustomerRelations,
   "Site Entry Progress": SiteEntryProgress,
   "OSS Progress": OSSProgress,
-  "FTTX Contracts municipality": FTTXContractsMunicipality,
   "FTTX Usage Report": FTTXUsageReport,
 };
 

@@ -152,6 +152,9 @@ importers:
       react-apexcharts:
         specifier: ^1.4.1
         version: 1.4.1(apexcharts@3.53.0)(react@18.3.1)
+      react-circular-progressbar:
+        specifier: ^2.1.0
+        version: 2.1.0(react@18.3.1)
       react-color:
         specifier: ^2.19.3
         version: 2.19.3(react@18.3.1)
@@ -3629,6 +3632,11 @@ packages:
     peerDependencies:
       apexcharts: ^3.41.0
       react: '>=0.13'
+
+  react-circular-progressbar@2.1.0:
+    resolution: {integrity: sha512-xp4THTrod4aLpGy68FX/k1Q3nzrfHUjUe5v6FsdwXBl3YVMwgeXYQKDrku7n/D6qsJA9CuunarAboC2xCiKs1g==}
+    peerDependencies:
+      react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
 
   react-clock@5.0.0:
     resolution: {integrity: sha512-Cj3XqwLB1svtGWiw/A6vmLIPb9OhA/BsWUpS46lXTNTilK7zmP2zmtFgQEAfWUssc3nERXkMXzI0YrkzDpc0gQ==}
@@ -8855,6 +8863,10 @@ snapshots:
     dependencies:
       apexcharts: 3.53.0
       prop-types: 15.8.1
+      react: 18.3.1
+
+  react-circular-progressbar@2.1.0(react@18.3.1):
+    dependencies:
       react: 18.3.1
 
   react-clock@5.0.0(@types/react@18.3.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
