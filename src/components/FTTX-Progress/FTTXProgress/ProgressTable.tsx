@@ -18,24 +18,32 @@ const { Excavation, FiberShoot, FATInstallation } =
 // Order of models
 const models: (keyof ProgressCategory)[] = ["Inhouse", "FTK", "ServCo", "FCP"];
 
-// Tailwind styles
-const tableClasses =
-  "w-full border-collapse rounded-lg shadow-lg overflow-hidden";
-const mergedHeader =
-  "px-6 py-4 text-center font-bold uppercase bg-primary text-black border border-gray-600 dark:text-gray-900";
-const thHeader =
-  "px-6 py-4 text-center font-bold uppercase bg-primary text-black border border-gray-600 dark:text-gray-900";
-const thModel =
-  "px-6 py-4 text-center font-bold uppercase bg-primary text-black border border-gray-600 dark:text-gray-900";
-const tdClasses =
-  "px-6 py-4 text-center text-gray-800 dark:text-gray-300 border border-gray-400 dark:border-gray-700 transition-colors duration-300";
-const modelColumnClasses =
-  "px-6 py-4 text-center font-semibold bg-primary text-black dark:text-gray-900 border border-gray-600 dark:border-gray-700 transition-colors duration-300";
+/* Tailwind styles updated to match your deployment cards palette */
 
-// **Hover Effect: ONLY color change** 
-// (Using a darker shade from the same palette).
+// Table container
+const tableClasses =
+  "w-full border-collapse rounded-lg shadow overflow-hidden bg-white dark:bg-[#122031] border border-gray-200 dark:border-gray-700";
+
+// Merged header: using primary background for a bold statement
+const mergedHeader =
+  "px-6 py-4 text-center font-bold uppercase bg-primary text-gray-800   border-b border-gray-200 dark:border-gray-700";
+
+// Table header cells: also using the primary color for consistency
+const thHeader =
+  "px-6 py-4 text-center font-bold uppercase bg-primary text-gray-800  border border-gray-200 dark:border-gray-700";
+const thModel = thHeader;
+
+// Data cells styling
+const tdClasses =
+  "px-6 py-4 text-center text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-colors duration-300";
+
+// Model column: styled similarly to data cells for a uniform look
+const modelColumnClasses =
+  "px-6 py-4 text-center font-medium text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-colors duration-300";
+
+// Row hover effect
 const rowHoverEffect =
-  "hover:bg-gray-200 dark:hover:bg-[#1E2A39] transition-colors duration-300";
+  "hover:bg-gray-100 dark:hover:bg-[#1c2734] transition-colors duration-300";
 
 const ProgressTable: React.FC = () => {
   return (
@@ -62,13 +70,10 @@ const ProgressTable: React.FC = () => {
           {models.map((model, index) => (
             <tr
               key={model}
-              // Alternate row colors in light mode and use two close shades in dark mode
               className={`${rowHoverEffect} ${
                 index % 2 === 0
-                  ? // Even row
-                    "bg-gray-100 dark:bg-[#0F1A28]"
-                  : // Odd row
-                    "bg-white dark:bg-[#122031]"
+                  ? "bg-white dark:bg-[#122031]"
+                  : "bg-gray-50 dark:bg-[#1a2a3a]"
               }`}
             >
               <td className={modelColumnClasses}>{model}</td>

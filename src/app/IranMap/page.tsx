@@ -24,7 +24,6 @@ const availableTabs = [
   "FTTX Customer Relations",
   "Site Entry Progress",
   "OSS Progress",
-  "FTTX Contracts municipality",
   "FTTX Usage Report",
 ];
 
@@ -50,9 +49,10 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
     typeof searchParams.city === "string" ? searchParams.city : undefined;
   const initialRegion =
     typeof searchParams.region === "string" ? searchParams.region : undefined;
-    const regionName =
-    typeof searchParams.regionName === "string" ? searchParams.regionName : undefined;
-
+  const regionName =
+    typeof searchParams.regionName === "string"
+      ? searchParams.regionName
+      : undefined;
 
   const ActiveComponent = tabComponents[activeTab] || FTTXProgress;
 

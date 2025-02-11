@@ -19,13 +19,13 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({ region }) => {
         <div className="col-span-12">
           <WeeklyBacklogCharts />
         </div>
-        <div className="col-span-12 md:col-span-12 2xl:col-span-5  mt-4">
+        <div className="col-span-12 lg:col-span-12 2xl:col-span-5  mt-4">
           <SLAPieChart />
         </div>
-        <div className="col-span-12 md:col-span-9 2xl:col-span-5 mt-4">
+        <div className="col-span-12 lg:col-span-9 2xl:col-span-5 mt-4">
           <DistributionChart />
         </div>
-        <div className="col-span-12 md:col-span-3 2xl:col-span-2 mt-4">
+        <div className="col-span-12 lg:col-span-3 2xl:col-span-2 mt-4">
           <BackLog />
         </div>{" "}
         <div className="col-span-12">
