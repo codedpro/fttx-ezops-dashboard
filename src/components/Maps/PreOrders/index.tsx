@@ -1,3 +1,4 @@
+// FTTHMap.tsx
 import React, {
   useRef,
   useEffect,
@@ -27,6 +28,10 @@ import { Modal } from "@/components/Modal-Info";
 // For the tile overlay definitions:
 import { TileConfig } from "@/hooks/useTiles"; // Our tile interface
 
+// NEW: Import our closest block hook and modal
+import { useClosestBlock } from "@/hooks/useClosestBlock";
+import { ClosestBlockModal } from "@/components/ClosestBlockModal";
+
 mapboxgl.accessToken = "Dummy"; // Replace with real token if needed
 
 interface FTTHMapProps {
@@ -51,7 +56,9 @@ interface FTTHMapProps {
  * ForwardRef so the parent can access 'mapRef'.
  */
 const FTTHMap = forwardRef<
-  { mapRef: React.MutableRefObject<mapboxgl.Map | null> },
+  {
+    mapRef: React.MutableRefObject<mapboxgl.Map | null>;
+  },
   FTTHMapProps
 >(({ layers, tileLayers = [], mapStyle, zoomLocation }, ref) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -59,6 +66,29 @@ const FTTHMap = forwardRef<
   const [mapIsLoaded, setMapIsLoaded] = useState(false);
   const [modalData, setModalData] = useState<any>(null);
   const [isStyleLoaded, setIsStyleLoaded] = useState<boolean>(false);
+
+  // NEW: Our custom hook for fetching the closest block
+  const {
+    data: closestBlockData,
+    loading: closestBlockLoading,
+    error: closestBlockError,
+    fetchClosestBlock,
+  } = useClosestBlock();
+
+  // NEW: Track whether to show the closest-block modal
+  const [showClosestBlockModal, setShowClosestBlockModal] = useState(false);
+
+  useEffect(() => {
+    if (closestBlockData && closestBlockData.length > 0) {
+      setShowClosestBlockModal(true);
+    } else {
+      setShowClosestBlockModal(false);
+    }
+  }, [closestBlockData]);
+
+  const closeClosestBlockModal = () => {
+    setShowClosestBlockModal(false);
+  };
 
   /**
    * Add vector layers from 'layers' to the map
@@ -171,7 +201,7 @@ const FTTHMap = forwardRef<
     mapRef.current.on("zoom", () => {
       dynamicZoom(mapRef, layers as LayerType[]);
     });
-  }, [mapStyle, layers, tileLayers]); // only runs once if stable references
+  }, [mapStyle, layers, tileLayers]);
 
   // If base style changes, re-add vector and tile layers
   useEffect(() => {
@@ -202,7 +232,7 @@ const FTTHMap = forwardRef<
       .setLngLat([zoomLocation.lng, zoomLocation.lat])
       .addTo(mapRef.current);
 
-    // Clear query params from URL
+    // Clear query params from URL (if that's your custom logic)
     const url = new URL(window.location.href);
     url.search = "";
     window.history.replaceState({}, "", url.toString());
@@ -224,7 +254,7 @@ const FTTHMap = forwardRef<
     addTileLayersToMap();
   }, [tileLayers, mapIsLoaded]);
 
-  // Simple feature click → show modal with data
+  // Simple feature click → show modal with data, or if no feature → fetchClosestBlock
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -234,7 +264,7 @@ const FTTHMap = forwardRef<
         // Find a feature belonging to our known layer IDs
         const relevantLayerIds = [
           ...layers.map((l) => l.id),
-          ...tileLayers.map((t) => t.id),
+          ...(tileLayers ?? []).map((t) => t.id),
         ];
 
         const clickedFeature = features.find(
@@ -243,8 +273,15 @@ const FTTHMap = forwardRef<
 
         if (clickedFeature) {
           setModalData(clickedFeature.properties || {});
+          return; // If we found a feature, we do NOT call the closest block
         }
       }
+
+      // NEW: If we didn't find a relevant feature, fetch closest block
+      // e.lngLat has { lng, lat }
+      const lat = e.lngLat.lat;
+      const lng = e.lngLat.lng;
+      fetchClosestBlock(lat, lng);
     };
 
     mapRef.current.on("click", handleClick);
@@ -252,7 +289,7 @@ const FTTHMap = forwardRef<
     return () => {
       mapRef.current?.off("click", handleClick);
     };
-  }, [layers, tileLayers]);
+  }, [layers, tileLayers, fetchClosestBlock]);
 
   // Resize observer to keep map from glitching on container resize
   function debounce(func: (...args: any[]) => void, delay: number) {
@@ -292,8 +329,18 @@ const FTTHMap = forwardRef<
   return (
     <>
       <div ref={mapContainerRef} className="w-full h-screen" />
+
+      {/* Existing modal for clicked feature data */}
       {modalData && (
         <Modal data={modalData} onClose={() => setModalData(null)} />
+      )}
+
+      {/* NEW: Show the closestBlockModal if data is present */}
+      {showClosestBlockModal && closestBlockData && (
+        <ClosestBlockModal
+          data={closestBlockData}
+          onClose={closeClosestBlockModal}
+        />
       )}
     </>
   );
