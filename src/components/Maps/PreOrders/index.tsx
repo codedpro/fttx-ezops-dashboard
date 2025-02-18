@@ -279,9 +279,13 @@ const FTTHMap = forwardRef<
 
       // NEW: If we didn't find a relevant feature, fetch closest block
       // e.lngLat has { lng, lat }
-      const lat = e.lngLat.lat;
-      const lng = e.lngLat.lng;
-      fetchClosestBlock(lat, lng);
+      const blockTile = tileLayers.find((tile) => tile.id === "blocks");
+      if (blockTile?.visible) {
+        // If the "block" tile is visible, fetch the closest block
+        const lat = e.lngLat.lat;
+        const lng = e.lngLat.lng;
+        fetchClosestBlock(lat, lng);
+      }
     };
 
     mapRef.current.on("click", handleClick);

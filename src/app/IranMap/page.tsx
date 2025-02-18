@@ -63,8 +63,23 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
       <div className="mt-6">
         <div className="tab-list flex flex-wrap gap-4 mb-4">
           {availableTabs.map((tab) => {
+            // Create a new URLSearchParams object based on the existing parameters.
             const params = new URLSearchParams();
+
+            // Copy over each existing search param.
+            Object.entries(searchParams).forEach(([key, value]) => {
+              if (value) {
+                if (Array.isArray(value)) {
+                  value.forEach((v) => params.append(key, v));
+                } else {
+                  params.set(key, value);
+                }
+              }
+            });
+
+            // Update or add the activeTab.
             params.set("activeTab", tab);
+
             return (
               <Link
                 key={tab}
