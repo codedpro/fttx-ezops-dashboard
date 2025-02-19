@@ -13,6 +13,7 @@ import { FaCircle, FaChartPie, FaCheckCircle } from "react-icons/fa";
 import { MdLocationCity } from "react-icons/md";
 import { FaCity } from "react-icons/fa";
 import { GiModernCity } from "react-icons/gi";
+import { MdLiveTv } from "react-icons/md";
 
 /** Province data interface and array.
  *  You must provide a custom `region_color` here for provinces that are special.
@@ -445,6 +446,9 @@ const IranMap: React.FC<IranMapProps> = ({
   const cityOriginalColors = useRef<Map<string, am5.Color>>(new Map());
   const citylist = useFTTHCitiesStore((state) => state.cities);
   const router = useRouter();
+  const liveCount = 1;
+  const totalCount = 35;
+  const progressPercent = (liveCount / totalCount) * 100;
 
   const updateQueryParams = (updates: Record<string, string | undefined>) => {
     const url = new URL(window.location.href);
@@ -460,6 +464,7 @@ const IranMap: React.FC<IranMapProps> = ({
 
     router.replace(`${url.pathname}?${currentParams.toString()}`);
   };
+
 
   // -----------------------------------------------
   // Initialize the map (only once)
@@ -989,7 +994,9 @@ const IranMap: React.FC<IranMapProps> = ({
   </div> 
 
  */}{" "}
-      <div className="absolute top-2 right-2 z-10 bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
+   <div className="absolute top-2 right-2 z-10 flex flex-col space-y-4">
+      {/* Main Card Container */}
+      <div className="bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
         <h5 className="font-semibold text-center text-sm text-gray-800 dark:text-gray-100">
           Household Obligation &amp; Coverage
         </h5>
@@ -1013,6 +1020,30 @@ const IranMap: React.FC<IranMapProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Progress Bar Container */}
+      <div className="bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300">
+          <span className="flex items-center">
+            <MdLiveTv className="mr-1 text-primary" /> Live Data
+          </span>
+          <span>
+            {liveCount} / {totalCount}
+          </span>
+        </div>
+        <div className="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-4 mt-1 relative">
+          <div
+            className="bg-primary h-4 rounded-full"
+            style={{ width: `${progressPercent}%` }}
+          ></div>
+          <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs">
+            {progressPercent.toFixed(1)}%
+          </span>
+        </div>
+      </div>
+    </div>
+
+
       {/* Bottom-Left: Selected Region & HH Legend */}
       <div className="absolute bottom-2 left-2 z-10 mt-2">
         <div className="bg-white dark:bg-gray-dark p-4 rounded-lg shadow-xl border border-gray-300 dark:border-gray-700">

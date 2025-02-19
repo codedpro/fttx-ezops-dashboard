@@ -334,12 +334,10 @@ const FTTHMap = forwardRef<
     <>
       <div ref={mapContainerRef} className="w-full h-screen" />
 
-      {/* Existing modal for clicked feature data */}
       {modalData && (
         <Modal data={modalData} onClose={() => setModalData(null)} />
       )}
 
-      {/* NEW: Show the closestBlockModal if data is present */}
       {showClosestBlockModal && closestBlockData && (
         <ClosestBlockModal
           data={closestBlockData}
