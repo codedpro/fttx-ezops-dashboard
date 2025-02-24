@@ -108,14 +108,7 @@ export const useLayerManager = (
       visible: layerVisibility.ODCLineLayer,
       toggle: () => toggleLayerVisibility("ODCLineLayer"),
     },
-    DownSiteAlarmLayer: {
-      ...useOLTDownSiteAlarmLayer(),
-      label: "OLT Down Alarm",
-      icon: "/images/map/DownSiteAlarm.png",
-      type: "point",
-      visible: layerVisibility.DownSiteAlarmLayer,
-      toggle: () => toggleLayerVisibility("DownSiteAlarmLayer"),
-    },
+
     PowerAlarmLayer: {
       ...useOLTPowerAlarmLayer(),
       label: "OLT Power Alarm",
@@ -124,7 +117,14 @@ export const useLayerManager = (
       visible: layerVisibility.PowerAlarmLayer,
       toggle: () => toggleLayerVisibility("PowerAlarmLayer"),
     },
- 
+     DownSiteAlarmLayer: {
+      ...useOLTDownSiteAlarmLayer(),
+      label: "OLT Down Alarm",
+      icon: "/images/map/DownSiteAlarm.png",
+      type: "point",
+      visible: layerVisibility.DownSiteAlarmLayer,
+      toggle: () => toggleLayerVisibility("DownSiteAlarmLayer"),
+    },
     postBlockLayer: {
       ...usePostBlockPolygonLayer(),
       label: "Blocks",
