@@ -14,32 +14,25 @@ import { cn } from "@/lib/utils";
 const PreorderAnalyse = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Handler to receive files from our FileUpload component.
   const handleFileUpload = (files: File[]) => {
     if (files.length > 0) {
       setSelectedFile(files[0]);
     }
   };
-
   const [isDarkMode, setIsDarkMode] = useState(false);
   useEffect(() => {
     const handleDarkModeChange = () => {
       const darkModeClass = document.documentElement.classList.contains("dark");
       setIsDarkMode(darkModeClass);
     };
-
     handleDarkModeChange();
-
     const observer = new MutationObserver(() => {
       handleDarkModeChange();
     });
-
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
-
     return () => observer.disconnect();
   }, []);
   const handleSubmit = async () => {
@@ -52,7 +45,6 @@ const PreorderAnalyse = () => {
       const formData = new FormData();
       formData.append("file", selectedFile);
       const userservice = new UserService();
-
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHCustomerCoplainUpload`,
         formData,
@@ -61,13 +53,11 @@ const PreorderAnalyse = () => {
             Authorization: `Bearer ${userservice.getToken()}`,
             "Content-Type": "multipart/form-data",
           },
-          responseType: "blob", // Ensures we get a binary file back.
+          responseType: "blob",
         }
       );
-
       if (response.status === 200) {
-        // Try to extract filename from response headers (if provided)
-        let fileName = "downloaded.xlsx";
+        let fileName = `preorder-analyse.xlsx`;
         const contentDisposition = response.headers["content-disposition"];
         if (contentDisposition) {
           const fileNameMatch =
@@ -76,7 +66,18 @@ const PreorderAnalyse = () => {
             fileName = fileNameMatch[1];
           }
         }
-        // Create a blob URL and trigger a download.
+        const timestamp = new Date().toISOString().replace(/:/g, "-");
+
+        const dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex !== -1) {
+          fileName =
+            fileName.slice(0, dotIndex) +
+            "_" +
+            timestamp +
+            fileName.slice(dotIndex);
+        } else {
+          fileName = fileName + "_" + timestamp;
+        }
         const url = window.URL.createObjectURL(
           new Blob([response.data], { type: response.headers["content-type"] })
         );
@@ -100,7 +101,6 @@ const PreorderAnalyse = () => {
       setLoading(false);
     }
   };
-
   return (
     <DefaultLayout>
       <div className="mx-auto w-full max-w-5xl">
@@ -108,14 +108,11 @@ const PreorderAnalyse = () => {
           <h3 className="mb-4 text-lg font-medium text-dark dark:text-white">
             Upload Excel File
           </h3>
-
-          {/* FileUpload component */}
           <FileUpload
             onChange={handleFileUpload}
             accept={{ "excel/*": [".xlsx", ".csv"] }}
             acceptDes="XLSX, CSV"
           />
-
           <div className="flex justify-end gap-3 mt-4">
             <button
               className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
