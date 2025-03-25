@@ -1,14 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import { useDropzone } from 'react-dropzone';
-
+import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import { FaUpload } from "react-icons/fa";
 
 export const FileUpload = ({
   onChange,
+  accept,
+  acceptDes,
 }: {
   onChange?: (files: File[]) => void;
+  accept?: { [mime: string]: string[] };
+  acceptDes?: string;
 }) => {
   const [files, setFiles] = useState<File[]>([]);
 
@@ -17,13 +20,14 @@ export const FileUpload = ({
     if (onChange) onChange(acceptedFiles);
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: {
-      "image/*": [".png", ".jpg", ".jpeg"],
-    },
+  const dropzoneOptions = {
+    accept: accept || { "image/*": [".png", ".jpg", ".jpeg"] },
     onDrop: handleFileChange,
     multiple: false,
-  });
+    acceptDes,
+  };
+
+  const { getRootProps, getInputProps } = useDropzone(dropzoneOptions);
 
   return (
     <div
@@ -38,10 +42,11 @@ export const FileUpload = ({
             <FaUpload />
           </span>
           <p className="mt-2.5 text-body-sm font-medium">
-            <span className="text-primary">Click to upload</span> or drag and
-            drop
+            <span className="text-primary">Click to upload</span> or drag and drop
           </p>
-          <p className="mt-1 text-body-xs">SVG, PNG, JPG (max, 800 X 800px)</p>
+          <p className="mt-1 text-body-xs">
+           {acceptDes ?? `SVG, PNG, JPG (max, 800 X 800px)`}
+          </p>
         </div>
       ) : (
         <div className="mt-4">
@@ -49,7 +54,7 @@ export const FileUpload = ({
             <motion.div
               key={idx}
               layoutId={idx === 0 ? "file-upload" : `file-upload-${idx}`}
-              className="relative z-40 bg-white  dark:border-dark-3 dark:bg-[#122031] flex flex-col items-start justify-start md:h-24 p-4 mt-4 w-full mx-auto rounded-md shadow-sm"
+              className="relative z-40 bg-white dark:border-dark-3 dark:bg-[#122031] flex flex-col items-start justify-start md:h-24 p-4 mt-4 w-full mx-auto rounded-md shadow-sm"
             >
               <div className="flex justify-between w-full items-center gap-4">
                 <motion.p
