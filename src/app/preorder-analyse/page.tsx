@@ -57,27 +57,17 @@ const PreorderAnalyse = () => {
         }
       );
       if (response.status === 200) {
-        let fileName = `preorder-analyse.xlsx`;
-        const contentDisposition = response.headers["content-disposition"];
-        if (contentDisposition) {
-          const fileNameMatch =
-            contentDisposition.match(/filename="?([^"]+)"?/);
-          if (fileNameMatch && fileNameMatch[1]) {
-            fileName = fileNameMatch[1];
-          }
-        }
         const timestamp = new Date().toISOString().replace(/:/g, "-");
-
-        const dotIndex = fileName.lastIndexOf(".");
-        if (dotIndex !== -1) {
-          fileName =
-            fileName.slice(0, dotIndex) +
-            "_" +
-            timestamp +
-            fileName.slice(dotIndex);
-        } else {
-          fileName = fileName + "_" + timestamp;
+        const contentType = response.headers["content-type"];
+        let extension = "xlsx";
+        if (contentType === "text/csv") {
+          extension = "csv";
+        } else if (contentType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+          extension = "xlsx";
         }
+        
+        const fileName = `preorder-analyse_${timestamp}.${extension}`;
+        
         const url = window.URL.createObjectURL(
           new Blob([response.data], { type: response.headers["content-type"] })
         );
