@@ -24,6 +24,7 @@ import { UserService } from "@/services/userService";
 interface FTTHPayload {
   Date: string;
   Value: number;
+  Value2: number;
 }
 
 interface ChartFourProps {
@@ -220,18 +221,22 @@ const ChartFour: React.FC<ChartFourProps> = ({
     [filteredData]
   );
 
-  const series = useMemo(
-    () => [
-      {
-        name: "Network Payload",
-        data: filteredData.map((item) => ({
+  const series = useMemo(() => [
+    {
+        name: "Charged Traffic Usage",
+        data: filteredData.map(item => ({
           x: formatDateForDisplay(item.Date),
-          y: item.Value,
+         y: item.Value,
         })),
+   },
+      {
+        name: "Actual Traffic Usage",
+        data: filteredData.map(item => ({
+          x: formatDateForDisplay(item.Date),
+          y: item.Value2,
+      })),
       },
-    ],
-    [filteredData]
-  );
+    ], [filteredData]);
 
   const options = useMemo(() => {
     return {
@@ -240,7 +245,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
         position: "top",
         horizontalAlign: "left",
       },
-      colors: ["#feca00", "#fff18a"],
+      colors: ["#FECA00", "#00ADEF"],
       chart: {
         fontFamily: "Satoshi, sans-serif",
         height: 310,
@@ -287,7 +292,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
               value /= 1000;
               unitIndex++;
             }
-            return `${value.toFixed(2)} ${units[unitIndex]}`;
+            return `${value?.toFixed(2)} ${units[unitIndex]}`;
           },
         },
         title: { style: { fontSize: "0px" } },
