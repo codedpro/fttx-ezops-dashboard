@@ -1,11 +1,13 @@
+/* ------------------------------------------------------------------ */
+/*  ChartFour.tsx                                                     */
+/* ------------------------------------------------------------------ */
 "use client";
 
 import React, {
   useState,
   useMemo,
-  useCallback,
   useEffect,
-  useRef,
+  useCallback,
 } from "react";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,13 +20,15 @@ import DefaultSelectOption from "@/components/SelectOption/DefaultSelectOption";
 import { Input } from "../FormElements/Input";
 import { UserService } from "@/services/userService";
 
-// --------------------
-// TYPE DEFINITIONS
-// --------------------
+/* ------------------------------------------------------------------ */
+/*  TYPE DEFINITIONS                                                  */
+/* ------------------------------------------------------------------ */
 interface FTTHPayload {
   Date: string;
-  Value: number;
-  Value2: number;
+  Value: number;     // Charged traffic   (≈ 30 TB) — axis 0
+  Value2: number;    // Actual traffic    (≈ 30 TB) — axis 0
+  ValueUp: number;   // Upload traffic    (≈ 10 GB) — axis 1
+  ValueDown: number; // Download traffic  (≈ 10 GB) — axis 1
 }
 
 interface ChartFourProps {
@@ -33,20 +37,14 @@ interface ChartFourProps {
   defaultCity: string;
 }
 
-// --------------------
-// INTERNAL FETCH FUNCTION
-// (Client side: uses axios + localStorage for the token. Adjust as needed.)
-// --------------------
+/* ------------------------------------------------------------------ */
+/*  DATA FETCH (client-side)                                          */
+/* ------------------------------------------------------------------ */
 async function fetchFTTHPayload(
   token: string,
-  city: string = "all"
+  city: string = "all",
 ): Promise<FTTHPayload[]> {
-  const data = JSON.stringify({
-    "StartDay": 1,
-    "EndDay": 30,
-    "City": city
-  });
-  
+  const data = JSON.stringify({ StartDay: 1, EndDay: 30, City: city });
 
   const config = {
     method: "post",
@@ -55,27 +53,26 @@ async function fetchFTTHPayload(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    data: data,
+    data,
   };
 
   try {
-    const response = await axios.request<FTTHPayload[]>(config);
+    const res = await axios.request<FTTHPayload[]>(config);
 
-    if (response.data?.length === 0 && city !== "all") {
-      console.warn(`No data found for city "${city}". Falling back to "all".`);
-      return await fetchFTTHPayload(token, "all");
+    if (res.data?.length === 0 && city !== "all") {
+      console.warn(`No data for “${city}”. Falling back to “all”.`);
+      return fetchFTTHPayload(token, "all");
     }
-
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching FTTH payload data:", error);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching FTTH payload:", err);
     throw new Error("Failed to fetch FTTH payload data");
   }
 }
 
-// --------------------
-// MAIN COMPONENT
-// --------------------
+/* ================================================================== */
+/*  COMPONENT                                                         */
+/* ================================================================== */
 const ChartFour: React.FC<ChartFourProps> = ({
   exportid,
   header,
@@ -84,191 +81,179 @@ const ChartFour: React.FC<ChartFourProps> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // --------------------
-  // STATE & REFS
-  // --------------------
-  const [filter, setFilter] = useState<string>("Week");  // "Week" or "Month"
-  const [selectedCity, setSelectedCity] = useState<string>("all");
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [payloadData, setPayloadData] = useState<FTTHPayload[] | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  /* ----------------------------  STATE  --------------------------- */
+  const [filter, setFilter]         = useState<"Week" | "Month">("Week");
+  const [selectedCity, setCity]     = useState<string>("all");
+  const [searchTerm, setSearch]     = useState<string>("");
+  const [selectedDay, setDay]       = useState<string | null>(null);
+  const [isModalOpen, setModal]     = useState<boolean>(false);
+  const [isSearching, setBusy]      = useState<boolean>(false);
+  const [payload, setPayload]       = useState<FTTHPayload[] | null>(null);
+  const [errorMsg, setError]        = useState<string | null>(null);
 
-  const { cities } = useFTTHCitiesStore((state) => ({
-    cities: state.cities,
-    isLoading: state.isLoading,
-    error: state.error,
+  const { cities } = useFTTHCitiesStore((s) => ({
+    cities: s.cities,
+    isLoading: s.isLoading,
+    error:     s.error,
   }));
 
-  // --------------------
-  // RETRIEVE CITY FROM QUERY & FETCH DATA
-  // --------------------
+  /* -----------------  INITIAL CITY FROM URL  ---------------------- */
   useEffect(() => {
-    // Identify the city from the URL query or use the default
-    const queryCity = searchParams.get("PayloadCity");
+    const queryCity   = searchParams.get("PayloadCity");
     const initialCity = queryCity || defaultCity;
 
-    // Match it to a known city, or fallback to "all"
-    const matchedCity = cities.find((c) => c.Name === initialCity);
-    if (matchedCity) {
-      setSelectedCity(initialCity);
-      setSearchTerm(matchedCity.Full_Name);
+    const match = cities.find((c) => c.Name === initialCity);
+    if (match) {
+      setCity(initialCity);
+      setSearch(match.Full_Name);
     } else {
-      setSelectedCity("all");
-      setSearchTerm("");
+      setCity("all");
+      setSearch("");
     }
-
-    setIsSearching(false);
+    setBusy(false);
   }, [cities, defaultCity, searchParams]);
 
-  // Whenever selectedCity changes (or we do a new search),
-  // we re-fetch the payload data from the server.
+  /* -----------------------------  DATA  --------------------------- */
   useEffect(() => {
-    const fetchData = async () => {
-      setIsSearching(true);
-      setErrorMessage(null);
+    const load = async () => {
+      setBusy(true);
+      setError(null);
 
       try {
-        // Retrieve token from localStorage or another method
-        const userservice = new UserService()
-        const token = userservice.getToken();
-        // If you have no token in localStorage, handle error or redirect
-        if (!token) {
-          setErrorMessage("No AccessToken found in localStorage.");
-          setPayloadData(null);
-          setIsSearching(false);
-          return;
-        }
+        const token = new UserService().getToken();
+        if (!token) throw new Error("No AccessToken found.");
 
-        // Actually fetch the data
-        const result = await fetchFTTHPayload(token, selectedCity);
-        setPayloadData(result);
-      } catch (err: any) {
-        console.error(err);
-        setErrorMessage(err.message || "Failed to fetch payload data");
-        setPayloadData(null);
+        setPayload(await fetchFTTHPayload(token, selectedCity));
+      } catch (e: any) {
+        setError(e.message || "Failed to fetch payload data");
+        setPayload(null);
       } finally {
-        setIsSearching(false);
+        setBusy(false);
       }
     };
 
-    // Do not fetch if selectedCity = ""
-    if (selectedCity) {
-      fetchData();
-    }
+    if (selectedCity) load();
   }, [selectedCity]);
 
-  // --------------------
-  // CITY SELECTION HANDLER
-  // --------------------
-  const handleCityChange = (value: string) => {
-    const foundCity = cities.find((c) => c.Full_Name === value);
-    const params = new URLSearchParams(searchParams.toString());
+  /* ---------------------------  FILTERS  -------------------------- */
+  const sorted = useMemo(
+    () =>
+      payload
+        ? [...payload].sort(
+            (a, b) =>
+              new Date(a.Date).getTime() - new Date(b.Date).getTime()
+          )
+        : [],
+    [payload]
+  );
 
-    if (!value.trim()) {
-      // Clearing the search
-      params.delete("PayloadCity");
-      setSelectedCity("all");
-      setSearchTerm("");
-    } else {
-      const newCity = foundCity?.Name || "all";
-      setSelectedCity(newCity);
-      params.set("PayloadCity", newCity);
-    }
-
-    // Replaces the URL without a full reload
-    router.replace(`?${params.toString()}`);
-  };
-
-  // --------------------
-  // DATA PREPARATION
-  // --------------------
-  const sortedData = useMemo(() => {
-    if (!payloadData) return [];
-    return [...payloadData].sort(
-      (a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime()
-    );
-  }, [payloadData]);
-
-  const filteredData = useMemo(() => {
+  const filtered = useMemo(() => {
     const lastN = filter === "Week" ? 7 : 30;
-    return sortedData.slice(-1 * lastN);
-  }, [sortedData, filter]);
+    return sorted.slice(-lastN);
+  }, [sorted, filter]);
 
-  // --------------------
-  // CHART CONFIG
-  // --------------------
-  const formatDateForDisplay = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+  /* -------------------------  HELPERS  ---------------------------- */
+  const labelDate = (d: string) =>
+    new Date(d).toLocaleDateString("en-US", {
       day: "numeric",
       month: "short",
     });
+
+  const modalDate = (d: string) => {
+    const dt = new Date(d);
+    return `${dt.getFullYear()}-${`0${dt.getMonth() + 1}`.slice(-2)}-${`0${dt.getDate()}`.slice(-2)}`;
   };
 
-  const formatDateForModal = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = `0${date.getMonth() + 1}`.slice(-2);
-    const day = `0${date.getDate()}`.slice(-2);
-    return `${year}-${month}-${day}`;
+  const humanUnits = (v: number) => {
+    const u = ["MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    let i = 0;
+    while (v >= 1000 && i < u.length - 1) {
+      v /= 1000;
+      i++;
+    }
+    return `${v.toFixed(2)} ${u[i]}`;
   };
 
-  const dates = useMemo(
-    () => filteredData.map((item) => formatDateForDisplay(item.Date)),
-    [filteredData]
+  /* ----------------------------  SERIES  -------------------------- */
+  const series = useMemo(
+    () => [
+      {
+        name: "Charged Traffic Usage", // TB-scale
+        type: "area",
+        data: filtered.map((p) => ({
+          x: labelDate(p.Date),
+          y: p.Value,
+        })),
+      },
+      {
+        name: "Actual Traffic Usage", // TB-scale
+        type: "area",
+        data: filtered.map((p) => ({
+          x: labelDate(p.Date),
+          y: p.Value2,
+        })),
+      },
+      {
+        name: "Throughput uplink", // GB-scale
+        type: "line",
+        data: filtered.map((p) => ({
+          x: labelDate(p.Date),
+          y: p.ValueUp,
+        })),
+      },
+      {
+        name: "Throughput downlink", // GB-scale
+        type: "line",
+        data: filtered.map((p) => ({
+          x: labelDate(p.Date),
+          y: p.ValueDown,
+        })),
+      },
+    ],
+    [filtered]
   );
 
-  const series = useMemo(() => [
-    {
-        name: "Charged Traffic Usage",
-        data: filteredData.map(item => ({
-          x: formatDateForDisplay(item.Date),
-         y: item.Value,
-        })),
-   },
-      {
-        name: "Actual Traffic Usage",
-        data: filteredData.map(item => ({
-          x: formatDateForDisplay(item.Date),
-          y: item.Value2,
-      })),
-      },
-    ], [filteredData]);
-
-  const options = useMemo(() => {
-    return {
-      legend: {
-        show: true,
-        position: "top",
-        horizontalAlign: "left",
-      },
-      colors: ["#FECA00", "#00ADEF"],
+  /* ---------------------------  OPTIONS  -------------------------- */
+  const options = useMemo(
+    () => ({
       chart: {
         fontFamily: "Satoshi, sans-serif",
         height: 310,
         type: "area",
         toolbar: { show: false },
         events: {
-          markerClick: (
-            event: any,
-            chartContext: any,
-            { seriesIndex, dataPointIndex }: any
-          ) => {
-            const selectedData = series[seriesIndex].data[dataPointIndex];
-            if (selectedData && selectedData.x) {
-              const originalDate = filteredData[dataPointIndex].Date;
-              const formattedDate = formatDateForModal(originalDate);
-              setSelectedDay(formattedDate);
-              setIsModalOpen(true);
+          markerClick: (_e: any, _ctx: any, { dataPointIndex }: any) => {
+            const d = filtered[dataPointIndex]?.Date;
+            if (d) {
+              setDay(modalDate(d));
+              setModal(true);
             }
           },
         },
       },
-      fill: { gradient: { opacityFrom: 0.55, opacityTo: 0 } },
-      stroke: { curve: "smooth", width: 2 },
+      
+      colors: ["#00ADEF", "#FECA00", "#845EC2", "#4ADE80"],
+      legend: {
+        show: true,
+        position: "top",
+        horizontalAlign: "left",
+      },
+      /* ↑↑↑ no change above ↑↑↑ */
+
+      /* ↓↓↓ updated fill & stroke below ↓↓↓ */
+      fill: {
+        // area for first two, solid fill (full opacity) for lines
+        type: ["gradient", "gradient", "solid", "solid"],
+        gradient: { opacityFrom: 0.55, opacityTo: 0 },
+        opacity: [0.55, 0.55, 1, 1],
+      },
+      stroke: {
+        curve: "smooth",
+        // keep area thin, make lines a bit thicker
+        width: [2, 2, 3, 3],
+      },
+      /* ↑↑↑ end fill & stroke updates ↑↑↑ */
+
       grid: {
         strokeDashArray: 5,
         xaxis: { lines: { show: false } },
@@ -277,134 +262,137 @@ const ChartFour: React.FC<ChartFourProps> = ({
       dataLabels: { enabled: false },
       xaxis: {
         type: "category",
-        categories: dates,
+        categories: filtered.map((p) => labelDate(p.Date)),
         labels: { style: { fontSize: "20px" } },
         axisBorder: { show: false },
         axisTicks: { show: false },
       },
-      yaxis: {
-        labels: {
-          formatter: (value: number) => {
-            // Convert numeric values to MB/GB/TB, etc.
-            const units = ["MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-            let unitIndex = 0;
-            while (value >= 1000 && unitIndex < units.length - 1) {
-              value /= 1000;
-              unitIndex++;
-            }
-            return `${value?.toFixed(2)} ${units[unitIndex]}`;
-          },
+      yaxis: [
+        {
+          seriesName: [
+            "Charged Traffic Usage",
+            "Actual Traffic Usage",
+          ],
+          labels: { formatter: humanUnits },
+          title: { style: { fontSize: "0px" } },
         },
-        title: { style: { fontSize: "0px" } },
-      },
-    };
-  }, [dates, series, filteredData]);
+        {
+          opposite: true,
+          seriesName: [
+            "Throughput uplink",
+            "Throughput downlink",
+          ],
+          labels: { formatter: humanUnits },
+          title: { style: { fontSize: "0px" } },
+        },
+      ],
+    }),
+    [filtered]
+  );
 
-  // --------------------
-  // DOWNLOAD
-  // --------------------
+  /* -----------------------  DOWNLOAD XLSX  ------------------------ */
   const handleDownload = () => {
-    if (!filteredData || filteredData.length === 0) {
-      alert("No data available to download.");
+    if (!filtered.length) {
+      alert("No data to export.");
       return;
     }
-
-    const exportData = filteredData.map((item) => ({
-      Date: item.Date.split("T")[0],
-      Value: item.Value,
-    }));
-    exportToXLSX(exportData, `Filtered_Data_${filter}`);
+    exportToXLSX(
+      filtered.map((p) => ({
+        Date:     p.Date.split("T")[0],
+        Charged:  p.Value,
+        Actual:   p.Value2,
+        Upload:   p.ValueUp,
+        Download: p.ValueDown,
+      })),
+      `Filtered_Data_${filter}`
+    );
   };
 
-  // --------------------
-  // MODAL
-  // --------------------
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
-    setSelectedDay(null);
-  }, []);
+  /* --------------------  CITY SELECTION & SEARCH  ----------------- */
+  const changeCity = (val: string) => {
+    const found = cities.find((c) => c.Full_Name === val);
+    const params = new URLSearchParams(searchParams.toString());
 
-  // --------------------
-  // CITY AUTOCOMPLETE
-  // --------------------
-  const filteredCities = useMemo(() => {
-    return cities.filter((city) =>
-      city.Full_Name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [cities, searchTerm]);
+    if (!val.trim()) {
+      params.delete("PayloadCity");
+      setCity("all");
+      setSearch("");
+    } else {
+      const city = found?.Name || "all";
+      setCity(city);
+      params.set("PayloadCity", city);
+    }
+    router.replace(`?${params.toString()}`);
+  };
 
-  const matchedCity = cities.find((c) => c.Name === selectedCity);
-  const shouldShowSuggestions =
-    searchTerm.trim().length > 0 &&
-    (!matchedCity || searchTerm !== matchedCity.Full_Name);
+  const matched = cities.find((c) => c.Name === selectedCity);
+  const suggestions = useMemo(
+    () =>
+      cities.filter((c) =>
+        c.Full_Name.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [cities, searchTerm]
+  );
+  const showSuggest =
+    !!searchTerm.trim() &&
+    (!matched || searchTerm !== matched.Full_Name);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      if (searchTerm.trim().length === 0) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete("PayloadCity");
-        setSelectedCity("all");
-        router.replace(`?${params.toString()}`);
-      } else if (filteredCities.length > 0) {
-        const firstCity = filteredCities[0];
-        handleCityChange(firstCity.Full_Name);
-        setSearchTerm(firstCity.Full_Name);
-      }
+    if (e.key !== "Enter") return;
+    if (!searchTerm.trim()) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("PayloadCity");
+      setCity("all");
+      router.replace(`?${params.toString()}`);
+    } else if (suggestions.length) {
+      const first = suggestions[0];
+      changeCity(first.Full_Name);
+      setSearch(first.Full_Name);
     }
   };
 
-  // --------------------
-  // RENDER
-  // --------------------
+  /* -----------------------------  UI  ----------------------------- */
   return (
     <div className="col-span-12 rounded-[10px] bg-white dark:bg-gray-dark px-7.5 pb-12.5 pt-7.5 shadow-1 dark:shadow-card xl:col-span-7">
       {/* HEADER + FILTERS */}
       <div className="mb-3.5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between relative z-10">
-        <div>
-          <h4 className="text-body-2xlg font-bold text-dark dark:text-white">
-            {header} {matchedCity?.Full_Name}
-          </h4>
-        </div>
+        <h4 className="text-body-2xlg font-bold text-dark dark:text-white">
+          {header} {matched?.Full_Name}
+        </h4>
         <div className="relative flex flex-col gap-2.5 sm:flex-row sm:items-center w-full sm:w-auto">
           <p className="font-medium uppercase text-dark dark:text-dark-6">
             Filter by:
           </p>
-
           <DefaultSelectOption
             options={["Week", "Month"]}
-            onChange={(val: string) => setFilter(val)}
+            onChange={(v: any) => setFilter(v as "Week" | "Month")}
             defaultValue={filter}
           />
-
-          {/* City Search */}
           <div className="relative w-full sm:w-64">
             <Input
               type="text"
               placeholder="Search city..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            {/* SUGGESTIONS */}
-            {shouldShowSuggestions && filteredCities.length > 0 && (
+            {showSuggest && suggestions.length > 0 && (
               <ul className="absolute left-0 right-0 bg-white dark:bg-gray-dark border dark:border-dark-3 mt-1 max-h-40 w-full overflow-auto rounded-md shadow-lg z-30 text-black dark:text-white">
-                {filteredCities.map((city) => (
+                {suggestions.map((c) => (
                   <li
-                    key={city.Name}
+                    key={c.Name}
                     className="p-2 hover:bg-gray-200 dark:hover:bg-dark-2 cursor-pointer"
                     onClick={() => {
-                      handleCityChange(city.Full_Name);
-                      setSearchTerm(city.Full_Name);
+                      changeCity(c.Full_Name);
+                      setSearch(c.Full_Name);
                     }}
                   >
-                    {city.Full_Name}
+                    {c.Full_Name}
                   </li>
                 ))}
               </ul>
             )}
           </div>
-
-          {/* DOWNLOAD BUTTON */}
           <button
             className="flex items-center gap-1 bg-primary text-white px-2 py-1 rounded-md text-xs sm:text-sm hover:bg-primaryhover"
             onClick={handleDownload}
@@ -416,12 +404,10 @@ const ChartFour: React.FC<ChartFourProps> = ({
         </div>
       </div>
 
-      {/* CONTENT / CHART */}
+      {/* CHART */}
       <div>
-        {errorMessage ? (
-          <div className="text-red-600 font-medium">
-            {errorMessage}
-          </div>
+        {errorMsg ? (
+          <div className="text-red-600 font-medium">{errorMsg}</div>
         ) : isSearching ? (
           <div className="flex justify-center items-center h-32">
             <svg
@@ -437,15 +423,15 @@ const ChartFour: React.FC<ChartFourProps> = ({
                 r="10"
                 stroke="currentColor"
                 strokeWidth="4"
-              ></circle>
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
                 d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
+              />
             </svg>
           </div>
-        ) : payloadData && payloadData.length > 0 ? (
+        ) : payload && payload.length ? (
           <ReactApexChart
             options={options as ApexCharts.ApexOptions}
             series={series}
@@ -463,8 +449,11 @@ const ChartFour: React.FC<ChartFourProps> = ({
       {isModalOpen && selectedDay && (
         <PayloadDayModal
           date={selectedDay}
-          onClose={handleCloseModal}
-          city={matchedCity?.Name ?? "all"}
+          onClose={() => {
+            setModal(false);
+            setDay(null);
+          }}
+          city={matched?.Name ?? "all"}
         />
       )}
     </div>
