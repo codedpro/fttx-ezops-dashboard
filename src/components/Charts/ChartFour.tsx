@@ -82,7 +82,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
   const searchParams = useSearchParams();
 
   /* ----------------------------  STATE  --------------------------- */
-  const [filter, setFilter]         = useState<"Week" | "Month">("Week");
+  const [filter, setFilter]         = useState<"Week" | "Month">("Month");
   const [selectedCity, setCity]     = useState<string>("all");
   const [searchTerm, setSearch]     = useState<string>("");
   const [selectedDay, setDay]       = useState<string | null>(null);
@@ -269,6 +269,18 @@ const ChartFour: React.FC<ChartFourProps> = ({
         yaxis: { lines: { show: true } },
       },
       dataLabels: { enabled: false },
+          
+    tooltip: {
+      y: {
+        formatter: (val: number, { series, seriesIndex }: any) => {
+          if (seriesIndex === 2 || seriesIndex === 3) {
+            return humanUnitsPerSecond(val);  // Uplink / Downlink
+          } else {
+            return humanUnits(val);            // Charged / Actual
+          }
+        },
+      },
+    },
       xaxis: {
         type: "category",
         categories: filtered.map((p) => labelDate(p.Date)),
