@@ -173,7 +173,16 @@ const ChartFour: React.FC<ChartFourProps> = ({
     }
     return `${v.toFixed(2)} ${u[i]}`;
   };
-
+  const humanUnitsPerSecond = (v: number) => {
+    const u = ["MB/s", "GB/s", "TB/s", "PB/s", "EB/s", "ZB/s", "YB/s"];
+    let i = 0;
+    while (v >= 1000 && i < u.length - 1) {
+      v /= 1000;
+      i++;
+    }
+    return `${v.toFixed(2)} ${u[i]}`;
+  };
+  
   /* ----------------------------  SERIES  -------------------------- */
   const series = useMemo(
     () => [
@@ -282,7 +291,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
             "Throughput peak uplink",
             "Throughput peak downlink",
           ],
-          labels: { formatter: humanUnits },
+          labels: { formatter: humanUnitsPerSecond },
           title: { style: { fontSize: "0px" } },
         },
       ],
