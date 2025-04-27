@@ -26,8 +26,8 @@ interface ChartSixProps {
 // --------------------
 async function fetchIBSNGOnlineCount(
   token: string,
-  interval: string = "1m",
-  rowLimit: number = 10
+  interval: string = "10m",
+  rowLimit: number = 1000
 ): Promise<OnlineCountPayload[]> {
   const data = JSON.stringify({
     interval,
@@ -61,8 +61,8 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   // --------------------
   // STATE & REFS
   // --------------------
-  const [interval, setIntervalState] = useState<string>("1m");
-  const [rowLimit, setRowLimit] = useState<number>(50);
+  const [interval, setIntervalState] = useState<string>("10m");
+  const [rowLimit, setRowLimit] = useState<number>(1000);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [payloadData, setPayloadData] = useState<OnlineCountPayload[] | null>(
     null
