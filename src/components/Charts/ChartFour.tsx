@@ -241,7 +241,8 @@ const ChartFour: React.FC<ChartFourProps> = ({
         },
       },
       
-      colors: ["#00ADEF", "#FECA00", "#845EC2", "#4ADE80"],
+      colors: ["#00CFFF", "#FFD700", "#AA55FF", "#00FFAA"],
+
       legend: {
         show: true,
         position: "top",
@@ -251,15 +252,16 @@ const ChartFour: React.FC<ChartFourProps> = ({
 
       /* ↓↓↓ updated fill & stroke below ↓↓↓ */
       fill: {
-        // area for first two, solid fill (full opacity) for lines
         type: ["gradient", "gradient", "solid", "solid"],
-        gradient: { opacityFrom: 0.55, opacityTo: 0 },
-        opacity: [0.55, 0.55, 1, 1],
+        gradient: {
+          opacityFrom: 0.3,  // ⬅ lower area fill opacity
+          opacityTo: 0,
+        },
+        opacity: [0.3, 0.3, 0.5, 0.5], // ⬅ area = light fill, lines = full solid
       },
       stroke: {
         curve: "smooth",
-        // keep area thin, make lines a bit thicker
-        width: [2, 2, 3, 3],
+        width: [3, 3, 4, 4],  // ⬅ thicker lines for throughput
       },
       /* ↑↑↑ end fill & stroke updates ↑↑↑ */
 
