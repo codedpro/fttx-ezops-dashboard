@@ -194,7 +194,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
         })),
       },
       {
-        name: "Throughput uplink", // GB-scale
+        name: "Throughput peak uplink", // GB-scale
         type: "line",
         data: filtered.map((p) => ({
           x: labelDate(p.Date),
@@ -202,7 +202,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
         })),
       },
       {
-        name: "Throughput downlink", // GB-scale
+        name: "Throughput peak downlink", // GB-scale
         type: "line",
         data: filtered.map((p) => ({
           x: labelDate(p.Date),
@@ -279,8 +279,8 @@ const ChartFour: React.FC<ChartFourProps> = ({
         {
           opposite: true,
           seriesName: [
-            "Throughput uplink",
-            "Throughput downlink",
+            "Throughput peak uplink",
+            "Throughput peak downlink",
           ],
           labels: { formatter: humanUnits },
           title: { style: { fontSize: "0px" } },
