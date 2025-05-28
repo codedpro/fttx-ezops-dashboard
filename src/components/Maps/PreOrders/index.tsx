@@ -171,7 +171,42 @@ const FTTHMap = forwardRef<
       );
     });
   };
+ function  enableMiddleClickRotate(map: mapboxgl.Map) {
+  // Mapbox’s built-in right-click rotate handler
+  const dragRotate = (map as any).dragRotate;
+  if (!dragRotate) {
+    console.warn("[enableMiddleClickRotate] no dragRotate handler found");
+    return;
+  }
 
+  // Grab the canvas element
+  const canvas = map.getCanvas();
+
+  // Handlers that forward the native mouse events:
+  const onMouseDown = (e: MouseEvent) => {
+    if (e.button !== 1) return;       // only middle-click
+    e.preventDefault();               // stop default pan/scroll
+    dragRotate._onMouseDown(e);       // start the rotate/pitch gesture
+
+    // while dragging, forward move & up
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
+  const onMouseMove = (e: MouseEvent) => dragRotate._onMouseMove(e);
+  const onMouseUp   = (e: MouseEvent) => {
+    dragRotate._onMouseUp(e);
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
+  };
+
+  // Wire it all up
+  canvas.addEventListener("mousedown", onMouseDown);
+
+  // (Optionally return a cleanup function if you ever want to remove it)
+  return () => {
+    canvas.removeEventListener("mousedown", onMouseDown);
+  };
+}
   useEffect(() => {
     // Initialize map once
     if (mapRef.current) return; // Already initialized
@@ -196,6 +231,7 @@ const FTTHMap = forwardRef<
       dynamicZoom(mapRef, layers as LayerType[]);
       setIsStyleLoaded(true);
     });
+    enableMiddleClickRotate(mapRef.current);
 
     // If you rely on dynamic zoom on each zoom event:
     mapRef.current.on("zoom", () => {
@@ -258,35 +294,26 @@ const FTTHMap = forwardRef<
   useEffect(() => {
     if (!mapRef.current) return;
 
-    const handleClick = (e: mapboxgl.MapMouseEvent) => {
-      const features = mapRef.current?.queryRenderedFeatures(e.point);
-      if (features && features.length > 0) {
-        // Find a feature belonging to our known layer IDs
-        const relevantLayerIds = [
-          ...layers.map((l) => l.id),
-          ...(tileLayers ?? []).map((t) => t.id),
-        ];
+const handleClick = (e: mapboxgl.MapMouseEvent) => {
+  // 1) Only query features from your GeoJSON/vector layers:
+  const vectorLayerIds = layers.map((l) => l.id);
+  const features = mapRef.current?.queryRenderedFeatures(e.point, {
+    layers: vectorLayerIds,
+  });
 
-        const clickedFeature = features.find(
-          (feat) => feat.layer && relevantLayerIds.includes(feat.layer.id)
-        );
+  // 2) If you clicked one of those, show its modal and bail out:
+  if (features && features.length > 0) {
+    setModalData(features[0].properties || {});
+    return;
+  }
 
-        if (clickedFeature) {
-          setModalData(clickedFeature.properties || {});
-          return; // If we found a feature, we do NOT call the closest block
-        }
-      }
+  // 3) Otherwise, check if the "blocks" tile is on and fetch nearest block:
+  const blockTile = tileLayers.find((tile) => tile.id === "blocks");
+  if (blockTile?.visible) {
+    fetchClosestBlock(e.lngLat.lat, e.lngLat.lng);
+  }
+};
 
-      // NEW: If we didn't find a relevant feature, fetch closest block
-      // e.lngLat has { lng, lat }
-      const blockTile = tileLayers.find((tile) => tile.id === "blocks");
-      if (blockTile?.visible) {
-        // If the "block" tile is visible, fetch the closest block
-        const lat = e.lngLat.lat;
-        const lng = e.lngLat.lng;
-        fetchClosestBlock(lat, lng);
-      }
-    };
 
     mapRef.current.on("click", handleClick);
 

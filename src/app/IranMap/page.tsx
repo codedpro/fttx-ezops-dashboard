@@ -44,7 +44,6 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
     availableTabs.includes(searchParams.activeTab)
       ? searchParams.activeTab
       : "FTTX Progress";
-
   const initialCity =
     typeof searchParams.city === "string" ? searchParams.city : undefined;
   const initialRegion =
@@ -53,20 +52,14 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
     typeof searchParams.regionName === "string"
       ? searchParams.regionName
       : undefined;
-
   const ActiveComponent = tabComponents[activeTab] || FTTXProgress;
-
   return (
     <DefaultLayout className="p-0 md:p-0">
       <IranMap initialRegion={initialRegion} initialCity={initialCity} />
-
       <div className="mt-6">
         <div className="tab-list flex flex-wrap gap-4 mb-4">
           {availableTabs.map((tab) => {
-            // Create a new URLSearchParams object based on the existing parameters.
             const params = new URLSearchParams();
-
-            // Copy over each existing search param.
             Object.entries(searchParams).forEach(([key, value]) => {
               if (value) {
                 if (Array.isArray(value)) {
@@ -76,10 +69,7 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
                 }
               }
             });
-
-            // Update or add the activeTab.
             params.set("activeTab", tab);
-
             return (
               <Link
                 key={tab}
@@ -96,7 +86,6 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
             );
           })}
         </div>
-
         <ActiveComponent region={regionName ?? initialCity ?? "Iran"} />
       </div>
     </DefaultLayout>

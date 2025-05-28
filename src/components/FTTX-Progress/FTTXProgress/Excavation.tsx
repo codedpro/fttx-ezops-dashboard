@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-import { FTTX_PROGRESS_DATA } from "@/data/fttxProgressData";
-
-// React Icons
 import { FaRoad, FaUsers } from "react-icons/fa";
 
 interface ProgressDetails {
@@ -21,45 +18,48 @@ interface SectionData {
   FCP: ProgressDetails;
 }
 
-/**
- * Custom hook to observe dark mode changes.
- * It checks if the <html> element has a "dark" class,
- * and uses a MutationObserver to update if that class changes.
- */
+interface ExcavationData {
+  Excavation: SectionData;
+  FiberShoot: SectionData;
+  FATInstallation: SectionData;
+}
+
+interface ExcavationProps {
+  data: ExcavationData;
+}
+
 function useDarkModeObserver() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      // Check initially if dark mode is active.
-      setIsDark(document.documentElement.classList.contains("dark"));
+    if (typeof document === "undefined") return;
+    setIsDark(document.documentElement.classList.contains("dark"));
 
-      // Create a MutationObserver to watch for attribute changes on <html>.
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === "attributes" && mutation.attributeName === "class") {
-            setIsDark(document.documentElement.classList.contains("dark"));
-          }
-        });
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "class"
+        ) {
+          setIsDark(
+            document.documentElement.classList.contains("dark")
+          );
+        }
       });
+    });
 
-      observer.observe(document.documentElement, { attributes: true });
-
-      return () => {
-        observer.disconnect();
-      };
-    }
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
   }, []);
 
   return isDark;
 }
 
-const ChartComponent: React.FC<{ title: string; sectionData: SectionData }> = ({
-  title,
-  sectionData,
-}) => {
+const ChartComponent: React.FC<{
+  title: string;
+  sectionData: SectionData;
+}> = ({ title, sectionData }) => {
   const isDarkMode = useDarkModeObserver();
-  // Choose label color based on dark mode.
   const labelColor = isDarkMode ? "#fff" : "#000";
 
   const series = [
@@ -77,58 +77,73 @@ const ChartComponent: React.FC<{ title: string; sectionData: SectionData }> = ({
     },
   ];
 
-  const options: ApexOptions = {
-    chart: {
-      type: "bar",
-      height: 350,
-      toolbar: { show: false },
-    },
-    colors: ["#feca00", "#28a745", "#17a2b8"],
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: "60%",
-        borderRadius: 6,
-        dataLabels: {
-          position: "top",
-        },
+const options: ApexOptions = {
+  chart: {
+    type: "bar",
+    height: 350,
+    toolbar: { show: false },
+  },
+  colors: ["#feca00", "#28a745", "#17a2b8"],
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: "60%",
+      borderRadius: 6,
+      dataLabels: {
+        position: "top",
       },
     },
-    
-    dataLabels: {
-      enabled: true,
-      offsetY: -18,
+  },
+  tooltip: {
+    y: {
+       formatter: (val: number | string): string => {
+     return typeof val === "number"
+     ? val.toLocaleString()
+     : val.toString();
+      },
+    },
+  },
+  dataLabels: {
+    enabled: true,
+    offsetY: -18,
+    style: {
+      fontSize: "12px",
+      fontWeight: 600,
+      colors: [labelColor],
+    },
+    formatter: function (val: number | string): string | number {
+      if (typeof val === "number") {
+        return val.toLocaleString();
+      }
+      return val;
+    },
+  },
+  xaxis: {
+    categories: ["Irancell", "FCP"],
+    labels: {
+      style: {
+        fontSize: "14px",
+        fontWeight: 600,
+      },
+    },
+  },
+  yaxis: {
+    labels: {
       style: {
         fontSize: "12px",
-        fontWeight: 600,
-        // Use our dynamic labelColor array.
-        colors: [labelColor],
-      },
-      // Add a slight drop shadow for improved contrast.
- 
-      formatter: function (val: number | string): string | number {
-        if (typeof val === "number") {
-          return val.toLocaleString();
-        }
-        return val;
       },
     },
-    xaxis: {
-      categories: ["Irancell", "FCP"],
-      labels: { style: { fontSize: "14px", fontWeight: 600 } },
-    },
-    yaxis: {
-      labels: { style: { fontSize: "12px" } },
-    },
-    legend: {
-      position: "top",
-      horizontalAlign: "center",
-    },
-    grid: {
-      borderColor: "#e7e7e7",
-      strokeDashArray: 5,
-    },
-  };
+  },
+  legend: {
+    position: "top",
+    horizontalAlign: "center",
+  },
+  grid: {
+    borderColor: "#e7e7e7",
+    strokeDashArray: 5,
+  },
+};
+
 
   return (
     <div className="p-6 bg-white dark:bg-[#122031] shadow-lg rounded-xl border border-gray-300 dark:border-gray-700">
@@ -138,8 +153,6 @@ const ChartComponent: React.FC<{ title: string; sectionData: SectionData }> = ({
       <div className="relative">
         <ReactApexChart options={options} series={series} type="bar" height={350} />
       </div>
-
-      {/* Display Total Distance or Total Count with an icon, centered */}
       <div className="mt-4 flex items-center justify-center text-gray-600 dark:text-gray-300 text-base">
         {sectionData.TotalDistance ? (
           <>
@@ -159,25 +172,20 @@ const ChartComponent: React.FC<{ title: string; sectionData: SectionData }> = ({
   );
 };
 
-const Excavation: React.FC = () => {
+const Excavation: React.FC<ExcavationProps> = ({ data }) => {
   return (
     <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Excavation Chart */}
       <ChartComponent
         title="Excavation Progress"
-        sectionData={FTTX_PROGRESS_DATA.Excavation as SectionData}
+        sectionData={data.Excavation}
       />
-
-      {/* Fiber Shoot Chart */}
       <ChartComponent
         title="Fiber Shoot Progress"
-        sectionData={FTTX_PROGRESS_DATA.FiberShoot as SectionData}
+        sectionData={data.FiberShoot}
       />
-
-      {/* FAT Installation Chart */}
       <ChartComponent
         title="FAT Installation Progress"
-        sectionData={FTTX_PROGRESS_DATA.FATInstallation as SectionData}
+        sectionData={data.FATInstallation}
       />
     </div>
   );

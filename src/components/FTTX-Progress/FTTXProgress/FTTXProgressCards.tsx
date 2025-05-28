@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { FTTX_PROGRESS_DATA } from "@/data/fttxProgressData";
-
 import {
   FiActivity,
   FiHome,
@@ -10,7 +8,6 @@ import {
   FiUsers,
   FiTrendingUp,
 } from "react-icons/fi";
-
 import { FaCity, FaHouseUser, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 interface DeploymentData {
@@ -18,6 +15,14 @@ interface DeploymentData {
   Households: number;
   Percentage: string;
   AdditionalCities?: number;
+}
+
+interface FTTXProgressData {
+  Deployment: Record<string, DeploymentData>;
+}
+
+interface FTTXDeploymentCardsProps {
+  data: FTTXProgressData;
 }
 
 const deploymentChanges: Record<string, number> = {
@@ -36,15 +41,15 @@ const deploymentIcons: { [key: string]: React.ElementType } = {
   FCP: FiTrendingUp,
 };
 
-const FTTXDeploymentCards: React.FC = () => {
+const FTTXDeploymentCards: React.FC<FTTXDeploymentCardsProps> = ({ data }) => {
+ 
   return (
-    <div className=" grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {Object.entries(FTTX_PROGRESS_DATA.Deployment).map(([key, value]) => {
-        const data = value as DeploymentData;
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {Object.entries(data.Deployment).map(([key, value]) => {
+        const deployment = value as DeploymentData;
         const IconComponent = deploymentIcons[key] || FiActivity;
-        const percentValue = parseFloat(data.Percentage);
+        const percentValue = parseFloat(deployment.Percentage);
         const changeValue = deploymentChanges[key] || 0;
-        // Determine arrow icon and color based on the change.
         const isPositive = changeValue >= 0;
         const ArrowIcon = isPositive ? FaArrowUp : FaArrowDown;
         const arrowColor = isPositive ? "text-green-500" : "text-red-500";
@@ -74,10 +79,10 @@ const FTTXDeploymentCards: React.FC = () => {
                 <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300">
                   <FaCity className="text-lg" />
                   <span className="font-semibold">Cities:</span>
-                  <span className="text-xl font-semibold">{data.Cities}</span>
-                  {data.AdditionalCities && (
+                  <span className="text-xl font-semibold">{deployment.Cities}</span>
+                  {deployment.AdditionalCities != null && (
                     <span className="ml-1 text-xs text-gray-500">
-                      (+{data.AdditionalCities})
+                      (+{deployment.AdditionalCities})
                     </span>
                   )}
                 </div>
@@ -87,7 +92,7 @@ const FTTXDeploymentCards: React.FC = () => {
                   <FaHouseUser className="text-lg" />
                   <span className="font-semibold">HH:</span>
                   <span className="text-xl font-semibold">
-                    {data.Households.toLocaleString()}
+                    {deployment.Households.toLocaleString()}
                   </span>
                 </div>
 
@@ -95,7 +100,7 @@ const FTTXDeploymentCards: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-xl font-bold text-primary">
-                      {data.Percentage}
+                      {deployment.Percentage}
                     </span>
                     <span className={`flex items-center gap-1 ${arrowColor}`}>
                       <ArrowIcon />
@@ -107,7 +112,7 @@ const FTTXDeploymentCards: React.FC = () => {
                     <div
                       className="bg-primary h-2.5 rounded-full transition-all duration-500"
                       style={{ width: `${percentValue}%` }}
-                    ></div>
+                    />
                   </div>
                 </div>
               </div>

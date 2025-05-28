@@ -138,7 +138,7 @@
 }
 
 .flatpickr-day {
-    @apply dark:!text-dark-6 dark:hover:!border-dark-2 dark:hover:!bg-dark-2;
+    @apply dark:!text-dark-7 dark:hover:!border-dark-2 dark:hover:!bg-dark-2;
 }
 
 .flatpickr-months .flatpickr-prev-month,
