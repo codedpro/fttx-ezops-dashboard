@@ -177,7 +177,7 @@ const useSearchPlaces = (
     const bounds = map.getBounds();
 
     const filtered = data.features.filter((f) =>
-      bounds.contains([f.geometry.coordinates[0], f.geometry.coordinates[1]])
+      bounds?.contains([f.geometry.coordinates[0], f.geometry.coordinates[1]])
     );
     source.setData({ type: "FeatureCollection", features: filtered });
   };

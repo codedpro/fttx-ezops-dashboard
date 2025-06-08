@@ -18,7 +18,7 @@ export type LayerKeys =
   | "CPLayer"
   | "FTTHPowerLayer"
   | "TCLayer"
-  | "postBlockLayer"
+ // | "postBlockLayer"
   | "autoFATLayer"
   | "PowerAlarmLayer"
   | "DownSiteAlarmLayer"
