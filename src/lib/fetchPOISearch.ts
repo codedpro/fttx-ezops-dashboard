@@ -17,7 +17,7 @@ export const fetchPOISearch = async (
   const userService = new UserService();
   const token = userService.getToken();
   const response = await axios.post<POISearchResponse[]>(
-    "https://fttx.mtnirancell.ir/backend/api/poisearch",
+    "https://fttx.mtnirancell.ir/backend/api/poisearchexact",
     params,
     {
       headers: {

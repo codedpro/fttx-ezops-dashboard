@@ -80,7 +80,7 @@ const FTTHModemsMap: React.FC = () => {
     "SFATLayer",
     "OLTLayer",
     "autoFATLayer",
-    "postBlockLayer",
+//    "postBlockLayer",
 
     //Lines
     "ODCLineLayer",
@@ -94,7 +94,7 @@ const FTTHModemsMap: React.FC = () => {
     SFATLayer: true,
     OLTLayer: true,
     autoFATLayer: true,
-    postBlockLayer: true,
+ //   postBlockLayer: true,
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,

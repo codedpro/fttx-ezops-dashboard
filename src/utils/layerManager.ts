@@ -20,7 +20,7 @@ import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
 import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
 import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
 import { useAutoFATLayer } from "@/components/Maps/auto-plan/Layers/autoFATLayer";
-import { usePostBlockPolygonLayer } from "@/components/Maps/auto-plan/Layers/PostBlockLayer";
+//import { usePostBlockPolygonLayer } from "@/components/Maps/auto-plan/Layers/PostBlockLayer";
 import { useOLTPowerAlarmLayer } from "@/components/Maps/Main/Layers/OLTPowerAlarmLayer";
 import { useOLTDownSiteAlarmLayer } from "@/components/Maps/Main/Layers/OLTDownSiteAlarmLayer";
 
@@ -125,14 +125,14 @@ export const useLayerManager = (
       visible: layerVisibility.DownSiteAlarmLayer,
       toggle: () => toggleLayerVisibility("DownSiteAlarmLayer"),
     },
-    postBlockLayer: {
-      ...usePostBlockPolygonLayer(),
-      label: "Blocks",
-      icon: "/images/map/blocks.png",
-      type: "fill",
-      visible: layerVisibility.postBlockLayer,
-      toggle: () => toggleLayerVisibility("postBlockLayer"),
-    },
+//    postBlockLayer: {
+//      ...usePostBlockPolygonLayer(),
+//      label: "Blocks",
+//      icon: "/images/map/blocks.png",
+//      type: "fill",
+//      visible: layerVisibility.postBlockLayer,
+//      toggle: () => toggleLayerVisibility("postBlockLayer"),
+//    },
 
     FTTHPowerLayer: {
       ...useFTTHPowerLayer(),
