@@ -26,6 +26,14 @@ interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
 }
+interface SidebarItemType {
+  label: string;
+  icon: React.ReactElement;
+  route: string;
+  pro?: boolean;
+  message?: string;
+  children?: SidebarItemType[];
+}
 
 const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -66,7 +74,7 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const allowedDesignUsers = ["amirhossein.nou", "amirhossein.o", "mojtaba.tag", "alireza.tagh", "mohammad.akbarp"];
   const username = userservice.getUserName();
 
-  const sidebarItems = [
+const sidebarItems: SidebarItemType[] = [
     {
       label: "Dashboard",
       icon: <FaTachometerAlt />,
