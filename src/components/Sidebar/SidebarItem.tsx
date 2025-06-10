@@ -34,7 +34,7 @@ const SidebarItem = ({ item, collapsed }: SidebarItemProps) => {
             </span>
           )}
           {item.pro && !collapsed && (
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md bg-primary px-1.5 py-px text-[10px] font-medium leading-[17px] text-white">
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md bg-dark dark:bg-white px-1.5 py-px text-[10px] font-medium leading-[17px] text-white dark:text-black">
               New
             </span>
           )}

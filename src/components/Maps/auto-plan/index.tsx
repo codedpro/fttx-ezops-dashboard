@@ -1,283 +1,302 @@
+// FTTHMap.tsx
 import React, {
-    useRef,
-    useEffect,
-    useState,
-    useImperativeHandle,
-    forwardRef,
-  } from "react";
-  import mapboxgl, {
-    GeoJSONSourceSpecification,
-    Marker,
-    StyleSpecification,
-  } from "mapbox-gl";
-  import "mapbox-gl/dist/mapbox-gl.css";
-  
-  import { dynamicZoom } from "@/utils/dynamicZoom";
-  import { LayerType } from "@/types/FTTHMapProps";
-  import {
-    addFillLayer,
-    addHeatmapLayer,
-    addLineLayer,
-    addPointLayer,
-  } from "@/utils/mapLayers";
-  import { Modal } from "@/components/Modal-Info";
-  
-  mapboxgl.accessToken = "Dummy";
-  
-  interface FTTHMapProps {
-    layers: Array<{
-      id: string;
-      source: GeoJSONSourceSpecification | null;
-      visible: boolean;
-      type: "point" | "line" | "heatmap" | "fill" | "polygon";
-      icons?: { [key: string]: string };
-      paint?: {
-        "line-color"?: string;
-        "line-width"?: number;
-        "line-opacity"?: number;
-      };
-    }>;
-    mapStyle: StyleSpecification;
-    zoomLocation: { lat: number; lng: number; zoom: number } | null;
-  }
-  
-  const FTTHMap = forwardRef<
-    { mapRef: React.MutableRefObject<mapboxgl.Map | null> },
-    FTTHMapProps
-  >(({ layers, mapStyle, zoomLocation }, ref) => {
-    const mapContainerRef = useRef<HTMLDivElement | null>(null);
-    const mapRef = useRef<mapboxgl.Map | null>(null);
-    const [mapIsLoaded, setMapIsLoaded] = useState(false);
-    const [modalData, setModalData] = useState<any>(null);
-    const [isStyleloaded, setIsStyleloaded] = useState<boolean>(false);
-  
-    const addLayersToMap = () => {
-      if (!mapRef.current) return;
-  
-      layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
-        const layerExists = mapRef.current?.getLayer(id);
-        const sourceExists = mapRef.current?.getSource(id);
-  
-        if (!sourceExists && source) {
-          mapRef.current?.addSource(id, {
-            ...source,
-          });
-        }
-  
-        if (!layerExists && mapRef.current?.getSource(id)) {
-          switch (type) {
-            case "point":
-              addPointLayer(mapRef, id, source, icons, visible);
-              break;
-            case "line":
-              addLineLayer(mapRef, id, source, paint, visible);
-              break;
-            case "heatmap":
-              addHeatmapLayer(mapRef, id, source, paint, visible);
-              break;
-            case "fill":
-              addFillLayer(mapRef, id, source, paint, visible);
-              break;
-            case "polygon":
-              addFillLayer(mapRef, id, source, paint, visible);
-              break;
-            default:
-              console.error("Unknown layer type", type);
-              break;
-          }
-        } else if (layerExists) {
-          mapRef.current?.setLayoutProperty(
-            id,
-            "visibility",
-            visible ? "visible" : "none"
-          );
-        }
-      });
+  useRef,
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
+import mapboxgl, {
+  GeoJSONSourceSpecification,
+  Marker,
+  StyleSpecification,
+  RasterSourceSpecification,
+  RasterLayerSpecification,
+} from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+import { dynamicZoom } from "@/utils/dynamicZoom";
+import { LayerType } from "@/types/FTTHMapProps";
+import {
+  addFillLayer,
+  addHeatmapLayer,
+  addLineLayer,
+  addPointLayer,
+} from "@/utils/mapLayers";
+import { Modal } from "@/components/Modal-Info";
+
+import { TileConfig } from "@/hooks/useTiles";
+import { useClosestBlock } from "@/hooks/useClosestBlock";
+import { ClosestBlockModal } from "@/components/ClosestBlockModal";
+
+mapboxgl.accessToken = "Dummy"; // Replace with real token
+
+interface FTTHMapProps {
+  layers: Array<{
+    id: string;
+    source: GeoJSONSourceSpecification | null;
+    visible: boolean;
+    type: "point" | "line" | "heatmap" | "fill" | "polygon";
+    icons?: { [key: string]: string };
+    paint?: {
+      "line-color"?: string;
+      "line-width"?: number;
+      "line-opacity"?: number;
     };
-  
-    useEffect(() => {
-      if (!mapContainerRef.current) return;
-  
-      const initializeMap = () => {
-        if (mapRef.current === null && mapContainerRef.current) {
-          mapRef.current = new mapboxgl.Map({
-            container: mapContainerRef.current,
-            style: mapStyle,
-            center: [52.6771, 36.538],
-            zoom: 13.5,
-            maxZoom: 18,
-          });
-  
-          mapRef.current.on("load", () => {
-            setMapIsLoaded(true);
-            addLayersToMap();
-            dynamicZoom(mapRef, layers as LayerType[]);
-            setIsStyleloaded(true);
-          });
-  
-          mapRef.current.on("zoom", () =>
-            dynamicZoom(mapRef, layers as LayerType[])
-          );
-        }
-      };
-  
-      initializeMap();
-    }, []);
-  
-    useEffect(() => {
-      if (mapRef.current) {
-        mapRef.current.setStyle(mapStyle);
-  
-        mapRef.current.once("styledata", () => {
-          addLayersToMap();
-        });
+  }>;
+  tileLayers?: TileConfig[];
+  mapStyle: StyleSpecification;
+  zoomLocation: { lat: number; lng: number; zoom: number } | null;
+}
+
+const FTTHMap = forwardRef<
+  { mapRef: React.MutableRefObject<mapboxgl.Map | null> },
+  FTTHMapProps
+>(({ layers, tileLayers = [], mapStyle, zoomLocation }, ref) => {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+
+  const [mapIsLoaded, setMapIsLoaded] = useState(false);
+  const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+  const [modalData, setModalData] = useState<any>(null);
+
+  // Closest-block hook
+  const {
+    data: closestBlockData,
+    fetchClosestBlock,
+  } = useClosestBlock();
+  const [showClosestBlockModal, setShowClosestBlockModal] = useState(false);
+
+  useEffect(() => {
+    setShowClosestBlockModal(!!closestBlockData?.length);
+  }, [closestBlockData]);
+
+  const closeClosestBlockModal = () => {
+    setShowClosestBlockModal(false);
+  };
+
+  const addVectorLayersToMap = () => {
+    if (!mapRef.current) return;
+    layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
+      const src = mapRef.current!.getSource(id);
+      const lyr = mapRef.current!.getLayer(id);
+
+      if (!src && source) {
+        mapRef.current!.addSource(id, source);
       }
-    }, [mapStyle]);
-  
-    useEffect(() => {
-        if (mapRef.current && zoomLocation && isStyleloaded) {
-          mapRef.current.flyTo({
-            center: [zoomLocation.lng, zoomLocation.lat],
-            zoom: zoomLocation.zoom,
-            essential: true,
-          });
-  
-          const marker = new Marker()
-            .setLngLat([zoomLocation.lng, zoomLocation.lat])
-            .addTo(mapRef.current);
-  
-          const url = new URL(window.location.href);
-          url.search = "";
-          window.history.replaceState({}, "", url.toString());
-  
-          return () => {
-            marker.remove();
-          };
+
+      if (!lyr && mapRef.current!.getSource(id)) {
+        switch (type) {
+          case "point":
+            addPointLayer(mapRef, id, source!, icons, visible);
+            break;
+          case "line":
+            addLineLayer(mapRef, id, source!, paint, visible);
+            break;
+          case "heatmap":
+            addHeatmapLayer(mapRef, id, source!, paint, visible);
+            break;
+          case "fill":
+          case "polygon":
+            addFillLayer(mapRef, id, source!, paint, visible);
+            break;
+          default:
+            console.error("Unknown vector layer type", type);
         }
-      }, [zoomLocation, isStyleloaded]);
-  
-    useEffect(() => {
-      if (mapRef.current && mapIsLoaded) {
-        layers.forEach(({ id, source, visible, type, icons = {}, paint }) => {
-          const layerExists = mapRef.current?.getLayer(id);
-          const sourceExists = mapRef.current?.getSource(id);
-  
-          if (!sourceExists && source) {
-            mapRef.current?.addSource(id, {
-              ...source,
-            });
-          }
-  
-          if (!layerExists && mapRef.current?.getSource(id)) {
-            switch (type) {
-              case "point":
-                addPointLayer(mapRef, id, source, icons, visible);
-                break;
-              case "line":
-                addLineLayer(mapRef, id, source, paint, visible);
-                break;
-              case "heatmap":
-                addHeatmapLayer(mapRef, id, source, paint, visible);
-                break;
-              case "fill":
-                addFillLayer(mapRef, id, source, paint, visible);
-                break;
-              case "polygon":
-                addFillLayer(mapRef, id, source, paint, visible); // Corrected
-                break;
-              default:
-                console.error("Unknown layer type", type);
-                break;
-            }
-          } else if (layerExists) {
-            mapRef.current?.setLayoutProperty(
-              id,
-              "visibility",
-              visible ? "visible" : "none"
-            );
-          }
-        });
+      } else if (lyr) {
+        mapRef.current!.setLayoutProperty(
+          id,
+          "visibility",
+          visible ? "visible" : "none"
+        );
       }
-    }, [layers, mapIsLoaded]);
-  
-    useEffect(() => {
-      if (!mapRef.current) return;
-  
-      const handleClick = (e: mapboxgl.MapMouseEvent) => {
-        const features = mapRef.current?.queryRenderedFeatures(e.point);
-        if (features && features.length > 0) {
-          const clickedFeature = features.find(
-            (feature) =>
-              feature.layer &&
-              layers.map((layer) => layer.id).includes(feature.layer.id)
-          );
-  
-          // If a valid feature is clicked
-          if (clickedFeature) {
-            // Extract and set modal data from the clicked feature
-            const geometryType = clickedFeature.geometry.type;
-            const featureData = {
-              ...clickedFeature.properties,
-              geometryType,
-            };
-            setModalData(featureData); // Set modal data only
-          }
-        }
-      };
-  
-      mapRef.current.on("click", handleClick);
-  
-      // Cleanup event listener on component unmount
-      return () => {
-        if (mapRef.current) {
-          mapRef.current.off("click", handleClick);
-        }
-      };
-    }, [layers]);
-  
-    function debounce(func: (...args: any[]) => void, delay: number) {
-      let timeoutId: NodeJS.Timeout;
-      return (...args: any[]) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-      };
-    }
-  
-    const resizeMap = debounce(() => {
-      if (mapRef.current) {
-        mapRef.current.resize();
+    });
+  };
+
+  const addTileLayersToMap = () => {
+    if (!mapRef.current) return;
+    tileLayers.forEach(({ id, source, layer, visible }) => {
+      if (!source || !layer) return;
+
+      const src = mapRef.current!.getSource(id);
+      const lyr = mapRef.current!.getLayer(id);
+
+      if (!src) {
+        mapRef.current!.addSource(id, source as RasterSourceSpecification);
       }
-    }, 100);
-  
-    useEffect(() => {
-      const observer = new ResizeObserver(() => {
-        resizeMap();
-      });
-  
-      if (mapContainerRef.current) {
-        observer.observe(mapContainerRef.current);
+      if (!lyr) {
+        mapRef.current!.addLayer(layer as RasterLayerSpecification);
       }
-  
-      return () => {
-        if (mapContainerRef.current) {
-          observer.unobserve(mapContainerRef.current);
-        }
-      };
-    }, []);
-  
-    useImperativeHandle(ref, () => ({
-      mapRef,
-    }));
-  
-    return (
-      <>
-        <div ref={mapContainerRef} className="w-full h-screen" />
-        {modalData && (
-          <Modal data={modalData} onClose={() => setModalData(null)} />
-        )}
-      </>
+      mapRef.current!.setLayoutProperty(
+        id,
+        "visibility",
+        visible ? "visible" : "none"
+      );
+    });
+  };
+
+  const enableMiddleClickRotate = (map: mapboxgl.Map) => {
+    const dragRotate = (map as any).dragRotate;
+    if (!dragRotate) return;
+
+    const canvas = map.getCanvas();
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button !== 1) return;
+      e.preventDefault();
+      dragRotate._onMouseDown(e);
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    };
+    const onMouseMove = (e: MouseEvent) => dragRotate._onMouseMove(e);
+    const onMouseUp = (e: MouseEvent) => {
+      dragRotate._onMouseUp(e);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    canvas.addEventListener("mousedown", onMouseDown);
+    return () => {
+      canvas.removeEventListener("mousedown", onMouseDown);
+    };
+  };
+
+  // Initialize map once
+  useEffect(() => {
+    if (mapRef.current || !mapContainerRef.current) return;
+
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: mapStyle,
+      center: [52.6771, 36.538],
+      zoom: 13.5,
+      maxZoom: 18,
+    });
+
+    mapRef.current.on("load", () => {
+      setMapIsLoaded(true);
+      addVectorLayersToMap();
+      addTileLayersToMap();
+      dynamicZoom(mapRef, layers as LayerType[]);
+      setIsStyleLoaded(true);
+    });
+
+    mapRef.current.on("zoom", () =>
+      dynamicZoom(mapRef, layers as LayerType[])
     );
-  });
-  
-  export default FTTHMap;
-  
+
+    const cleanupRotate = enableMiddleClickRotate(mapRef.current);
+
+    return () => {
+      cleanupRotate?.();
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-apply style
+  useEffect(() => {
+    if (!mapRef.current) return;
+    mapRef.current.setStyle(mapStyle);
+    mapRef.current.once("styledata", () => {
+      if (mapIsLoaded) {
+        addVectorLayersToMap();
+        addTileLayersToMap();
+      }
+    });
+  }, [mapStyle, mapIsLoaded]);
+
+  // Fly to new zoomLocation & show marker
+  useEffect(() => {
+    if (!mapRef.current || !zoomLocation || !isStyleLoaded) return;
+    const { lat, lng, zoom } = zoomLocation;
+
+    mapRef.current.flyTo({ center: [lng, lat], zoom, essential: true });
+    const marker = new Marker().setLngLat([lng, lat]).addTo(mapRef.current);
+
+    const url = new URL(window.location.href);
+    url.search = "";
+    window.history.replaceState({}, "", url.toString());
+
+    return () => {
+      marker.remove();
+    };
+  }, [zoomLocation, isStyleLoaded]);
+
+  // Keep vector layers in sync
+  useEffect(() => {
+    if (mapRef.current && mapIsLoaded) {
+      addVectorLayersToMap();
+    }
+  }, [layers, mapIsLoaded]);
+
+  // Keep tile layers in sync
+  useEffect(() => {
+    if (mapRef.current && mapIsLoaded) {
+      addTileLayersToMap();
+    }
+  }, [tileLayers, mapIsLoaded]);
+
+  // Simple feature click → show modal; else fetch closest block
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const handleClick = (e: mapboxgl.MapMouseEvent) => {
+      // 1) Only query features from your GeoJSON/vector layers:
+      const vectorLayerIds = layers.map((l) => l.id);
+      const features = mapRef.current!.queryRenderedFeatures(e.point, {
+        layers: vectorLayerIds,
+      });
+
+      // 2) If you clicked one of those, show its modal and bail out:
+      if (features.length > 0) {
+        setModalData(features[0].properties || {});
+        return;
+      }
+
+      // 3) Otherwise, check if the "blocks" tile is on and fetch nearest block:
+      const blockTile = tileLayers.find((tile) => tile.id === "blocks");
+      if (blockTile?.visible) {
+        fetchClosestBlock(e.lngLat.lat, e.lngLat.lng);
+      }
+    };
+
+    mapRef.current.on("click", handleClick);
+    return () => {
+      mapRef.current?.off("click", handleClick);
+    };
+  }, [layers, tileLayers, fetchClosestBlock]);
+
+  // Resize observer
+  const debounce = <T extends any[]>(fn: (...args: T) => void, ms: number) => {
+    let t: NodeJS.Timeout;
+    return (...args: T) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+  };
+  const resizeMap = debounce(() => mapRef.current?.resize(), 100);
+
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(resizeMap);
+    observer.observe(container);
+    return () => observer.unobserve(container);
+  }, [resizeMap]);
+
+  useImperativeHandle(ref, () => ({ mapRef }));
+
+  return (
+    <>
+      <div ref={mapContainerRef} className="w-full h-screen" />
+      {modalData && <Modal data={modalData} onClose={() => setModalData(null)} />}
+      {showClosestBlockModal && closestBlockData && (
+        <ClosestBlockModal data={closestBlockData} onClose={closeClosestBlockModal} />
+      )}
+    </>
+  );
+});
+
+export default FTTHMap;

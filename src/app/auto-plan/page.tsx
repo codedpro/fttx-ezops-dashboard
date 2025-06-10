@@ -20,6 +20,7 @@ import useSearchPlaces from "@/hooks/useSearchPlaces";
 import FTTHMap from "@/components/Maps/auto-plan";
 import { UserService } from "@/services/userService";
 import { useInitializePostBlocks } from "@/hooks/useInitializePostBlocks";
+import { useTiles } from "@/hooks/useTiles";
 
 const FTTHModemsMap: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -80,7 +81,7 @@ const FTTHModemsMap: React.FC = () => {
     "SFATLayer",
     "OLTLayer",
     "autoFATLayer",
-//    "postBlockLayer",
+    //    "postBlockLayer",
 
     //Lines
     "ODCLineLayer",
@@ -94,7 +95,7 @@ const FTTHModemsMap: React.FC = () => {
     SFATLayer: true,
     OLTLayer: true,
     autoFATLayer: true,
- //   postBlockLayer: true,
+    //   postBlockLayer: true,
     ODCLineLayer: true,
     FATLineLayer: true,
     MetroLineLayer: true,
@@ -102,6 +103,10 @@ const FTTHModemsMap: React.FC = () => {
   };
 
   const { activeLayers } = useLayerManager(selectedLayers, defaultVisibility);
+  const { activeTiles } = useTiles(["blocks"], {
+    blocks: true,
+  });
+
   const pointLayers = activeLayers.filter(
     (layer) =>
       layer.type === "point" ||
@@ -210,6 +215,8 @@ const FTTHModemsMap: React.FC = () => {
             <LayerPanel
               title=""
               layers={pointLayers}
+                              tiles={activeTiles} // <--- Pass tile overlays here
+
               isMinimized={isPointPanelMinimized}
               toggleMinimized={() => setIsPointPanelMinimized((prev) => !prev)}
               customPosition="top-left"
@@ -235,6 +242,8 @@ const FTTHModemsMap: React.FC = () => {
             <FTTHMap
               ref={ftthMapRef}
               layers={activeLayers}
+                            tileLayers={activeTiles} // <--- Pass tile overlays to the map
+
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
             />
