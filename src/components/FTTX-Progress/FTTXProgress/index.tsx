@@ -61,12 +61,17 @@ interface ApiResponse {
 }
 
 interface FTTXProgressProps {
-  region: string;
+  province?: string;
+  city?: string;
   /** Optional override for the `as_of` query param (YYYY-MM-DD). */
   asOf?: string;
 }
 
-const FTTXProgress: React.FC<FTTXProgressProps> = ({ region, asOf }) => {
+const FTTXProgress: React.FC<FTTXProgressProps> = ({
+  city,
+  province,
+  asOf,
+}) => {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,25 +81,31 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({ region, asOf }) => {
     setLoading(true);
     setError(null);
 
-    const fetchData = async () => { 
+    const fetchData = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_LNM_API_URL;
-        const dateParam = "2025-04-21" ?? new Date().toISOString().slice(0, 10);
-        const res = await fetch(
-          `${baseUrl}/IranMapDashboardSummary`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${Cookies.get("AccessToken") ?? ""}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+
+        const params = new URLSearchParams();
+        if (province) params.set("province", province);
+        if (city) params.set("city", city);
+        if (asOf) params.set("as_of", asOf);
+
+        const url = `${baseUrl}/IranMapDashboardSummary${params.toString() ? `?${params.toString()}` : ""}`;
+
+        const res = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${Cookies.get("AccessToken") ?? ""}`,
+            "Content-Type": "application/json",
+          },
+        });
+
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
+
         const json: ApiResponse = await res.json();
-        console.log(json)
+        console.log(json);
         setData(json);
       } catch (err: any) {
         setError(err.message || "Unknown error");
@@ -104,7 +115,7 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({ region, asOf }) => {
     };
 
     fetchData();
-  }, [asOf]);
+  }, [province, city]);
 
   if (loading) {
     return <div className="text-center py-8">Loading FTTX progress…</div>;
@@ -125,7 +136,7 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({ region, asOf }) => {
   return (
     <div>
       <h2 className="text-4xl mb-8 text-center font-bold text-gray-800 dark:text-gray-100">
-        FTTX Progress of {region}
+        FTTX Progress of {province ?? city ?? "Iran" }
       </h2>
 
       {/* Summary Cards for FiberShoot, FATInstallation & Excavation */}
@@ -134,7 +145,7 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({ region, asOf }) => {
       <div className="grid grid-cols-12 gap-4">
         {/* Excavation details */}
         <div className="col-span-12">
-          <Excavation  data={data} />
+          <Excavation data={data} />
         </div>
 
         {/* Weekly line chart (you can adjust props as your chart expects) */}

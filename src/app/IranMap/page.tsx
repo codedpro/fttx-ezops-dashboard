@@ -86,7 +86,7 @@ const Dashboard = ({ searchParams }: DashboardProps) => {
             );
           })}
         </div>
-        <ActiveComponent region={regionName ?? initialCity ?? "Iran"} />
+        <ActiveComponent province={regionName} city={initialCity} region={regionName ?? initialCity ?? "Iran"}/>
       </div>
     </DefaultLayout>
   );

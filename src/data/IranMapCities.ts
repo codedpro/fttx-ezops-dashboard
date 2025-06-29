@@ -1,0 +1,20 @@
+export const IranMapCities: string[] = [
+  "Abadan", "Abik", "Astara", "Abrisham", "Abhar", "Abumusa", "Arak", "Ardestan", "Ardakan", "Arsanjan",
+  "Eqbaliyeh", "Eqlid", "Alvand", "Omidiyeh", "Amirkola", "Andisheh", "Andimeshk", "Izeh", "Babol", "Badrood",
+  "Baghmalek", "Baghershahr", "Borazjan", "Bardaskan", "Bastak", "Bastam", "Bandar-e Deyr", "Bandar-e Deylam",
+  "Behbahan", "Buin Zahra", "Bavanat", "Bukan", "Buin Miandasht", "Pakdasht", "Poldasht", "Piranshahr",
+  "Pirbakran", "Takestan", "Taybad", "Tabriz", "Torbat-e Jam", "Tiran", "Takab", "Jahrom", "Juybar", "Chadegan",
+  "Charam", "Chenaran", "Chahardangeh", "Hajiabad", "Hasanabad", "Kherameh", "Khorramabad", "Khorramdarreh",
+  "Khorramshahr", "Khomein", "Khomeyni Shahr", "Khaf", "Khurzuq", "Khormuj", "Darab", "Daran", "Damghan",
+  "Dargaz", "Dastgerd", "Delijan", "Dehbarz", "Dehdasht", "Dogonbadan", "Dowlatabad", "Robat Karim", "Zanjan",
+  "Zavareh", "Sabzevar", "Sarakhs", "Sorkheh", "Sarvestan", "Saadatshahr", "Semnan", "Semirom", "Sangan",
+  "Susangerd", "Shapurabad", "Shadegan", "Shazand", "Shandiz", "Shahedshahr", "Shahrood", "Shahin Dej",
+  "Shavur", "Shahreza", "Shahriar", "Shush", "Shushtar", "Sheyban", "Shiraz", "Salehabad", "Sabashahr", "Sadra",
+  "Safashahr", "Ferdosiyeh", "Fereydunkenar", "Fasa", "Falavarjan", "Firuzabad", "Qaemshahr", "Qarah Zia od Din",
+  "Ghal'eh Tal", "Qahderijan", "Quchan", "Gheydar", "Kashmar", "Kamshcheh", "Kuhsar", "Gotvand", "Garmsar",
+  "Gulbahar", "Golsar", "Golestan", "Gonabad", "Genaveh", "Lamerd", "Lendeh", "Lavandevil", "Likak", "Mamuniyeh",
+  "Mahdasht", "Maku", "Mahallat", "Mohammadshahr", "Mohammadiyeh", "Marvdasht", "Masjed Soleyman", "Mashhad Rizeh",
+  "Molathani", "Mahabad", "Mohajeran", "Mahdishahr", "Meyami", "Miandoab", "Nain", "Najafabad", "Nasimshahr",
+  "Nashtifan", "Nasrabad", "Nazarabad", "Naqadeh", "Nurabad", "Nushabad", "Neyriz", "Hashtgerd", "Varamin",
+  "Veys", "Kariz", "Kelishad va Sudarjan", "Kamalshahr", "Kahrizak", "Kavar", "Kut-e Abdollah", "Yasuj"
+];

@@ -14,6 +14,7 @@ import { MdLocationCity } from "react-icons/md";
 import { FaCity } from "react-icons/fa";
 import { GiModernCity } from "react-icons/gi";
 import { MdLiveTv } from "react-icons/md";
+import { IranMapCities } from "@/data/IranMapCities";
 
 /** Province data interface and array.
  *  You must provide a custom `region_color` here for provinces that are special.
@@ -29,7 +30,7 @@ export const provinceData: ProvinceData[] = [
     id: "IR-02",
     persian_name: "آذربایجان غربی",
     value: "286.787k",
-    region_color: "#00cc00",  
+    region_color: "#00cc00",
   },
   {
     id: "IR-01",
@@ -72,7 +73,7 @@ export const provinceData: ProvinceData[] = [
     persian_name: "البرز",
     value: "388.827k",
     region_color: "#ffa500",
-  }, 
+  },
   {
     id: "IR-22",
     persian_name: "مرکزی",
@@ -133,8 +134,6 @@ export const provinceData: ProvinceData[] = [
     value: "33.944k",
     region_color: "#ffa500",
   },
- 
-
 ];
 
 /** Interfaces for region/city data. */
@@ -401,25 +400,86 @@ function deselectAll(
     poly.set("fill", fill);
   });
 }
+function levenshtein(a: string, b: string): number {
+  const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
+    Array.from({ length: b.length + 1 }, (_, j) =>
+      i === 0 ? j : j === 0 ? i : 0
+    )
+  );
 
-/** Updates city markers with data from the store. */
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+  }
+
+  return matrix[a.length][b.length];
+}
+
+function normalizeCityName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-]+/g, "");
+}
+
 function updateCities(
   pointSeries: am5map.MapPointSeries,
   allCities: any[],
   availableCityNames: string[]
 ) {
   pointSeries.data.setAll([]);
-  const filtered = allCities.filter((c) => {
-    if (!c || typeof c.name !== "string") return false;
-    return availableCityNames.includes(c.name);
-  });
-  filtered.forEach((city) => {
+
+  const geoCityNormalizedMap = allCities
+    .filter((c) => c && typeof c.name === "string")
+    .map((c) => ({
+      original: c,
+      normalized: normalizeCityName(c.name),
+    }));
+
+  const matchedCities: any[] = [];
+  const unmatchedNames: string[] = [];
+
+  for (const available of availableCityNames) {
+    const normAvailable = normalizeCityName(available);
+
+    let found =
+      geoCityNormalizedMap.find(
+        (geo) =>
+          normAvailable === geo.normalized ||
+          normAvailable.includes(geo.normalized) ||
+          geo.normalized.includes(normAvailable)
+      ) ||
+      geoCityNormalizedMap.find(
+        (geo) => levenshtein(normAvailable, geo.normalized) <= 2
+      );
+
+    if (found) {
+      matchedCities.push(found.original);
+    } else {
+      unmatchedNames.push(available);
+    }
+  }
+
+  matchedCities.forEach((city) => {
     pointSeries.data.push({
       geometry: { type: "Point", coordinates: [city.long, city.lat] },
       name: city.name,
     });
   });
+
   pointSeries.set("visible", true);
+
+  if (unmatchedNames.length > 0) {
+    console.warn(
+      `[IranMap] ${unmatchedNames.length} unmatched city names from IranMapCities:`,
+      unmatchedNames
+    );
+  }
 }
 
 /** Main IranMap component. */
@@ -465,7 +525,6 @@ const IranMap: React.FC<IranMapProps> = ({
     router.replace(`${url.pathname}?${currentParams.toString()}`);
   };
 
-
   // -----------------------------------------------
   // Initialize the map (only once)
   // -----------------------------------------------
@@ -505,14 +564,27 @@ const IranMap: React.FC<IranMapProps> = ({
     });
 
     // Tooltip shows persian name and value.
+    // polygonTemplate.adapters.add("tooltipText", function (text, target) {
+    //   const dataItem = target.dataItem;
+    //   if (dataItem && dataItem.dataContext) {
+    //     const feature = dataItem.dataContext as FeatureWithDirectName;
+    //     const id = feature.id ? feature.id.toString() : "";
+    //     const pData = findProvinceDataById(id);
+    //     if (pData) {
+    //       return `[bold]${pData.persian_name}[/]\n${pData.value}`;
+    //     }
+    //   }
+    //   return text;
+    // });
     polygonTemplate.adapters.add("tooltipText", function (text, target) {
       const dataItem = target.dataItem;
       if (dataItem && dataItem.dataContext) {
         const feature = dataItem.dataContext as FeatureWithDirectName;
         const id = feature.id ? feature.id.toString() : "";
+        const name = feature.NAME_ENG || "Unknown";
         const pData = findProvinceDataById(id);
         if (pData) {
-          return `[bold]${pData.persian_name}[/]\n${pData.value}`;
+          return `[bold]${name}[/]\n${pData.value}`;
         }
       }
       return text;
@@ -668,11 +740,8 @@ const IranMap: React.FC<IranMapProps> = ({
       }, 50);
     });
 
-    updateCities(
-      pointSeries,
-      cities,
-      citylist.map((x: any) => x.Name)
-    );
+    updateCities(pointSeries, cities, IranMapCities);
+
     applyDarkModeStyling(
       polygonSeriesRef.current,
       regionLabelSeriesRef.current,
@@ -780,13 +849,9 @@ const IranMap: React.FC<IranMapProps> = ({
 
   useEffect(() => {
     if (mapReady && pointSeriesRef.current) {
-      updateCities(
-        pointSeriesRef.current,
-        cities,
-        citylist.map((x: any) => x.Name)
-      );
+      updateCities(pointSeriesRef.current, cities, IranMapCities);
     }
-  }, [mapReady, citylist]);
+  }, [mapReady]);
 
   const handleProvinceClick = (ev: any) => {
     if (inCityMode) return;
@@ -994,56 +1059,56 @@ const IranMap: React.FC<IranMapProps> = ({
   </div> 
 
  */}{" "}
-   <div className="absolute top-2 right-2 z-10 flex flex-col space-y-4">
-      {/* Main Card Container */}
-      <div className="bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
-        <h5 className="font-semibold text-center text-sm text-gray-800 dark:text-gray-100">
-          Household Obligation &amp; Coverage
-        </h5>
-        <div className="mt-2 flex items-center justify-around">
-          <div className="flex flex-col items-center">
-            <FaChartPie className="text-red-500 dark:text-red-400 text-2xl" />
-            <p className="text-red-600 dark:text-red-300 text-base font-semibold">
-              5.07M
-            </p>
-            <p className="text-xs text-red-500 dark:text-red-400">Obligation</p>
+      <div className="absolute top-2 right-2 z-10 flex flex-col space-y-4">
+        {/* Main Card Container */}
+        <div className="bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
+          <h5 className="font-semibold text-center text-sm text-gray-800 dark:text-gray-100">
+            Household Obligation &amp; Coverage
+          </h5>
+          <div className="mt-2 flex items-center justify-around">
+            <div className="flex flex-col items-center">
+              <FaChartPie className="text-red-500 dark:text-red-400 text-2xl" />
+              <p className="text-red-600 dark:text-red-300 text-base font-semibold">
+                5.07M
+              </p>
+              <p className="text-xs text-red-500 dark:text-red-400">
+                Obligation
+              </p>
+            </div>
+            <div className="w-px h-10 bg-gray-300 dark:bg-gray-600 mx-3" />
+            <div className="flex flex-col items-center">
+              <FaCheckCircle className="text-green-500 dark:text-green-400 text-2xl" />
+              <p className="text-green-600 dark:text-green-300 text-base font-semibold">
+                1.87M
+              </p>
+              <p className="text-xs text-green-500 dark:text-green-400 text-center">
+                Coverage
+              </p>
+            </div>
           </div>
-          <div className="w-px h-10 bg-gray-300 dark:bg-gray-600 mx-3" />
-          <div className="flex flex-col items-center">
-            <FaCheckCircle className="text-green-500 dark:text-green-400 text-2xl" />
-            <p className="text-green-600 dark:text-green-300 text-base font-semibold">
-              1.87M
-            </p>
-            <p className="text-xs text-green-500 dark:text-green-400 text-center">
-              Coverage
-            </p>
+        </div>
+
+        {/* Progress Bar Container */}
+        <div className="bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300">
+            <span className="flex items-center">
+              <MdLiveTv className="mr-1 text-primary" /> Live Data
+            </span>
+            <span>
+              {liveCount} / {totalCount}
+            </span>
+          </div>
+          <div className="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-4 mt-1 relative">
+            <div
+              className="bg-primary h-4 rounded-full"
+              style={{ width: `${progressPercent}%` }}
+            ></div>
+            <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs">
+              {progressPercent.toFixed(1)}%
+            </span>
           </div>
         </div>
       </div>
-
-      {/* Progress Bar Container */}
-      <div className="bg-white dark:bg-gray-dark p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between text-xs text-gray-700 dark:text-gray-300">
-          <span className="flex items-center">
-            <MdLiveTv className="mr-1 text-primary" /> Live Data
-          </span>
-          <span>
-            {liveCount} / {totalCount}
-          </span>
-        </div>
-        <div className="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-4 mt-1 relative">
-          <div
-            className="bg-primary h-4 rounded-full"
-            style={{ width: `${progressPercent}%` }}
-          ></div>
-          <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs">
-            {progressPercent.toFixed(1)}%
-          </span>
-        </div>
-      </div>
-    </div>
-
-
       {/* Bottom-Left: Selected Region & HH Legend */}
       <div className="absolute bottom-2 left-2 z-10 mt-2">
         <div className="bg-white dark:bg-gray-dark p-4 rounded-lg shadow-xl border border-gray-300 dark:border-gray-700">
