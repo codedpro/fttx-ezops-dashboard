@@ -56,9 +56,10 @@ const FTTHModemsMap: React.FC = () => {
   // 2) Manage tile overlays (for multiple tile layers on top of base)
   //    Here we define we want 2 tile layers: "stadiaDark" and "stadiaLight"
   //    and their default visibilities.
-  const { activeTiles } = useTiles(["blocks"], {
-    blocks: true,
-  });
+  // TODO: Undo this
+  //const { activeTiles } = useTiles(["blocks"], {
+  //  blocks: true,
+ // });
 
   const [selectedStyleId, setSelectedStyleId] = useState<string>("Dark");
 
@@ -402,7 +403,9 @@ const FTTHModemsMap: React.FC = () => {
               <LayerPanel
                 title=""
                 layers={pointLayers}
-                tiles={activeTiles} // <--- Pass tile overlays here
+                  // TODO: Undo this
+
+               // tiles={activeTiles}
                 isMinimized={isPointPanelMinimized}
                 toggleMinimized={() =>
                   setIsPointPanelMinimized((prev) => !prev)
@@ -416,7 +419,7 @@ const FTTHModemsMap: React.FC = () => {
               <LayerPanel
                 title=""
                 layers={lineLayers}
-                tiles={undefined}
+             //   tiles={undefined}
                 isMinimized={isLinePanelMinimized}
                 toggleMinimized={() => setIsLinePanelMinimized((prev) => !prev)}
                 customPosition="bottom-left"
@@ -467,7 +470,8 @@ const FTTHModemsMap: React.FC = () => {
             <FTTHMap
               ref={ftthMapRef}
               layers={activeLayers}
-              tileLayers={activeTiles} // <--- Pass tile overlays to the map
+              // TODO : Undo this
+              // tileLayers={activeTiles}
               mapStyle={mapStyle}
               zoomLocation={zoomLocation}
               // onEdit, isEditMode, onCoordinatesChange, etc. omitted if not used
