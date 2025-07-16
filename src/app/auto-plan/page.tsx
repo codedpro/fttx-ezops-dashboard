@@ -67,13 +67,9 @@ const FTTHModemsMap: React.FC = () => {
   const userservice = new UserService();
   const token = userservice.getToken();
 
-  const initializePostBlocks = (token: string) => {
-    useInitializePostBlocks(token);
-  };
-
-  if (token) {
-    initializePostBlocks(token); // Call it as a utility function
-  }
+  // Initialize post block data when a token is available. `useInitializePostBlocks`
+  // is a React hook so it must be called unconditionally at the top level.
+  useInitializePostBlocks(token);
 
   const selectedLayers = [
     //Points

@@ -37,7 +37,7 @@ const ModemPage = async ({ params }: { params: { id: string } }) => {
           <div className="text-center p-6 bg-red-100 text-red-700 rounded-lg shadow-lg">
             <h1 className="text-3xl font-bold mb-4">Modem Not Found</h1>
             <p className="text-lg">
-              Sorry, we couldn't find any data for the modem with ID:{" "}
+              Sorry, we couldn&apos;t find any data for the modem with ID:{" "}
               <span className="font-semibold">{modemId}</span>.
             </p>
             <p className="mt-4">
