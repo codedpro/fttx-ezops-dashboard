@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 import axios, { AxiosError } from "axios";
 import qs from "qs";
@@ -23,6 +23,7 @@ export default function Signin() {
     password: false,
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
   const separatorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -122,7 +123,8 @@ export default function Signin() {
         Cookies.set("Role", JSON.stringify(data.Role), { expires: 1 });
         Cookies.set("UserName", data.Username, { expires: 1 });
 
-       window.location.href = "/";
+        const redirectTo = searchParams.get("redirect") ?? "/";
+        router.push(redirectTo);
       } else {
         console.error("Failed to login:", data.message);
       }

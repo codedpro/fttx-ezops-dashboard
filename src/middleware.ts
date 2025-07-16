@@ -19,7 +19,12 @@ export async function middleware(request: NextRequest) {
   const token = tokenCookie?.value;
 
   if (!token) {
-    const response = NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set(
+      "redirect",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    );
+    const response = NextResponse.redirect(loginUrl);
 
     response.cookies.delete("AccessToken");
     response.cookies.delete("Email");
@@ -44,7 +49,12 @@ export async function middleware(request: NextRequest) {
       if (verifyResponse.status === 200) {
         return NextResponse.next();
       } else {
-        const response = NextResponse.redirect(new URL("/login", request.url));
+        const loginUrl = new URL("/login", request.url);
+        loginUrl.searchParams.set(
+          "redirect",
+          `${request.nextUrl.pathname}${request.nextUrl.search}`
+        );
+        const response = NextResponse.redirect(loginUrl);
         response.cookies.delete("AccessToken");
         response.cookies.delete("Email");
         response.cookies.delete("Name");
@@ -59,7 +69,12 @@ export async function middleware(request: NextRequest) {
       }
  
 
-      const response = NextResponse.redirect(new URL("/login", request.url));
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set(
+        "redirect",
+        `${request.nextUrl.pathname}${request.nextUrl.search}`
+      );
+      const response = NextResponse.redirect(loginUrl);
       response.cookies.delete("AccessToken");
       response.cookies.delete("Email");
       response.cookies.delete("Name");
