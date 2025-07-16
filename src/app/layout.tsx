@@ -29,22 +29,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let token = Cookies.get("AccessToken");
-  if (token !== null && token !== undefined) {
-    useInitializeFTTHModems(token);
-    useInitializeFTTHFats(token);
-    useInitializeFTTHOthers(token);
-    useInitializeFTTHPoints(token);
-    useInitializeFTTHPreorders(token);
-    useInitializeFTTHSuggestedFAT(token);
-    useInitializeIranFTTXAreas(token);
-    useInitializeFTTHCities(token);
-    useInitializeFTTHBlocks(token);
-    useInitializeFTTHACSRXPower(token);
-    useInitializeFATData(token);
-    useInitializeAlarms(token);
-   // useInitializePostBlocks(token);
-  }
+  const token = Cookies.get("AccessToken");
+  // Register all data initialization hooks. Each hook internally checks if the
+  // provided token is valid before performing any actions, so it is safe to call
+  // them unconditionally.
+  useInitializeFTTHModems(token);
+  useInitializeFTTHFats(token);
+  useInitializeFTTHOthers(token);
+  useInitializeFTTHPoints(token);
+  useInitializeFTTHPreorders(token);
+  useInitializeFTTHSuggestedFAT(token);
+  useInitializeIranFTTXAreas(token);
+  useInitializeFTTHCities(token);
+  useInitializeFTTHBlocks(token);
+  useInitializeFTTHACSRXPower(token);
+  useInitializeFATData(token);
+  useInitializeAlarms(token);
+  // useInitializePostBlocks(token);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function RootLayout({
       <body suppressHydrationWarning={true}>
         <noscript>
           <strong>
-            We're sorry but your site doesn't work properly without JavaScript
+            We&apos;re sorry but your site doesn&apos;t work properly without JavaScript
             enabled. Please enable it to continue.
           </strong>
         </noscript>

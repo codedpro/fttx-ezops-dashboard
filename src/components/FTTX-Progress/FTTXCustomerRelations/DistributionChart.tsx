@@ -6,8 +6,12 @@ import Highcharts, { Point } from "highcharts";
 import Highcharts3D from "highcharts/highcharts-3d";
 import { CUSTOMER_RELATIONS_DATA } from "@/data/fttxCustomerRelationsData";
 
-if (typeof Highcharts3D === "function") {
-  Highcharts3D(Highcharts);
+// `highcharts/highcharts-3d` ships with incomplete type information that
+// doesn't describe the actual module shape. Runtime usage expects the module
+// to be a function accepting the Highcharts instance, so we cast to `any` to
+// avoid compilation errors when registering the plugin.
+if (typeof (Highcharts3D as any) === "function") {
+  (Highcharts3D as any)(Highcharts);
 }
 
 // Function to detect dark mode

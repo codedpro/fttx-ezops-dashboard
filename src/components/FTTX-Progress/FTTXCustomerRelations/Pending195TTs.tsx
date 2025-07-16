@@ -7,8 +7,11 @@ import Highcharts3D from "highcharts/highcharts-3d";
 import { CUSTOMER_RELATIONS_DATA } from "@/data/fttxCustomerRelationsData";
 
 // Initialize Highcharts 3D if available
-if (typeof Highcharts3D === "function") {
-  Highcharts3D(Highcharts);
+// The type definitions for `highcharts/highcharts-3d` incorrectly mark the
+// module as non-callable. Cast to `any` so the plugin can be registered at
+// runtime without TypeScript errors.
+if (typeof (Highcharts3D as any) === "function") {
+  (Highcharts3D as any)(Highcharts);
 }
 
 // Custom hook to detect large devices (≥1024px)
