@@ -65,7 +65,7 @@ const FTTHModemsMap: React.FC = () => {
   const [isLinePanelMinimized, setIsLinePanelMinimized] = useState(false);
 
   const userservice = new UserService();
-  const token = userservice.getToken();
+  const token = userservice.getToken() ?? undefined;
 
   // Initialize post block data when a token is available. `useInitializePostBlocks`
   // is a React hook so it must be called unconditionally at the top level.

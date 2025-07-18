@@ -29,7 +29,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const token = Cookies.get("AccessToken");
+  const token = Cookies.get("AccessToken") ?? "";
   // Register all data initialization hooks. Each hook internally checks if the
   // provided token is valid before performing any actions, so it is safe to call
   // them unconditionally.
