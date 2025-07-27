@@ -7,8 +7,7 @@ export const useInitializePostBlocks = (token?: string) => {
   const startFetching = usePostBlockStore((state) => state.startFetching);
 
   useEffect(() => {
-    if (token) {
-      startFetching(token);
-    }
+    if (!token) return;
+    startFetching(token);
   }, [startFetching, token]);
 };

@@ -8,6 +8,7 @@ export const useInitializeFTTHSuggestedFAT = (token: string) => {
   );
 
   useEffect(() => {
+    if (!token) return;
     startFetching(token);
   }, [startFetching, token]);
 };
