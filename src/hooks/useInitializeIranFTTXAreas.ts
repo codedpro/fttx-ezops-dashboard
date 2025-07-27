@@ -6,6 +6,7 @@ export const useInitializeIranFTTXAreas = (token: string) => {
   const startFetching = useIranFTTXAreasStore((state) => state.startFetching);
 
   useEffect(() => {
+    if (!token) return;
     startFetching(token);
   }, [startFetching, token]);
 };

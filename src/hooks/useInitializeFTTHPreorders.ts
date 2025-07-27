@@ -6,6 +6,7 @@ export const useInitializeFTTHPreorders = (token: string) => {
   const startFetching = useFTTHPreordersStore((state) => state.startFetching);
 
   useEffect(() => {
+    if (!token) return;
     startFetching(token);
   }, [startFetching, token]);
 };
