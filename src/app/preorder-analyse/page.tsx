@@ -46,7 +46,7 @@ const PreorderAnalyse = () => {
       formData.append("file", selectedFile);
       const userservice = new UserService();
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHCustomerCoplainUpload`,
+        `/api/FTTHCustomerCoplainUpload`,
         formData,
         {
           headers: {

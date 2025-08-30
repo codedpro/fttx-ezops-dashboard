@@ -27,7 +27,7 @@ export const useFTTHCitiesStore = create<FTTHCitiesState>((set, get) => ({
 
     const fetchCities = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const url = '/api';
         const config = {
           method: "get",
           maxBodyLength: Infinity,

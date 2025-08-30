@@ -32,7 +32,7 @@ export const useIranFTTXAreasStore = create<IranFTTXAreasState>((set, get) => ({
       set({ fetchingInProgress: true });
 
       try {
-        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const url = '/api';
         const response = await fetch(url + "/getiranfttx", {
           method: "GET",
           headers: {
@@ -94,7 +94,7 @@ export const useIranFTTXAreasStore = create<IranFTTXAreasState>((set, get) => ({
       set({ fetchingInProgress: true, isLoading: true });
 
       try {
-        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const url = '/api';
         const response = await fetch(url + "/getiranfttx", {
           method: "GET",
           headers: {

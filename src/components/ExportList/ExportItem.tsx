@@ -53,7 +53,7 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
 
     const config = {
       method: "post",
-      url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDynamicExport`,
+      url: `/api/FTTHDynamicExport`,
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

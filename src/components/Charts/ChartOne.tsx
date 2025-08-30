@@ -121,7 +121,7 @@ const ChartOne: React.FC<ChartOneProps> = ({
 
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportUTTicketDaily`,
+        `/api/FTTHDashboardExportUTTicketDaily`,
         {
           Start: start,
           End: end,

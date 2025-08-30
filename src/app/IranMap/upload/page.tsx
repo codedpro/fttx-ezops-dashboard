@@ -61,7 +61,7 @@ const IranMapUpload = () => {
 
       const userService = new UserService();
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/IranMapDashboardImport`,
+        `/api/IranMapDashboardImport`,
         formData,
         {
           headers: {

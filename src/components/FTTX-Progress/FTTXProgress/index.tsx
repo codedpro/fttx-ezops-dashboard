@@ -83,7 +83,7 @@ const FTTXProgress: React.FC<FTTXProgressProps> = ({
 
     const fetchData = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const baseUrl = '/api';
 
         const params = new URLSearchParams();
         if (province) params.set("province", province);

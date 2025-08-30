@@ -126,7 +126,7 @@ const ChartThree: React.FC<ChartThreeProps> = ({
   const handleDownload = async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/${apiname}`,
+        `/api/${apiname}`,
         {
           headers: {
             Authorization: `Bearer ${userService.getToken()}`,

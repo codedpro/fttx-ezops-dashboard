@@ -61,12 +61,12 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ cardData }) => {
 
     try {
       const apiEndpoints: Record<string, string> = {
-        preorder_Notpaid: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreOrderNotPaid`,
-        preorder_Paid: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPreorderPaid`,
-        purchase_But_Not_Delivered: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportPurchaseButNotDelivered`,
-        rejected: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportRejected`,
-        canceled: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportCanceled`,
-        confirmed_Waiting_For_Purchase: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDashboardExportConfirmedWaitingForPurchase`,
+        preorder_Notpaid: `/api/FTTHDashboardExportPreOrderNotPaid`,
+        preorder_Paid: `/api/FTTHDashboardExportPreorderPaid`,
+        purchase_But_Not_Delivered: `/api/FTTHDashboardExportPurchaseButNotDelivered`,
+        rejected: `/api/FTTHDashboardExportRejected`,
+        canceled: `/api/FTTHDashboardExportCanceled`,
+        confirmed_Waiting_For_Purchase: `/api/FTTHDashboardExportConfirmedWaitingForPurchase`,
       };
 
       const apiUrl = apiEndpoints[id];

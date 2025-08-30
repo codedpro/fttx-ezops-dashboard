@@ -33,7 +33,7 @@ export const useFTTHSuggestedFATStore = create<FTTHSuggestedFATState>(
         set({ fetchingInProgress: true });
 
         try {
-          const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+          const url = '/api';
           const response = await fetch(url + "/SuggestedFAT", {
             method: "GET",
             headers: {
@@ -97,7 +97,7 @@ export const useFTTHSuggestedFATStore = create<FTTHSuggestedFATState>(
         set({ fetchingInProgress: true, isLoading: true });
 
         try {
-          const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+          const url = '/api';
           const response = await fetch(url + "/SuggestedFAT", {
             method: "GET",
             headers: {

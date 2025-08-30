@@ -36,7 +36,7 @@ async function fetchIBSNGOnlineCount(
 
   const config = {
     method: "post",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetIBSNGOnlineCount`,
+    url: `/api/FTTHGetIBSNGOnlineCount`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

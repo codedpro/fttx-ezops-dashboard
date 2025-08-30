@@ -32,7 +32,7 @@ export const useFATDataStore = create<FATDataState>((set, get) => ({
       set({ fetchingInProgress: true });
 
       try {
-        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const url = '/api';
         const response = await fetch(url + "/FTTHGetTabrizFATs", {
           method: "GET",
           headers: {
@@ -93,7 +93,7 @@ export const useFATDataStore = create<FATDataState>((set, get) => ({
       set({ fetchingInProgress: true, isLoading: true });
 
       try {
-        const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+        const url = '/api';
         const response = await fetch(url + "/FTTHGetTabrizFATs", {
           method: "GET",
           headers: {

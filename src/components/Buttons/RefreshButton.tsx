@@ -25,7 +25,7 @@ const RefreshButton = ({
 
     const config = {
       method: "post",
-      url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/IBSNGForceRefresh`,
+      url: `/api/IBSNGForceRefresh`,
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/x-www-form-urlencoded",

@@ -35,7 +35,7 @@ const exportToKMZ = async (filteredFeatures: any[]) => {
     );
 
     console.log(JSON.stringify(geojsonDataArray));
-    const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+    const url = '/api';
     const response = await fetch(url + "/GeoToKMZ", {
       method: "POST",
       headers: {

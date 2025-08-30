@@ -50,28 +50,26 @@ export function useTiles(selectedTiles: TileKeys[], defaultVisibility: Partial<R
   const allTiles: Record<TileKeys, Omit<TileConfig, "visible" | "toggle">> = {
     blocks: {
       id: "blocks",
-      label: "blocks",
+      label: "OpenStreetMap (English)",
       icon: "/images/map/blocks.png",
-      type: "vector",
+      type: "raster",
       source: {
-        type: "vector",
-        tiles: ["https://fttx.mtnirancell.ir/tiles/{z}/{x}/{y}.pbf"],
-        minzoom: 10,
-        maxzoom: 18,
-        attribution: "© LNM TEAM, MTN IRANCELL",
-      } as VectorSourceSpecification,
+        type: "raster",
+        tiles: [
+          "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        ],
+        tileSize: 256,
+        minzoom: 0,
+        maxzoom: 19,
+        attribution: "© OpenStreetMap contributors",
+      } as RasterSourceSpecification,
       layer: {
         id: "blocks",
-        type: "fill-extrusion",
+        type: "raster",
         source: "blocks",
-        "source-layer": "blocks", // Using the correct source-layer from the example
-        paint: {
-          "fill-extrusion-color": "#888",
-          "fill-extrusion-height": ["get", "height"],
-          "fill-extrusion-base": 0,
-          "fill-extrusion-opacity": 0.85,
-        },
-      } as FillExtrusionLayerSpecification,
+      } as RasterLayerSpecification,
     },
   }
 

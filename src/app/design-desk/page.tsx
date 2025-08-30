@@ -341,7 +341,7 @@ const DesignDesk: React.FC = () => {
   }) => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHSeperateLines`,
+        `/api/FTTHSeperateLines`,
         {
           ...data,
           Type: data.object,
@@ -384,7 +384,7 @@ const DesignDesk: React.FC = () => {
   }) => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewFATPoint`,
+        `/api/FTTHAddNewFATPoint`,
         {
           ...objectDetails,
           ...data,
@@ -420,7 +420,7 @@ const DesignDesk: React.FC = () => {
   };
 
   const handleFATDetailSubmit = (ObjectData: any) => {
-    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditFATPoint`, {
+    fetch(`/api/FTTHEditFATPoint`, {
       method: "POST",
       body: JSON.stringify({
         ...ObjectData,
@@ -449,7 +449,7 @@ const DesignDesk: React.FC = () => {
   };
 
   const handleOtherDetailSubmit = (ObjectData: any) => {
-    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditComponentPoint`, {
+    fetch(`/api/FTTHEditComponentPoint`, {
       method: "POST",
       body: JSON.stringify({
         ...ObjectData,
@@ -478,7 +478,7 @@ const DesignDesk: React.FC = () => {
   };
 
   const handleLineDetailSubmit = (lineData: any) => {
-    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHEditLineDetail`, {
+    fetch(`/api/FTTHEditLineDetail`, {
       method: "POST",
       body: JSON.stringify({
         ...lineData,
@@ -511,7 +511,7 @@ const DesignDesk: React.FC = () => {
     Name: string;
     Plan_Type: string;
   }) => {
-    fetch(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewComponentPoint`, {
+    fetch(`/api/FTTHAddNewComponentPoint`, {
       method: "POST",
       body: JSON.stringify({
         ...objectDetails,
@@ -640,7 +640,7 @@ const DesignDesk: React.FC = () => {
 
       axios
         .post(
-          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHDeleteRoute`,
+          `/api/FTTHDeleteRoute`,
           payload,
           {
             headers: {
@@ -688,7 +688,7 @@ const DesignDesk: React.FC = () => {
 
     axios
       .post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/${isConnectingLineData ? "FTTHConnectLine" : "FTTHEditLine"}`,
+        `/api/${isConnectingLineData ? "FTTHConnectLine" : "FTTHEditLine"}`,
         payload,
         {
           headers: {
@@ -766,7 +766,7 @@ const DesignDesk: React.FC = () => {
     const fetchConnectedLines = async (token: string) => {
       try {
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHHowManyLinesConnected`,
+          `/api/FTTHHowManyLinesConnected`,
           objectData.Chain_ID,
           {
             headers: {
@@ -843,7 +843,7 @@ const DesignDesk: React.FC = () => {
       }
 
       axios
-        .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}${endpoint}`, payload, {
+        .post(`/api${endpoint}`, payload, {
           headers: {
             Authorization: `Bearer ${userservice.getToken()}`,
             "Content-Type": "application/json",
@@ -898,7 +898,7 @@ const DesignDesk: React.FC = () => {
     };
 
     axios
-      .post(`${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHAddNewRoute`, payload, {
+      .post(`/api/FTTHAddNewRoute`, payload, {
         headers: {
           Authorization: `Bearer ${userservice.getToken()}`,
           "Content-Type": "application/json",
@@ -944,7 +944,7 @@ const DesignDesk: React.FC = () => {
 
     axios
       .post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHMoveComponent`,
+        `/api/FTTHMoveComponent`,
         payload,
         {
           headers: {

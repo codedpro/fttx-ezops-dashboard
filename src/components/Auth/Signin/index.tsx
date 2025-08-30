@@ -12,7 +12,7 @@ import {
 } from "@/components/FormElements/InputUtils";
 import { Label } from "@/components/FormElements/Label";
 import { gsap } from "gsap";
-import https from "https";
+// no https agent needed for internal API
 
 export default function Signin() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -101,13 +101,11 @@ export default function Signin() {
 
     const config = {
       method: "post",
-      url: process.env.NEXT_PUBLIC_LNM_API_URL + "/login",
+      url: "/api/login",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       data: data,
-
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
       timeout: 30000,
     };
 

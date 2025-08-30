@@ -33,7 +33,7 @@ export const useFTTHACSRXPowerStore = create<FTTHACSRXPowerState>(
         set({ fetchingInProgress: true });
 
         try {
-          const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+          const url = '/api';
           const response = await fetch(url + "/FTTHACSRXPower", {
             method: "GET",
             headers: {
@@ -96,7 +96,7 @@ export const useFTTHACSRXPowerStore = create<FTTHACSRXPowerState>(
         set({ fetchingInProgress: true, isLoading: true });
 
         try {
-          const url = process.env.NEXT_PUBLIC_LNM_API_URL;
+          const url = '/api';
           const response = await fetch(url + "/FTTHACSRXPower", {
             method: "GET",
             headers: {

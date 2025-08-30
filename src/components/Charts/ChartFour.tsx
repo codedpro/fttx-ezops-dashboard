@@ -48,7 +48,7 @@ async function fetchFTTHPayload(
 
   const config = {
     method: "post",
-    url: `${process.env.NEXT_PUBLIC_LNM_API_URL}/FTTHGetPayloadPerDayV2`,
+    url: `/api/FTTHGetPayloadPerDayV2`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

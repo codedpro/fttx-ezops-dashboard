@@ -75,7 +75,7 @@ const SettingBoxes = () => {
       setLoading(true);
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_LNM_API_URL}/UserProfileUpdate`,
+        `/api/UserProfileUpdate`,
         {
           Name: fullName,
           Email: email,
@@ -108,9 +108,7 @@ const SettingBoxes = () => {
     confirm(async () => {
       try {
         setLoading2(true);
-        const response = await axios.delete(
-          `${process.env.NEXT_PUBLIC_LNM_API_URL}/UserProfileUpdate`
-        );
+        const response = await axios.delete(`/api/UserProfileUpdate`);
 
         if (response.status !== 200) {
           toast.error(response.data.message || "Failed to delete photo.");
@@ -145,7 +143,7 @@ const SettingBoxes = () => {
         formData.append("file", selectedFile);
 
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_LNM_API_URL}/`,
+          `/api/UserProfileUpload`,
           formData,
           {
             headers: {

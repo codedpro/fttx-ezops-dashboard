@@ -8,7 +8,7 @@ export const fetchLocationData = async (
 ): Promise<NominatimResponse[]> => {
   try {
     const response = await axios.get<NominatimResponse[]>(
-      "https://nominatim.openstreetmap.org/search",
+      "/api/nominatim/search",
       {
         params: {
           q: query,

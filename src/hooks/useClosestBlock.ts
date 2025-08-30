@@ -40,7 +40,7 @@ export function useClosestBlock() {
 
     try {
       const response = await axios.post<ClosestBlockResult[]>(
-         `${process.env.NEXT_PUBLIC_LNM_API_URL}/ExternalApiGetClosestBlockByPoint`,
+         `/api/ExternalApiGetClosestBlockByPoint`,
         {
           latitude,
           longitude,

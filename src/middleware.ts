@@ -36,8 +36,9 @@ export async function middleware(request: NextRequest) {
   }
   if (pathname !== "/api/VerifyToken") {
     try {
+      const verifyUrl = new URL("/api/VerifyToken", request.url);
       const verifyResponse = await fetch(
-        `${process.env.FTTXBACKEND_ORIGINS}/VerifyToken`,
+        verifyUrl.toString(),
         {
           method: "GET",
           headers: {
