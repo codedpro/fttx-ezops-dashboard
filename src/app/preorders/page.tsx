@@ -344,11 +344,20 @@ const FTTHModemsMap: React.FC = () => {
 
   // Once all visible layers are loaded, remove "Loading..."
   useEffect(() => {
-    const areVisibleLayersLoaded = activeLayers.every((layer) => layer.source);
+    const visibleLayers = activeLayers.filter((layer) => layer.visible);
+    const areVisibleLayersLoaded = visibleLayers.every(
+      (layer) => layer.source !== null
+    );
     if (areVisibleLayersLoaded) {
       setLoading(false);
     }
   }, [activeLayers]);
+
+  // Fallback in case some layers never load
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 10000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Searching
   const { handleSearchPlaces, removeAllMarkers } = useSearchPlaces(
