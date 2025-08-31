@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { LRUCache } from "lru-cache";
+
+const tokenCache = new LRUCache<string, boolean>({
+  max: 1000,
+  ttl: 1000 * 60,
+});
 
 export async function middleware(request: NextRequest) {
   const publicPaths = [
@@ -35,19 +41,21 @@ export async function middleware(request: NextRequest) {
     return response;
   }
   if (pathname !== "/api/VerifyToken") {
+    if (tokenCache.get(token)) {
+      return NextResponse.next();
+    }
+
     try {
       const verifyUrl = new URL("/api/VerifyToken", request.url);
-      const verifyResponse = await fetch(
-        verifyUrl.toString(),
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const verifyResponse = await fetch(verifyUrl.toString(), {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (verifyResponse.status === 200) {
+        tokenCache.set(token, true);
         return NextResponse.next();
       } else {
         const loginUrl = new URL("/login", request.url);
@@ -68,7 +76,6 @@ export async function middleware(request: NextRequest) {
       if (error instanceof Error) {
         console.error("Error during token verification:", error.message);
       }
- 
 
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set(
