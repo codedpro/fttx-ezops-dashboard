@@ -21,6 +21,9 @@ const randFloat = (min: number, max: number, digits = 2) => {
   return parseFloat(v.toFixed(digits));
 };
 
+export const NL_BASE_LAT = 52.1326;
+export const NL_BASE_LONG = 5.2913;
+
 export const DUMMY_TOKEN = "dummy-token-123";
 export const DUMMY_USER = {
   Name: "test test",
@@ -129,7 +132,7 @@ export function mockFTTHACS(count = 500): FTTHACS[] {
 }
 
 export function mockFTTHSalesDetails(): TableData[] {
-  const cities = ["Tehran", "Shiraz", "Tabriz", "Mashhad"];
+  const cities = ["Amsterdam", "Rotterdam", "Utrecht", "Eindhoven"];
   return cities.map((c) => ({
     City: c,
     Request: rand(100, 500),
@@ -170,7 +173,7 @@ export function mockExportList(): ExportItemType[] {
       isPlanStatus: true,
       numberParameters: null,
       planStatus: ["Pending", "Confirmed", "Rejected"],
-      cities: ["Tehran", "Shiraz", "Tabriz"],
+      cities: ["Amsterdam", "Rotterdam", "Utrecht"],
       persian_Name: "پیش سفارش ها",
     },
   ];
@@ -178,18 +181,18 @@ export function mockExportList(): ExportItemType[] {
 
 export function mockFTTHCities(): FTTHCity[] {
   return [
-    { ID: 1, Name: "all", Full_Name: "All", Lat: 35.6892, Long: 51.3890, Farsi: "همه" },
-    { ID: 2, Name: "Tehran", Full_Name: "Tehran", Lat: 35.6892, Long: 51.3890, Farsi: "تهران" },
-    { ID: 3, Name: "Shiraz", Full_Name: "Shiraz", Lat: 29.5918, Long: 52.5837, Farsi: "شیراز" },
-    { ID: 4, Name: "Tabriz", Full_Name: "Tabriz", Lat: 38.0962, Long: 46.2738, Farsi: "تبریز" },
+    { ID: 1, Name: "all", Full_Name: "All", Lat: NL_BASE_LAT, Long: NL_BASE_LONG, Farsi: "همه" },
+    { ID: 2, Name: "Amsterdam", Full_Name: "Amsterdam", Lat: 52.3676, Long: 4.9041, Farsi: "آمستردام" },
+    { ID: 3, Name: "Rotterdam", Full_Name: "Rotterdam", Lat: 51.9244, Long: 4.4777, Farsi: "روتردام" },
+    { ID: 4, Name: "Utrecht", Full_Name: "Utrecht", Lat: 52.0907, Long: 5.1214, Farsi: "اوترخت" },
   ];
 }
 
 export function mockFTTHModems(count = 200): FTTHModem[] {
   return Array.from({ length: count }).map((_, i) => ({
     Modem_ID: 8411000 + i,
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
     OLT: `OLT${rand(1000, 9999)}`,
     POP: `POP${rand(1, 9)}`,
     FAT: `FAT${rand(1, 999)}`,
@@ -205,12 +208,12 @@ export function mockFTTHComponentsFat(count = 100): FTTHFatComponent[] {
   return Array.from({ length: count }).map((_, i) => ({
     FAT_ID: 1000 + i,
     Name: `FAT_${1000 + i}`,
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
     OLT: `OLT${rand(1000, 9999)}`,
     POP: `POP${rand(1, 9)}`,
     FAT: `FAT${1000 + i}`,
-    City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
     Is_Plan: false,
     Chain_ID: 50000 + i,
     Type: i % 2 === 0 ? "MFAT" : "SFAT",
@@ -223,9 +226,9 @@ export function mockFTTHComponentsOther(count = 40): FTTHOtherComponent[] {
   return Array.from({ length: count }).map((_, i) => ({
     Component_ID: 2000 + i,
     Name: `${types[i % types.length]}_${2000 + i}`,
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
-    City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
+    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
     Chain_ID: 60000 + i,
     Type: types[i % types.length],
     Is_Plan: false,
@@ -236,12 +239,12 @@ export function mockFTTHComponentsOther(count = 40): FTTHOtherComponent[] {
 export function mockFTTHPoints(count = 200): FTTHPoint[] {
   return Array.from({ length: count }).map((_, i) => ({
     Point_ID: 70000 + i,
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
     Type: ["ODCLine", "FATLine", "DropCableLine"][i % 3],
     Chain_ID: 80000 + Math.floor(i / 5),
     Order: i % 10,
-    City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
     Is_Plan: false,
     Plan_Type: 0,
   }));
@@ -355,9 +358,9 @@ export function mockModemPacketRemaining(): ModemPacketDetails[] {
 
 export function mockNearbyFATs(): NearybyFATs[] {
   return [
-    { FAT_ID: 501, Name: "FAT_501", FAT_Lat: 35.7, FAT_Long: 51.3 },
-    { FAT_ID: 502, Name: "FAT_502", FAT_Lat: 35.71, FAT_Long: 51.31 },
-    { FAT_ID: 503, Name: "FAT_503", FAT_Lat: 35.72, FAT_Long: 51.32 },
+    { FAT_ID: 501, Name: "FAT_501", FAT_Lat: NL_BASE_LAT + 0.01, FAT_Long: NL_BASE_LONG + 0.01 },
+    { FAT_ID: 502, Name: "FAT_502", FAT_Lat: NL_BASE_LAT + 0.02, FAT_Long: NL_BASE_LONG + 0.02 },
+    { FAT_ID: 503, Name: "FAT_503", FAT_Lat: NL_BASE_LAT + 0.03, FAT_Long: NL_BASE_LONG + 0.03 },
   ];
 }
 
@@ -368,10 +371,10 @@ export function mockNominatimSearch() {
       licence: "Data © OpenStreetMap contributors",
       osm_type: "node",
       osm_id: 1,
-      boundingbox: ["35.68", "35.70", "51.38", "51.40"],
-      lat: "35.6892",
-      lon: "51.3890",
-      display_name: "Tehran, Iran",
+      boundingbox: ["52.36", "52.38", "4.89", "4.91"],
+      lat: "52.3676",
+      lon: "4.9041",
+      display_name: "Amsterdam, Netherlands",
       class: "place",
       type: "city",
       importance: 0.8,
@@ -384,8 +387,8 @@ export function mockFTTHACSRXPower(count = 100) {
   return Array.from({ length: count }).map((_, i) => ({
     Modem_ID: 841100 + i,
     RXPower: randFloat(-30, -5, 1),
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
   }));
 }
 
@@ -393,14 +396,14 @@ export function mockExportRowsDefault(rows = 20) {
   return Array.from({ length: rows }).map((_, i) => ({
     Row: i + 1,
     Name: `Item ${i + 1}`,
-    City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
     Status: ["Pending", "Confirmed", "Rejected"][i % 3],
     Value: rand(1, 1000),
   }));
 }
 
 export function mockFTTHBlocks(count = 120): FTTHBlock[] {
-  const cities = ["Tehran", "Shiraz", "Tabriz"];
+  const cities = ["Amsterdam", "Rotterdam", "Utrecht"];
   return Array.from({ length: count }).map((_, i) => ({
     ID: 1000 + i,
     Name: `BLK_${1000 + i}`,
@@ -412,8 +415,8 @@ export function mockFTTHBlocks(count = 120): FTTHBlock[] {
     "95HH": rand(10, 500),
     Area: rand(2000, 10000),
     length: rand(100, 1000),
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
     Chain_ID: 80000 + i,
     Order: i % 10,
     City: cities[i % cities.length],
@@ -423,16 +426,16 @@ export function mockFTTHBlocks(count = 120): FTTHBlock[] {
 export function mockFTTHTabrizFATs(count = 100): FATData[] {
   return Array.from({ length: count }).map((_, i) => ({
     FAT_Index: `FAT_${i + 1}`,
-    Lat: 38.06 + randFloat(-0.05, 0.05, 6),
-    Long: 46.29 + randFloat(-0.05, 0.05, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.05, 0.05, 6),
+    Long: NL_BASE_LONG + randFloat(-0.05, 0.05, 6),
     Modem_Count: rand(0, 64),
     Max_Distance_Covered_m: rand(100, 800),
   }));
 }
 
 export function mockFTTHPreorders(count = 200): FTTHPreorder[] {
-  const cities = ["Tehran", "Shiraz", "Tabriz"];
-  const provinces = ["Tehran", "Fars", "EastAzerbaijan"];
+  const cities = ["Amsterdam", "Rotterdam", "Utrecht"];
+  const provinces = ["North Holland", "South Holland", "Utrecht"];
   return Array.from({ length: count }).map((_, i) => ({
     ID: 9000 + i,
     Eshop_ID: 50000 + i,
@@ -440,8 +443,8 @@ export function mockFTTHPreorders(count = 200): FTTHPreorder[] {
     Province: provinces[i % provinces.length],
     City: cities[i % cities.length],
     Tracking_Code: `TRK${100000 + i}`,
-    Lat: 35 + randFloat(-1, 1, 6),
-    Long: 51 + randFloat(-1, 1, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
+    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
     Created_Date: new Date(Date.now() - i * 86400000 / 4).toISOString(),
     FTTH_ID: i % 5 === 0 ? 8411000 + i : null,
     Product_Name: ["FTTH 100M", "FTTH 50M", "FTTH 20M"][i % 3],
@@ -452,8 +455,8 @@ export function mockFTTHPreorders(count = 200): FTTHPreorder[] {
 export function mockSuggestedFAT(count = 80): SuggestedFAT[] {
   return Array.from({ length: count }).map((_, i) => ({
     Name: `SFAT_${100 + i}`,
-    Lat: 35.7 + randFloat(-0.3, 0.3, 6),
-    Long: 51.3 + randFloat(-0.3, 0.3, 6),
+    Lat: NL_BASE_LAT + randFloat(-0.3, 0.3, 6),
+    Long: NL_BASE_LONG + randFloat(-0.3, 0.3, 6),
     Count: rand(10, 150),
     ID: 100 + i,
   }));
