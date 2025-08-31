@@ -175,7 +175,8 @@ const FTTHModemsMap: React.FC = () => {
   } = usePolygonSelection(ftthMapRef.current?.mapRef ?? { current: null });
 
   useEffect(() => {
-    const areVisibleLayersLoaded = activeLayers.every((layer) => {
+    const visibleLayers = activeLayers.filter((layer) => layer.visible);
+    const areVisibleLayersLoaded = visibleLayers.every((layer) => {
       if (layersThatCanBeNull.includes(layer.id)) {
         return true;
       }
@@ -188,6 +189,12 @@ const FTTHModemsMap: React.FC = () => {
     console.log(areVisibleLayersLoaded);
     console.log(activeLayers);
   }, [activeLayers]);
+
+  // Fallback in case some layers never load
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 10000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <DefaultLayout className="p-0 md:p-0">
