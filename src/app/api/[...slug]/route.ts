@@ -24,6 +24,8 @@ import {
   mockFTTHTabrizFATs,
   mockFTTHPreorders,
   mockSuggestedFAT,
+  NL_BASE_LAT,
+  NL_BASE_LONG,
 } from "@/lib/mocks/data";
 
 // Local helpers used in a few summary responses
@@ -62,8 +64,12 @@ export async function GET(request: Request, context: { params: { slug?: string[]
     const url = new URL(request.url);
     const from = url.searchParams.get("from");
     const to = url.searchParams.get("to");
-    const [fromLng, fromLat] = (from || "51.3890,35.6892").split(",").map(parseFloat);
-    const [toLng, toLat] = (to || "51.4,35.7").split(",").map(parseFloat);
+    const [fromLng, fromLat] = (from || `${NL_BASE_LONG},${NL_BASE_LAT}`)
+      .split(",")
+      .map(parseFloat);
+    const [toLng, toLat] = (to || `${NL_BASE_LONG + 0.1},${NL_BASE_LAT + 0.1}`)
+      .split(",")
+      .map(parseFloat);
     const coordinates = [
       [fromLng, fromLat],
       // simple midpoints
@@ -103,8 +109,8 @@ export async function GET(request: Request, context: { params: { slug?: string[]
         Alarm_Name: ["LOS", "High Temperature", "Power Fail"][i % 3],
         Alarm_Time: new Date(now - i * 3600 * 1000).toISOString(),
         Alarm_Type: ["Critical", "Major", "Minor"][i % 3],
-        Lat: 35 + Math.random(),
-        Long: 51 + Math.random(),
+        Lat: NL_BASE_LAT + Math.random() * 0.1,
+        Long: NL_BASE_LONG + Math.random() * 0.1,
       }));
       return ok(alarms);
     }
@@ -135,12 +141,12 @@ export async function GET(request: Request, context: { params: { slug?: string[]
         FCP: { Plan: rand(100, 500), Actual: rand(80, 400), Weekly: rand(5, 50) },
       };
       const progress: Record<string, any> = {
-        Tehran: { Inhouse: "30%", FTK: "20%", ServCo: "25%", FCP: "25%" },
-        Shiraz: { Inhouse: "25%", FTK: "25%", ServCo: "25%", FCP: "25%" },
+        Amsterdam: { Inhouse: "30%", FTK: "20%", ServCo: "25%", FCP: "25%" },
+        Rotterdam: { Inhouse: "25%", FTK: "25%", ServCo: "25%", FCP: "25%" },
       };
       const deployment: Record<string, any> = {
-        Tehran: { Cities: 1, Households: rand(10000, 20000), Percentage: "45%" },
-        Shiraz: { Cities: 1, Households: rand(5000, 15000), Percentage: "35%" },
+        Amsterdam: { Cities: 1, Households: rand(10000, 20000), Percentage: "45%" },
+        Rotterdam: { Cities: 1, Households: rand(5000, 15000), Percentage: "35%" },
       };
       return ok({ Progress: progress, FiberShoot: fs, FATInstallation: fi, Excavation: fs, Deployment: deployment });
     }
@@ -148,9 +154,9 @@ export async function GET(request: Request, context: { params: { slug?: string[]
       const blocks = Array.from({ length: 5 }).map((_, i) => ({
         id: i + 1,
         coordinates: [
-          [51.3 + i * 0.01, 35.7 + i * 0.01],
-          [51.31 + i * 0.01, 35.71 + i * 0.01],
-          [51.32 + i * 0.01, 35.72 + i * 0.01],
+          [NL_BASE_LONG + i * 0.01, NL_BASE_LAT + i * 0.01],
+          [NL_BASE_LONG + 0.01 + i * 0.01, NL_BASE_LAT + 0.01 + i * 0.01],
+          [NL_BASE_LONG + 0.02 + i * 0.01, NL_BASE_LAT + 0.02 + i * 0.01],
         ],
       }));
       return ok(blocks);
@@ -160,12 +166,12 @@ export async function GET(request: Request, context: { params: { slug?: string[]
         ID: i + 1,
         Iran_FTTX_ID: 1000 + i,
         Name: `Area_${i + 1}`,
-        Province: ["Tehran", "Fars", "EastAzerbaijan"][i % 3],
-        City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+        Province: ["North Holland", "South Holland", "Utrecht"][i % 3],
+        City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
         Radius: 500 + i * 50,
         Precess_Serial: i + 1,
-        Lat: 35 + Math.random(),
-        Long: 51 + Math.random(),
+        Lat: NL_BASE_LAT + Math.random() * 0.1,
+        Long: NL_BASE_LONG + Math.random() * 0.1,
       }));
       return ok(areas);
     }
@@ -214,7 +220,7 @@ export async function POST(request: Request, context: { params: { slug?: string[
     case "FTTHGetPayloadUseDaily": {
       // Return a list of per-modem usage rows for a single day
       const rows = Array.from({ length: 30 }).map((_, i) => ({
-        City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+        City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
         Usage: rand(1000, 100000),
         ftth_id: 8411000 + i,
         modem_id: `MDM_${800000 + i}`,
@@ -260,10 +266,10 @@ export async function POST(request: Request, context: { params: { slug?: string[
         {
           id: 1,
           blockId: 1001,
-          stateName: "Tehran",
-          parish: "Tehran",
+          stateName: "North Holland",
+          parish: "Amsterdam",
           avenueTypeName: "St",
-          avenue: "Valiasr",
+          avenue: "Damrak",
           preAvenTypeName: "",
           preAven: "",
           floorNo: 1,
@@ -275,7 +281,7 @@ export async function POST(request: Request, context: { params: { slug?: string[
           buildingName: "Test Building",
           buildingType: "Residential",
           entrance: "North",
-          address: "Valiasr St, Tehran",
+          address: "Damrak St, Amsterdam",
         },
       ]);
     }
@@ -287,9 +293,12 @@ export async function POST(request: Request, context: { params: { slug?: string[
       const rows = 10;
       const data = Array.from({ length: rows }).map((_, i) => ({
         activity: ["Shop", "Cafe", "School"][i % 3],
-        city: ["Tehran", "Shiraz", "Tabriz"][i % 3],
-        province: ["Tehran", "Fars", "EastAzerbaijan"][i % 3],
-        location: { lat: 35.7 + Math.random() * 0.1, lon: 51.3 + Math.random() * 0.1 },
+        city: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
+        province: ["North Holland", "South Holland", "Utrecht"][i % 3],
+        location: {
+          lat: NL_BASE_LAT + Math.random() * 0.1,
+          lon: NL_BASE_LONG + Math.random() * 0.1,
+        },
       }));
       return ok(data);
     }
