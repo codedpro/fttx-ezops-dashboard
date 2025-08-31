@@ -9,6 +9,10 @@ import { TableData } from "@/types/SalesDetails";
 import { ExportItemType } from "@/types/exports";
 import { ModemDetails, ModemPacketDetails } from "@/types/ModemDetails";
 import { NearybyFATs } from "@/types/NearbyFATs";
+import { FTTHBlock } from "@/types/FTTHBlock";
+import { FATData } from "@/types/FTTHAutoPlanFATs";
+import { FTTHPreorder } from "@/types/FTTHPreorder";
+import { SuggestedFAT } from "@/types/SuggestedFAT";
 
 // Utilities
 const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -265,28 +269,39 @@ export function mockModemDetails(id: string): ModemDetails {
         DB_Last_Update: new Date().toISOString(),
       },
     ],
-    IBSNG_Internet_Onlines: [
-      {
-        FTTH_ID,
-        Sub_Service: "Internet",
-        QOS: "Premium",
-        Login_Time: new Date().toISOString(),
-        Ras_Desc: "RAS-1",
-        Remote_IP: "10.0.0.10",
-        MAC: "AA:BB:CC:DD:EE:FF",
-        Port: "1",
-        In_Bytes: rand(1e6, 1e9),
-        Out_Bytes: rand(1e6, 1e9),
-        In_Rate: rand(1e3, 1e6),
-        Out_Rate: rand(1e3, 1e6),
-        Session_ID: `sess_${FTTH_ID}`,
-        Rule: "default",
-        Failed_Reason: "",
-        Apn: "",
-        SSID: "",
-      },
-    ],
-    IBSNG_Connection_History: [],
+    IBSNG_Internet_Onlines: Array.from({ length: 3 }).map((_, i) => ({
+      FTTH_ID,
+      Sub_Service: "Internet",
+      QOS: ["Basic", "Standard", "Premium"][i % 3],
+      Login_Time: new Date(Date.now() - i * 3600_000).toISOString(),
+      Ras_Desc: `RAS-${i + 1}`,
+      Remote_IP: `10.0.0.${10 + i}`,
+      MAC: `AA:BB:CC:DD:EE:${(10 + i).toString(16).padStart(2, "0")}`,
+      Port: String(1 + i),
+      In_Bytes: rand(1e6, 1e9),
+      Out_Bytes: rand(1e6, 1e9),
+      In_Rate: rand(1e3, 1e6),
+      Out_Rate: rand(1e3, 1e6),
+      Session_ID: `sess_${FTTH_ID}_${i}`,
+      Rule: "default",
+      Failed_Reason: "",
+      Apn: "internet",
+      SSID: "FTTH-SSID",
+    })),
+    IBSNG_Connection_History: Array.from({ length: 10 }).map((_, i) => ({
+      ID: i + 1,
+      FTTH_ID,
+      User_ID: `user_${FTTH_ID}`,
+      Session_Start: new Date(Date.now() - (i + 1) * 86400_000).toISOString(),
+      Session_End: new Date(Date.now() - i * 86400_000).toISOString(),
+      Kill_Reason: "",
+      Terminate_Cause: ["User-Request", "Lost-Carrier", "Idle-Timeout"][i % 3],
+      MAC: `AA:BB:CC:DD:EE:${(20 + i).toString(16).padStart(2, "0")}`,
+      Port: String(1 + (i % 4)),
+      IPv4: `10.0.${i % 255}.${(i * 7) % 255}`,
+      IPv6: "::1",
+      RAS: `RAS-${(i % 3) + 1}`,
+    })),
     IBSNG_Ballances: [
       {
         ID: FTTH_ID,
@@ -384,3 +399,62 @@ export function mockExportRowsDefault(rows = 20) {
   }));
 }
 
+export function mockFTTHBlocks(count = 120): FTTHBlock[] {
+  const cities = ["Tehran", "Shiraz", "Tabriz"];
+  return Array.from({ length: count }).map((_, i) => ({
+    ID: 1000 + i,
+    Name: `BLK_${1000 + i}`,
+    Block_ID: 5000 + i,
+    Adres1395: `Address ${i}`,
+    Hoze1395: rand(1, 10),
+    BLK_No1395: rand(1, 9999),
+    Value: rand(1, 100),
+    "95HH": rand(10, 500),
+    Area: rand(2000, 10000),
+    length: rand(100, 1000),
+    Lat: 35 + randFloat(-1, 1, 6),
+    Long: 51 + randFloat(-1, 1, 6),
+    Chain_ID: 80000 + i,
+    Order: i % 10,
+    City: cities[i % cities.length],
+  }));
+}
+
+export function mockFTTHTabrizFATs(count = 100): FATData[] {
+  return Array.from({ length: count }).map((_, i) => ({
+    FAT_Index: `FAT_${i + 1}`,
+    Lat: 38.06 + randFloat(-0.05, 0.05, 6),
+    Long: 46.29 + randFloat(-0.05, 0.05, 6),
+    Modem_Count: rand(0, 64),
+    Max_Distance_Covered_m: rand(100, 800),
+  }));
+}
+
+export function mockFTTHPreorders(count = 200): FTTHPreorder[] {
+  const cities = ["Tehran", "Shiraz", "Tabriz"];
+  const provinces = ["Tehran", "Fars", "EastAzerbaijan"];
+  return Array.from({ length: count }).map((_, i) => ({
+    ID: 9000 + i,
+    Eshop_ID: 50000 + i,
+    Postal_Code: `10${rand(100000, 999999)}`,
+    Province: provinces[i % provinces.length],
+    City: cities[i % cities.length],
+    Tracking_Code: `TRK${100000 + i}`,
+    Lat: 35 + randFloat(-1, 1, 6),
+    Long: 51 + randFloat(-1, 1, 6),
+    Created_Date: new Date(Date.now() - i * 86400000 / 4).toISOString(),
+    FTTH_ID: i % 5 === 0 ? 8411000 + i : null,
+    Product_Name: ["FTTH 100M", "FTTH 50M", "FTTH 20M"][i % 3],
+    FAT_ID: i % 7 === 0 ? 1000 + i : null,
+  }));
+}
+
+export function mockSuggestedFAT(count = 80): SuggestedFAT[] {
+  return Array.from({ length: count }).map((_, i) => ({
+    Name: `SFAT_${100 + i}`,
+    Lat: 35.7 + randFloat(-0.3, 0.3, 6),
+    Long: 51.3 + randFloat(-0.3, 0.3, 6),
+    Count: rand(10, 150),
+    ID: 100 + i,
+  }));
+}

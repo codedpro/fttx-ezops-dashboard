@@ -27,7 +27,9 @@ const ChartOne: React.FC<ChartOneProps> = ({
 }) => {
   const [filter, setFilter] = useState<string>("Week");
 
-  const filteredData = dailyData.slice(filter === "Week" ? -7 : -30);
+  // Guard against unexpected payload shapes
+  const safeDailyData = Array.isArray(dailyData) ? dailyData : [];
+  const filteredData = safeDailyData.slice(filter === "Week" ? -7 : -30);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

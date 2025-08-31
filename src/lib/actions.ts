@@ -10,6 +10,29 @@ interface FTTHPayload {
   Value: number;
 }
 
+function getBaseUrl(): string {
+  // Browser: use the current origin
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  // Server: prefer explicit env configuration
+  const envUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    process.env.NEXTAUTH_URL ||
+    process.env.PUBLIC_SITE_URL;
+  if (envUrl) return envUrl.replace(/\/$/, "");
+
+  // Vercel / common host envs
+  const vercel = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL_URL;
+  if (vercel) return `https://${vercel.replace(/\/$/, "")}`;
+
+  // Fallback to localhost with detected port
+  const port = process.env.PORT || "3000";
+  return `http://localhost:${port}`;
+}
+
 export const fetchModemDetails = async (
   id: string,
   token: string
@@ -21,7 +44,7 @@ export const fetchModemDetails = async (
   const config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `/api/ModemDetails`,
+    url: `${getBaseUrl()}/api/ModemDetails`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Authorization: `Bearer ${token}`,
@@ -50,7 +73,7 @@ export const fetchModemPacketRemaining = async (
   const config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `/api/getftthuserremainingtraffic`,
+    url: `${getBaseUrl()}/api/getftthuserremainingtraffic`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -98,7 +121,7 @@ export const fetchFTTHPayload = async (
 
   const config = {
     method: "post",
-    url: `/api/FTTHGetPayloadPerDayV2`,
+    url: `${getBaseUrl()}/api/FTTHGetPayloadPerDayV2`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -123,7 +146,7 @@ export const fetchFTTHPayload = async (
 export const fetchFTTHDashboard = async (token: string) => {
   const config = {
     method: "get",
-    url: `/api/FTTHDashboard`,
+    url: `${getBaseUrl()}/api/FTTHDashboard`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Authorization: `Bearer ${token}`,
@@ -148,7 +171,7 @@ export const fetchFTTHDailyChartData = async (token: string) => {
 
     const config = {
       method: "post",
-      url: `/api/GetFTTHDashboardUTDailyChart`,
+      url: `${getBaseUrl()}/api/GetFTTHDashboardUTDailyChart`,
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -169,7 +192,7 @@ export const fetchFTTHDynamicExportList = async (
 ): Promise<ExportData> => {
   const config = {
     method: "get",
-    url: `/api/FTTHDynamicExportList`,
+    url: `${getBaseUrl()}/api/FTTHDynamicExportList`,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -201,7 +224,7 @@ export const fetchFTTHDynamicExportList = async (
 export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
   const config = {
     method: "get",
-    url: `/api/FTTHACS`,
+    url: `${getBaseUrl()}/api/FTTHACS`,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -222,7 +245,7 @@ export const fetchFTTHSalesDetails = async (
 ): Promise<TableData[]> => {
   const config = {
     method: "get",
-    url: `/api/GetFTTHDashboardSalesDetails`,
+    url: `${getBaseUrl()}/api/GetFTTHDashboardSalesDetails`,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -243,7 +266,7 @@ export const fetchFTTHGetPayloadUseDaily = async (
 ) => {
   const config = {
     method: "post",
-    url: `/api/FTTHGetPayloadUseDaily`,
+    url: `${getBaseUrl()}/api/FTTHGetPayloadUseDaily`,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

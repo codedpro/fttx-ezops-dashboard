@@ -20,7 +20,15 @@ import {
   mockNominatimSearch,
   mockFTTHACSRXPower,
   mockExportRowsDefault,
+  mockFTTHBlocks,
+  mockFTTHTabrizFATs,
+  mockFTTHPreorders,
+  mockSuggestedFAT,
 } from "@/lib/mocks/data";
+
+// Local helpers used in a few summary responses
+const rand = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
 
 function ok(data: any, init: ResponseInit = {}) {
   return NextResponse.json(data, { status: 200, ...init });
@@ -37,10 +45,8 @@ function notFound(message = "Not found") {
 function requireAuth(request: Request) {
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.split(" ")[1] || "";
-  // Simple dummy check; accept missing token for public endpoints
-  if (!authHeader) return { ok: true, token: DUMMY_TOKEN };
-  if (token === DUMMY_TOKEN) return { ok: true, token };
-  return { ok: false, token: "" };
+  // In mock mode, accept any token (or none) to keep the app usable
+  return { ok: true, token: token || DUMMY_TOKEN };
 }
 
 export async function GET(request: Request, context: { params: { slug?: string[] } }) {
@@ -104,6 +110,14 @@ export async function GET(request: Request, context: { params: { slug?: string[]
     }
     case "FTTHACSRXPower":
       return ok(mockFTTHACSRXPower(100));
+    case "FTTHBlocks":
+      return ok(mockFTTHBlocks(120));
+    case "FTTHGetTabrizFATs":
+      return ok(mockFTTHTabrizFATs(100));
+    case "FTTHPreorders":
+      return ok(mockFTTHPreorders(200));
+    case "SuggestedFAT":
+      return ok(mockSuggestedFAT(80));
     case "IranMapDashboardSummary": {
       // Build a minimal yet structured response matching ApiResponse
       const weekly = Array.from({ length: 12 }).reduce((acc: Record<string, number>, _, i) => {
@@ -198,8 +212,14 @@ export async function POST(request: Request, context: { params: { slug?: string[
       return ok(mockUTDailyChart(span));
     }
     case "FTTHGetPayloadUseDaily": {
-      // simplified response compatible with existing usage
-      return ok(mockFTTHPayload(1));
+      // Return a list of per-modem usage rows for a single day
+      const rows = Array.from({ length: 30 }).map((_, i) => ({
+        City: ["Tehran", "Shiraz", "Tabriz"][i % 3],
+        Usage: rand(1000, 100000),
+        ftth_id: 8411000 + i,
+        modem_id: `MDM_${800000 + i}`,
+      }));
+      return ok(rows);
     }
     case "IBSNGForceRefresh":
     case "FTTHSeperateLines":
@@ -230,6 +250,9 @@ export async function POST(request: Request, context: { params: { slug?: string[
     }
     case "FTTHDynamicExport": {
       return ok(mockExportRowsDefault(100));
+    }
+    case "FTTHDashboardExportUTTicketDaily": {
+      return ok(mockExportRowsDefault(50));
     }
     case "ExternalApiGetClosestBlockByPoint": {
       const now = Date.now();

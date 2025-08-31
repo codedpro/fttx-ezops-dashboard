@@ -96,7 +96,7 @@ const sidebarItems: SidebarItemType[] = [
       route: "/modem",
     },
     {
-      label: "Iran FTTX",
+      label: "FTTX Coverage Map",
       icon: <PiMapPinArea />,
       route: "/iranfttx",
     },

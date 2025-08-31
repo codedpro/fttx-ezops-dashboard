@@ -46,7 +46,9 @@ const Dashboard = async ({
     );
   }
 
-  const rootCwmpGponCounts = acsData.reduce(
+  const acsArray = Array.isArray(acsData) ? acsData : [];
+
+  const rootCwmpGponCounts = acsArray.reduce(
     (acc: { [key: string]: number }, item) => {
       const key = item.root_cwmp_GPON;
       if (acc[key]) {
@@ -81,7 +83,7 @@ const Dashboard = async ({
 
   const RXPowerRange = { min: -28, max: -8 };
 
-  const rxPowerCounts = acsData.reduce(
+  const rxPowerCounts = acsArray.reduce(
     (acc: { [key: string]: number }, item) => {
       const rxPower = item.RXPower;
       if (rxPower === null || rxPower === undefined) {
@@ -132,7 +134,7 @@ const Dashboard = async ({
   const colors_RXPower = assignColors(labels_RXPower);
 
   const unwantedModelNames = ["", "Unknown"];
-  const filteredModelNameData = acsData.filter(
+  const filteredModelNameData = acsArray.filter(
     (item) => !unwantedModelNames.includes(item.modelName)
   );
 

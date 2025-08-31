@@ -12,7 +12,7 @@ const categories = [
   "Approved by CRA",
   "Approved by CRA's Region",
   "Visited By CRA Region",
-  "Iranfttx Coverage",
+  "FTTX Coverage",
 ];
 
 const values = [

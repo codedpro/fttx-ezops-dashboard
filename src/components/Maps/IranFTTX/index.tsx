@@ -56,8 +56,8 @@ const IranFTTXMap = forwardRef<
         mapRef.current = new mapboxgl.Map({
           container: mapContainerRef.current,
           style: mapStyle,
-          center: [52.6771, 36.538],
-          zoom: 13.5,
+          center: [5.2913, 52.1326],
+          zoom: 6,
           maxZoom: 18,
         });
 

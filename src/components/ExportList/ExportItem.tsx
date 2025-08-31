@@ -197,12 +197,6 @@ const ExportItem: React.FC<ExportItemProps> = ({ exportItem }) => {
           </span>
         </h3>
         <div className="flex items-center">
-          <span
-            dir="rtl"
-            className="text-xs md:text-base text-gray-500 opacity-70 mr-2 whitespace-nowrap overflow-hidden text-ellipsis"
-          >
-            {exportItem.persian_Name}
-          </span>
           {isCollapsed ? (
             <FaChevronDown className="text-gray-600 dark:text-gray-300" />
           ) : (

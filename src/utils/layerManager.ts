@@ -188,7 +188,7 @@ export const useLayerManager = (
     },
     IranFTTXAreasFill: {
       ...useIranFTTXAreaLayer().fillLayer,
-      label: "Iran FTTX Areas",
+      label: "FTTX Coverage Areas",
       icon: "",
       type: "fill",
       visible: layerVisibility.IranFTTXAreasFill,

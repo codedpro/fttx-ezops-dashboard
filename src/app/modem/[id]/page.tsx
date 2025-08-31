@@ -16,11 +16,7 @@ import moment from "moment-jalaali";
 
 const ModemPage = async ({ params }: { params: { id: string } }) => {
   const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value;
-
-  if (!token) {
-    throw new Error("Unauthorized: No Access Token provided");
-  }
+  const token = cookieStore.get("AccessToken")?.value || "";
 
   const modemId = params.id;
   const modemDetails = await fetchModemDetails(modemId, token);
