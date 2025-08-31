@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { FTTHPreorder } from "../types/FTTHPreorder";
-import { mockFTTHPreorders } from "@/lib/mocks/data";
 
 interface FTTHPreordersState {
   preorders: FTTHPreorder[];
@@ -67,7 +66,7 @@ export const useFTTHPreordersStore = create<FTTHPreordersState>((set, get) => ({
           );
         }
       } catch (error: any) {
-        set({ preorders: mockFTTHPreorders(200), error: error.message, isLoading: false });
+        set({ error: error.message, isLoading: false });
       } finally {
         set({ fetchingInProgress: false });
       }
@@ -132,7 +131,7 @@ export const useFTTHPreordersStore = create<FTTHPreordersState>((set, get) => ({
           );
         }
       } catch (error: any) {
-        set({ preorders: mockFTTHPreorders(200), error: error.message, isLoading: false });
+        set({ error: error.message, isLoading: false });
       } finally {
         set({ fetchingInProgress: false });
       }

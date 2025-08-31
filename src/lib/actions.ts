@@ -4,20 +4,6 @@ import qs from "qs";
 import { ExportItemType, ExportData } from "@/types/exports";
 import { FTTHACS } from "@/types/FTTHACS";
 import { TableData } from "@/types/SalesDetails";
-import {
-  mockModemDetails,
-  mockModemPacketRemaining,
-  mockFTTHPayload,
-  mockFTTHDashboard,
-  mockUTDailyChart,
-  mockExportList,
-  mockFTTHACS,
-  mockFTTHSalesDetails,
-} from "./mocks/data";
-
-// simple random util for local fallbacks
-const rand = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
 
 interface FTTHPayload {
   Date: string;
@@ -68,10 +54,11 @@ export const fetchModemDetails = async (
 
   try {
     const response = await axios.request(config);
+
     return response.data;
   } catch (error) {
-    console.warn("Falling back to mock modem details:", error);
-    return mockModemDetails(id);
+    console.error("Error fetching modem details:", error);
+    throw new Error("Failed to fetch modem details");
   }
 };
 
@@ -96,10 +83,11 @@ export const fetchModemPacketRemaining = async (
 
   try {
     const response = await axios.request(config);
-    return response.data;
+    return response.data
+   // return response.data;
   } catch (error) {
-    console.warn("Falling back to mock remaining packet details:", error);
-    return mockModemPacketRemaining();
+    console.error("Error fetching modem details:", error);
+    throw new Error("Failed to fetch modem details");
   }
 };
 
@@ -147,10 +135,11 @@ export const fetchFTTHPayload = async (
       console.warn(`No data found for city "${city}". Falling back to "all".`);
       return await fetchFTTHPayload(token, "all");
     }
+    console.log(response.data)
     return response.data;
   } catch (error) {
-    console.warn("Falling back to mock FTTH payload:", error);
-    return mockFTTHPayload();
+    console.error("Error fetching FTTH dashboard data:", error);
+    throw new Error("Failed to fetch FTTH dashboard data");
   }
 };
 
@@ -168,8 +157,8 @@ export const fetchFTTHDashboard = async (token: string) => {
     const response = await axios.request(config);
     return response.data;
   } catch (error) {
-    console.warn("Falling back to mock FTTH dashboard data:", error);
-    return mockFTTHDashboard();
+    console.error("Error fetching FTTH dashboard data:", error);
+    throw new Error("Failed to fetch FTTH dashboard data");
   }
 };
 
@@ -193,16 +182,10 @@ export const fetchFTTHDailyChartData = async (token: string) => {
     const response = await axios(config);
     return response.data;
   } catch (error) {
-    console.warn("Falling back to mock daily chart data:", error);
-    return mockUTDailyChart();
+    console.error("Failed to fetch daily chart data:", error);
+    throw error;
   }
 };
-
-const reduceExports = (data: ExportItemType[]): ExportData =>
-  data.reduce<ExportData>((acc, exp) => {
-    (acc[exp.category] ||= []).push(exp);
-    return acc;
-  }, {});
 
 export const fetchFTTHDynamicExportList = async (
   token: string
@@ -218,13 +201,23 @@ export const fetchFTTHDynamicExportList = async (
 
   try {
     const response = await axios.request(config);
-    if (Array.isArray(response.data)) {
-      return reduceExports(response.data as ExportItemType[]);
-    }
-    throw new Error("Invalid export data");
+    const exportsData: ExportItemType[] = response.data;
+
+    const categories: ExportData = exportsData.reduce<ExportData>(
+      (acc, exp) => {
+        if (!acc[exp.category]) {
+          acc[exp.category] = [];
+        }
+        acc[exp.category].push(exp);
+        return acc;
+      },
+      {}
+    );
+
+    return categories;
   } catch (error) {
-    console.warn("Falling back to mock export list data:", error);
-    return reduceExports(mockExportList());
+    console.error("Error fetching FTTH export list data:", error);
+    throw new Error("Failed to fetch FTTH export list data");
   }
 };
 
@@ -240,10 +233,10 @@ export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
 
   try {
     const response = await axios.request(config);
+
     return response.data as FTTHACS[];
   } catch (error) {
-    console.warn("Falling back to mock ACS data:", error);
-    return mockFTTHACS(250);
+    throw new Error("Failed to fetch FTTH ACS data");
   }
 };
 
@@ -263,8 +256,7 @@ export const fetchFTTHSalesDetails = async (
     const response = await axios.request(config);
     return response.data as TableData[];
   } catch (error) {
-    console.warn("Falling back to mock sales details data:", error);
-    return mockFTTHSalesDetails();
+    throw new Error("Failed to fetch FTTH ACS data");
   }
 };
 
@@ -284,15 +276,10 @@ export const fetchFTTHGetPayloadUseDaily = async (
 
   try {
     const response = await axios.request(config);
+
     return response.data;
   } catch (error) {
-    console.warn("Falling back to mock payload use daily:", error);
-    const rows = Array.from({ length: 30 }).map((_, i) => ({
-      City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
-      Usage: rand(1000, 100000),
-      ftth_id: 8411000 + i,
-      modem_id: `MDM_${800000 + i}`,
-    }));
-    return rows;
+    console.error("Error fetching FTTH dashboard data:", error);
+    throw new Error("Failed to fetch FTTH dashboard data");
   }
 };
