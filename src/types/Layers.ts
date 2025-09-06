@@ -22,4 +22,5 @@ export type LayerKeys =
   | "autoFATLayer"
   | "PowerAlarmLayer"
   | "DownSiteAlarmLayer"
-  | "IranFTTXAreasFill";
+  | "IranFTTXAreasFill"
+  ;

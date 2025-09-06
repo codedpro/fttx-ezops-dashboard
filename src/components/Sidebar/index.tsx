@@ -21,7 +21,6 @@ import {
   PiPaintBrushBroad,
   PiPaintBrushBroadDuotone,
 } from "react-icons/pi";
-import { UserService } from "@/services/userService";
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
@@ -38,7 +37,6 @@ interface SidebarItemType {
 const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isArrowClicked, setIsArrowClicked] = useState(true);
-  const userservice = new UserService();
   useEffect(() => {
     setCollapsed(!sidebarOpen);
   }, [sidebarOpen]);
@@ -71,8 +69,6 @@ const SidebarComponent = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     color: "#1f2937",
     borderColor: "#e2e8f0",
   };
-  const allowedDesignUsers = ["amirhossein.nou", "amirhossein.o", "mojtaba.tag", "alireza.tagh", "mohammad.akbarp"];
-  const username = userservice.getUserName();
 
 const sidebarItems: SidebarItemType[] = [
     {
@@ -100,37 +96,28 @@ const sidebarItems: SidebarItemType[] = [
       icon: <PiMapPinArea />,
       route: "/iranfttx",
     },
-    /*     {
-      label: "Design Desk",
-      icon: <FaPaintBrush />,
-      route: "/design-desk",
-    }, */
     {
       label: "Exports",
       icon: <FaFileExport />,
       route: "/exports",
     },
-  ];
-  if (username && allowedDesignUsers.includes(username)) {
-    sidebarItems.push({
+    {
       label: "Design Desk",
       icon: <FaPaintBrush />,
       route: "/design-desk",
     },
-  
-  {
+    {
       label: "Management Report",
       icon: <FaChartLine />,
       route: "/IranMap",
-    },{
+    },
+    {
       label: "Ai Planning",
       icon: <FaRobot />,
       route: "/auto-plan",
       pro: true,
     },
-  
-  );
-  }
+  ];
   if (!sidebarOpen) {
     return null;
   }

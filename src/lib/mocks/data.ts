@@ -32,52 +32,121 @@ export const DUMMY_USER = {
   Role: ["user"],
 };
 
+// Netherlands macro-regions and their provinces (for map grouping)
+export const NL_REGIONS: Record<string, { provinces: string[] }> = {
+  "Noord-Nederland": { provinces: ["Groningen", "Friesland", "Drenthe"] },
+  "Oost-Nederland": { provinces: ["Overijssel", "Gelderland"] },
+  "Midden-Nederland": { provinces: ["Flevoland", "Utrecht"] },
+  "Randstad-Noord": { provinces: ["Noord-Holland"] },
+  "Randstad-Zuid": { provinces: ["Zuid-Holland", "Zeeland"] },
+  "Zuid-Nederland": { provinces: ["Noord-Brabant", "Limburg"] },
+};
+
+export function mockNLRegions() {
+  return Object.entries(NL_REGIONS).map(([name, cfg]) => ({ name, provinces: cfg.provinces }));
+}
+
 // Dashboard style payload per day (ChartFour expects expanded shape)
 export function mockFTTHPayload(days = 30) {
+  // Simulate a large NL ISP: daily traffic in hundreds of TB.
+  // Values are in GB so 300_000 = 300 TB.
   const today = new Date();
   return Array.from({ length: days }).map((_, i) => {
     const d = new Date(today);
     d.setDate(d.getDate() - (days - 1 - i));
-    // Coarse but realistic magnitudes
-    const charged = rand(20_000, 40_000);
-    const actual = charged - rand(0, 2000);
-    const up = rand(100, 500);
-    const down = rand(1000, 5000);
+
+    // Weekday/weekend profile: weekends see ~10% more video streaming.
+    const isWeekend = [0, 6].includes(d.getDay());
+    // Daily totals in GB: 8–14 PB on weekdays, 9–16 PB on weekends.
+    // 1 PB = 1,000,000 GB (approx in chart’s 1000-based units)
+    const baseGB = isWeekend ? rand(9_000_000, 16_000_000) : rand(8_000_000, 14_000_000);
+    const charged = baseGB; // GB/day
+    const actual = Math.max(0, charged - rand(100_000, 500_000)); // GB/day slightly lower than charged
+
+    // Peak throughput (GB/s in chart helper semantics: we keep it as GB to be unit-converted client-side)
+    // Peak downlink in the evening; uplink lower than downlink.
+    // Peak throughput in Gbps (downlink >> uplink)
+    const peakDownGbps = rand(1_200, 3_500); // 1.2–3.5 Tbps peak downlink
+    const peakUpGbps = rand(150, 450); // 0.15–0.45 Tbps peak uplink
+
     return {
       Date: d.toISOString().slice(0, 10),
-      Value: charged, // Charged Traffic
-      Value2: actual, // Actual Traffic
-      ValueUp: up, // Uplink peak
-      ValueDown: down, // Downlink peak
+      Value: charged,
+      Value2: actual,
+      ValueUp: peakUpGbps,
+      ValueDown: peakDownGbps,
     };
   });
 }
 
-export function mockIBSNGOnlineCount(rows = 100) {
+export function mockIBSNGOnlineCount(rows = 144) {
+  // 10-minute granularity for one day by default (144 points).
+  // Model a diurnal curve around a large installed base.
   const now = Date.now();
-  return Array.from({ length: rows }).map((_, i) => ({
-    datetime: new Date(now - (rows - 1 - i) * 10 * 60 * 1000).toISOString(),
-    count: rand(500, 2500),
-  }));
+  const points = Array.from({ length: rows }).map((_, i) => {
+    const ts = new Date(now - (rows - 1 - i) * 10 * 60 * 1000);
+    const hour = ts.getHours() + ts.getMinutes() / 60;
+
+    // Base installed active PPPoE sessions: ~0.9M by night, ~1.4M evening peak.
+    // Smooth with a cosine curve that peaks ~21:00.
+    const peakHour = 21;
+    const phase = Math.cos(((hour - peakHour) / 12) * Math.PI);
+    const base = 1_150_000 + (1 - phase) * 140_000; // ~1.01M to ~1.29M baseline swing
+
+    // Add small noise (±0.6%) so adjacent points don’t jump wildly.
+    const noise = 1 + (Math.random() - 0.5) * 0.012;
+    const count = Math.round(base * noise);
+
+    return {
+      datetime: ts.toISOString(),
+      count,
+    };
+  });
+  return points;
 }
 
 export function mockFTTHDashboard() {
+  // Model a large NL FTTx operator scale with consistent ratios.
+  const online = rand(1_000_000, 1_400_000); // Active online sessions
+  const offline = Math.round(online * randFloat(0.03, 0.08, 3)); // 3–8% offline
+
+  const delivered = rand(1_200_000, 1_900_000);
+  const notDelivered = rand(60_000, 220_000);
+
+  // Monthly package volume in MB (to match convertValuesToHighUnit's MB base).
+  // 9–20 billion MB ≈ 8.4–18.6 PB sold; consumed slightly less.
+  const totalSold = rand(9_000_000_000, 20_000_000_000);
+  const totalConsumed = rand(
+    Math.floor(totalSold * 0.75),
+    Math.floor(totalSold * 0.98)
+  );
+
+  const uTClosed = rand(6_000, 18_000);
+  const uTOpen = rand(500, 3_000);
+
+  const preorderNotPaid = rand(5_000, 20_000);
+  const preorderPaid = rand(4_000, 18_000);
+  const purchaseNotDelivered = rand(2_000, 10_000);
+  const rejected = rand(500, 3_000);
+  const canceled = rand(300, 2_000);
+  const confirmedWaiting = rand(2_000, 8_000);
+
   return [
     {
-      online_Count: rand(5000, 8000),
-      offline_Count: rand(200, 600),
-      modem_Delivered: rand(3000, 4000),
-      modem_Not_Delivered: rand(1000, 2000),
-      total_Sold: rand(10000, 20000),
-      total_Consumed: rand(7000, 15000),
-      uT_Closed: rand(1000, 2000),
-      uT_Open: rand(100, 400),
-      preorder_Notpaid: rand(100, 400),
-      preorder_Paid: rand(100, 500),
-      purchase_But_Not_Delivered: rand(100, 300),
-      rejected: rand(20, 100),
-      canceled: rand(10, 50),
-      confirmed_Waiting_For_Purchase: rand(50, 200),
+      online_Count: online,
+      offline_Count: offline,
+      modem_Delivered: delivered,
+      modem_Not_Delivered: notDelivered,
+      total_Sold: totalSold,
+      total_Consumed: totalConsumed,
+      uT_Closed: uTClosed,
+      uT_Open: uTOpen,
+      preorder_Notpaid: preorderNotPaid,
+      preorder_Paid: preorderPaid,
+      purchase_But_Not_Delivered: purchaseNotDelivered,
+      rejected,
+      canceled,
+      confirmed_Waiting_For_Purchase: confirmedWaiting,
     },
   ];
 }
@@ -132,7 +201,7 @@ export function mockFTTHACS(count = 500): FTTHACS[] {
 }
 
 export function mockFTTHSalesDetails(): TableData[] {
-  const cities = ["Amsterdam", "Rotterdam", "Utrecht", "Eindhoven"];
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all").slice(0, 8).map((c) => c.Name);
   return cities.map((c) => ({
     City: c,
     Request: rand(100, 500),
@@ -180,74 +249,120 @@ export function mockExportList(): ExportItemType[] {
 }
 
 export function mockFTTHCities(): FTTHCity[] {
-  return [
-    { ID: 1, Name: "all", Full_Name: "All", Lat: NL_BASE_LAT, Long: NL_BASE_LONG, Farsi: "همه" },
-    { ID: 2, Name: "Amsterdam", Full_Name: "Amsterdam", Lat: 52.3676, Long: 4.9041, Farsi: "آمستردام" },
-    { ID: 3, Name: "Rotterdam", Full_Name: "Rotterdam", Lat: 51.9244, Long: 4.4777, Farsi: "روتردام" },
-    { ID: 4, Name: "Utrecht", Full_Name: "Utrecht", Lat: 52.0907, Long: 5.1214, Farsi: "اوترخت" },
+  const cities: Array<Omit<FTTHCity, "ID" | "Farsi"> & { Farsi?: string }> = [
+    { Name: "all", Full_Name: "All", Lat: NL_BASE_LAT, Long: NL_BASE_LONG },
+    { Name: "Amsterdam", Full_Name: "Amsterdam", Lat: 52.3676, Long: 4.9041, Farsi: "آمستردام" },
+    { Name: "Rotterdam", Full_Name: "Rotterdam", Lat: 51.9244, Long: 4.4777, Farsi: "روتردام" },
+    { Name: "The Hague", Full_Name: "The Hague", Lat: 52.0705, Long: 4.3007 },
+    { Name: "Utrecht", Full_Name: "Utrecht", Lat: 52.0907, Long: 5.1214, Farsi: "اوترخت" },
+    { Name: "Eindhoven", Full_Name: "Eindhoven", Lat: 51.4416, Long: 5.4697 },
+    { Name: "Tilburg", Full_Name: "Tilburg", Lat: 51.5555, Long: 5.0913 },
+    { Name: "Groningen", Full_Name: "Groningen", Lat: 53.2194, Long: 6.5665 },
+    { Name: "Almere", Full_Name: "Almere", Lat: 52.3508, Long: 5.2647 },
+    { Name: "Breda", Full_Name: "Breda", Lat: 51.5719, Long: 4.7683 },
+    { Name: "Nijmegen", Full_Name: "Nijmegen", Lat: 51.8126, Long: 5.8372 },
+    { Name: "Haarlem", Full_Name: "Haarlem", Lat: 52.3874, Long: 4.6462 },
+    { Name: "Arnhem", Full_Name: "Arnhem", Lat: 51.9851, Long: 5.8987 },
+    { Name: "Maastricht", Full_Name: "Maastricht", Lat: 50.8514, Long: 5.6900 },
+    { Name: "Leiden", Full_Name: "Leiden", Lat: 52.1601, Long: 4.4970 },
+    { Name: "Dordrecht", Full_Name: "Dordrecht", Lat: 51.8133, Long: 4.6901 },
+    { Name: "Zoetermeer", Full_Name: "Zoetermeer", Lat: 52.0607, Long: 4.4940 },
+    { Name: "Enschede", Full_Name: "Enschede", Lat: 52.2215, Long: 6.8937 },
+    { Name: "Apeldoorn", Full_Name: "Apeldoorn", Lat: 52.2112, Long: 5.9699 },
+    { Name: "Zwolle", Full_Name: "Zwolle", Lat: 52.5168, Long: 6.0830 },
+    { Name: "Amersfoort", Full_Name: "Amersfoort", Lat: 52.1561, Long: 5.3878 },
   ];
+
+  return cities.map((c, idx) => ({
+    ID: idx + 1,
+    Name: c.Name,
+    Full_Name: c.Full_Name,
+    Lat: c.Lat,
+    Long: c.Long,
+    Farsi: c.Farsi || c.Full_Name,
+  }));
 }
 
 export function mockFTTHModems(count = 200): FTTHModem[] {
-  return Array.from({ length: count }).map((_, i) => ({
-    Modem_ID: 8411000 + i,
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-    OLT: `OLT${rand(1000, 9999)}`,
-    POP: `POP${rand(1, 9)}`,
-    FAT: `FAT${rand(1, 999)}`,
-    Symbol: ["Online", "Offline"][i % 2],
-    MAC: `AA:BB:CC:${(i % 99).toString().padStart(2, "0")}:DD:EE`,
-    IP: `10.0.${i % 255}.${(i * 7) % 255}`,
-    Error: "",
-    Online_Status: i % 3 === 0 ? "Offline" : "Online",
-  }));
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all");
+  const jitter = () => randFloat(-0.05, 0.05, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      Modem_ID: 8411000 + i,
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+      OLT: `OLT${rand(1000, 9999)}`,
+      POP: `POP${rand(1, 9)}`,
+      FAT: `FAT${rand(1, 999)}`,
+      Symbol: ["Online", "Offline"][i % 2],
+      MAC: `AA:BB:CC:${(i % 99).toString().padStart(2, "0")}:DD:EE`,
+      IP: `10.0.${i % 255}.${(i * 7) % 255}`,
+      Error: "",
+      Online_Status: i % 3 === 0 ? "Offline" : "Online",
+    };
+  });
 }
 
 export function mockFTTHComponentsFat(count = 100): FTTHFatComponent[] {
-  return Array.from({ length: count }).map((_, i) => ({
-    FAT_ID: 1000 + i,
-    Name: `FAT_${1000 + i}`,
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-    OLT: `OLT${rand(1000, 9999)}`,
-    POP: `POP${rand(1, 9)}`,
-    FAT: `FAT${1000 + i}`,
-    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
-    Is_Plan: false,
-    Chain_ID: 50000 + i,
-    Type: i % 2 === 0 ? "MFAT" : "SFAT",
-    Plan_Type: 0,
-  }));
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all");
+  const jitter = () => randFloat(-0.05, 0.05, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      FAT_ID: 1000 + i,
+      Name: `FAT_${1000 + i}`,
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+      OLT: `OLT${rand(1000, 9999)}`,
+      POP: `POP${rand(1, 9)}`,
+      FAT: `FAT${1000 + i}`,
+      City: city.Name,
+      Is_Plan: false,
+      Chain_ID: 50000 + i,
+      Type: i % 2 === 0 ? "MFAT" : "SFAT",
+      Plan_Type: 0,
+    };
+  });
 }
 
 export function mockFTTHComponentsOther(count = 40): FTTHOtherComponent[] {
   const types = ["OLT", "ODC", "CP", "TC"];
-  return Array.from({ length: count }).map((_, i) => ({
-    Component_ID: 2000 + i,
-    Name: `${types[i % types.length]}_${2000 + i}`,
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
-    Chain_ID: 60000 + i,
-    Type: types[i % types.length],
-    Is_Plan: false,
-    Plan_Type: 0,
-  }));
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all");
+  const jitter = () => randFloat(-0.05, 0.05, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      Component_ID: 2000 + i,
+      Name: `${types[i % types.length]}_${2000 + i}`,
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+      City: city.Name,
+      Chain_ID: 60000 + i,
+      Type: types[i % types.length],
+      Is_Plan: false,
+      Plan_Type: 0,
+    };
+  });
 }
 
 export function mockFTTHPoints(count = 200): FTTHPoint[] {
-  return Array.from({ length: count }).map((_, i) => ({
-    Point_ID: 70000 + i,
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-    Type: ["ODCLine", "FATLine", "DropCableLine"][i % 3],
-    Chain_ID: 80000 + Math.floor(i / 5),
-    Order: i % 10,
-    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
-    Is_Plan: false,
-    Plan_Type: 0,
-  }));
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all");
+  const jitter = () => randFloat(-0.03, 0.03, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      Point_ID: 70000 + i,
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+      Type: ["ODCLine", "FATLine", "DropCableLine"][i % 3],
+      Chain_ID: 80000 + Math.floor(i / 5),
+      Order: i % 10,
+      City: city.Name,
+      Is_Plan: false,
+      Plan_Type: 0,
+    };
+  });
 }
 
 export function mockModemDetails(id: string): ModemDetails {
@@ -384,43 +499,52 @@ export function mockNominatimSearch() {
 }
 
 export function mockFTTHACSRXPower(count = 100) {
-  return Array.from({ length: count }).map((_, i) => ({
-    Modem_ID: 841100 + i,
-    RXPower: randFloat(-30, -5, 1),
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-  }));
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all");
+  const jitter = () => randFloat(-0.05, 0.05, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      Modem_ID: 841100 + i,
+      RXPower: randFloat(-30, -5, 1),
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+    };
+  });
 }
 
 export function mockExportRowsDefault(rows = 20) {
   return Array.from({ length: rows }).map((_, i) => ({
     Row: i + 1,
     Name: `Item ${i + 1}`,
-    City: ["Amsterdam", "Rotterdam", "Utrecht"][i % 3],
+    City: mockFTTHCities().filter((c) => c.Name !== "all").map((c) => c.Name)[i % 6],
     Status: ["Pending", "Confirmed", "Rejected"][i % 3],
     Value: rand(1, 1000),
   }));
 }
 
 export function mockFTTHBlocks(count = 120): FTTHBlock[] {
-  const cities = ["Amsterdam", "Rotterdam", "Utrecht"];
-  return Array.from({ length: count }).map((_, i) => ({
-    ID: 1000 + i,
-    Name: `BLK_${1000 + i}`,
-    Block_ID: 5000 + i,
-    Adres1395: `Address ${i}`,
-    Hoze1395: rand(1, 10),
-    BLK_No1395: rand(1, 9999),
-    Value: rand(1, 100),
-    "95HH": rand(10, 500),
-    Area: rand(2000, 10000),
-    length: rand(100, 1000),
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-    Chain_ID: 80000 + i,
-    Order: i % 10,
-    City: cities[i % cities.length],
-  }));
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all").slice(0, 6);
+  const jitter = () => randFloat(-0.04, 0.04, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      ID: 1000 + i,
+      Name: `BLK_${1000 + i}`,
+      Block_ID: 5000 + i,
+      Adres1395: `Address ${i}`,
+      Hoze1395: rand(1, 10),
+      BLK_No1395: rand(1, 9999),
+      Value: rand(1, 100),
+      "95HH": rand(10, 500),
+      Area: rand(2000, 10000),
+      length: rand(100, 1000),
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+      Chain_ID: 80000 + i,
+      Order: i % 10,
+      City: city.Name,
+    };
+  });
 }
 
 export function mockFTTHTabrizFATs(count = 100): FATData[] {
@@ -433,23 +557,27 @@ export function mockFTTHTabrizFATs(count = 100): FATData[] {
   }));
 }
 
-export function mockFTTHPreorders(count = 200): FTTHPreorder[] {
-  const cities = ["Amsterdam", "Rotterdam", "Utrecht"];
+export function mockFTTHPreorders(count = 2000): FTTHPreorder[] {
+  const cities = mockFTTHCities().filter((c) => c.Name !== "all").slice(0, 10);
   const provinces = ["North Holland", "South Holland", "Utrecht"];
-  return Array.from({ length: count }).map((_, i) => ({
-    ID: 9000 + i,
-    Eshop_ID: 50000 + i,
-    Postal_Code: `10${rand(100000, 999999)}`,
-    Province: provinces[i % provinces.length],
-    City: cities[i % cities.length],
-    Tracking_Code: `TRK${100000 + i}`,
-    Lat: NL_BASE_LAT + randFloat(-0.5, 0.5, 6),
-    Long: NL_BASE_LONG + randFloat(-0.5, 0.5, 6),
-    Created_Date: new Date(Date.now() - i * 86400000 / 4).toISOString(),
-    FTTH_ID: i % 5 === 0 ? 8411000 + i : null,
-    Product_Name: ["FTTH 100M", "FTTH 50M", "FTTH 20M"][i % 3],
-    FAT_ID: i % 7 === 0 ? 1000 + i : null,
-  }));
+  const jitter = () => randFloat(-0.05, 0.05, 6);
+  return Array.from({ length: count }).map((_, i) => {
+    const city = cities[i % cities.length];
+    return {
+      ID: 9000 + i,
+      Eshop_ID: 50000 + i,
+      Postal_Code: `10${rand(100000, 999999)}`,
+      Province: provinces[i % provinces.length],
+      City: city.Name,
+      Tracking_Code: `TRK${100000 + i}`,
+      Lat: city.Lat + jitter(),
+      Long: city.Long + jitter(),
+      Created_Date: new Date(Date.now() - (i * 86400000) / 4).toISOString(),
+      FTTH_ID: i % 5 === 0 ? 8411000 + i : null,
+      Product_Name: ["FTTH 100M", "FTTH 50M", "FTTH 20M"][i % 3],
+      FAT_ID: i % 7 === 0 ? 1000 + i : null,
+    };
+  });
 }
 
 export function mockSuggestedFAT(count = 80): SuggestedFAT[] {

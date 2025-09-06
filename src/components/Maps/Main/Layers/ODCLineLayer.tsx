@@ -3,6 +3,7 @@ import { FeatureCollection, Geometry } from "geojson";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import { useEffect, useState } from "react";
 import { groupPointsByChainAndCreateLine } from "@/utils/groupPointsByChain";
+import { snapChainsToStreets } from "@/utils/snapToStreets";
 
 export const useODCLineLayer = () => {
   const points = useFTTHPointsStore((state) => state.points);
@@ -12,12 +13,16 @@ export const useODCLineLayer = () => {
     const odcPoints = points.filter(point => point.Type === "ODC");
 
     if (odcPoints.length > 0) {
-      const geoJsonData: FeatureCollection<Geometry> = groupPointsByChainAndCreateLine(odcPoints);
-
-      setSource({
-        type: "geojson",
-        data: geoJsonData,
-      });
+      const base: FeatureCollection<Geometry> = groupPointsByChainAndCreateLine(odcPoints);
+      (async () => {
+        try {
+          const snapped = await snapChainsToStreets(base.features as any);
+          const data: FeatureCollection<Geometry> = { type: "FeatureCollection", features: snapped } as any;
+          setSource({ type: "geojson", data });
+        } catch {
+          setSource({ type: "geojson", data: base });
+        }
+      })();
     }
   }, [points]);
 

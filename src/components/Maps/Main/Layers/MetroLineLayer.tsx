@@ -3,6 +3,7 @@ import { FeatureCollection, Geometry } from "geojson";
 import mapboxgl, { GeoJSONSourceSpecification } from "mapbox-gl";
 import { useEffect, useState } from "react";
 import { groupPointsByChainAndCreateLine } from "@/utils/groupPointsByChain";
+import { snapChainsToStreets } from "@/utils/snapToStreets";
 
 export const useMetroLineLayer = () => {
   const points = useFTTHPointsStore((state) => state.points);
@@ -12,13 +13,16 @@ export const useMetroLineLayer = () => {
     const metroPoints = points.filter((point) => point.Type === "Metro");
 
     if (metroPoints.length > 0) {
-      const geoJsonData: FeatureCollection<Geometry> =
-        groupPointsByChainAndCreateLine(metroPoints);
-
-      setSource({
-        type: "geojson",
-        data: geoJsonData,
-      });
+      const base: FeatureCollection<Geometry> = groupPointsByChainAndCreateLine(metroPoints);
+      (async () => {
+        try {
+          const snapped = await snapChainsToStreets(base.features as any);
+          const data: FeatureCollection<Geometry> = { type: "FeatureCollection", features: snapped } as any;
+          setSource({ type: "geojson", data });
+        } catch {
+          setSource({ type: "geojson", data: base });
+        }
+      })();
     }
   }, [points]);
 

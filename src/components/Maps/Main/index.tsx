@@ -13,6 +13,8 @@ import React, {
   import "mapbox-gl/dist/mapbox-gl.css";
   
   import { dynamicZoom } from "@/utils/dynamicZoom";
+  import type { FeatureCollection, Geometry, Position, Feature, MultiPolygon, Polygon } from "geojson";
+  import { REGIONS } from "@/lib/map-data";
   import { LayerType } from "@/types/FTTHMapProps";
   import {
     addFillLayer,
@@ -94,10 +96,119 @@ import React, {
         }
       });
     };
-  
+
+    // --- NL Provinces + Region Borders (always on) ---
+    const normalizeProvinceName = (raw: any) => {
+      if (!raw) return null as string | null;
+      const val = String(raw).toLowerCase().trim();
+      const clean = val
+        .replace(/^provincie\s+/i, "")
+        .replace(/\s*province$/i, "")
+        .replace(/-/g, "-")
+        .replace(/\s+/g, " ");
+      const canonical: Record<string, string> = {
+        "groningen": "Groningen",
+        "friesland": "Friesland",
+        "fryslân": "Friesland",
+        "drenthe": "Drenthe",
+        "overijssel": "Overijssel",
+        "gelderland": "Gelderland",
+        "flevoland": "Flevoland",
+        "utrecht": "Utrecht",
+        "noord-holland": "Noord-Holland",
+        "noord holland": "Noord-Holland",
+        "zuid-holland": "Zuid-Holland",
+        "zuid holland": "Zuid-Holland",
+        "zeeland": "Zeeland",
+        "noord-brabant": "Noord-Brabant",
+        "noord brabant": "Noord-Brabant",
+        "limburg": "Limburg",
+      };
+      if (canonical[clean]) return canonical[clean];
+      const titled = clean.replace(/\b\w/g, (m) => m.toUpperCase());
+      if (canonical[titled.toLowerCase()]) return canonical[titled.toLowerCase()];
+      return titled;
+    };
+
+    const addRegionsOverlay = async () => {
+      if (!mapRef.current) return;
+      try {
+        const res = await fetch("/netherlands-provinces.json");
+        if (!res.ok) return;
+        const raw = (await res.json()) as FeatureCollection<Geometry>;
+        const processed: FeatureCollection<Geometry> = {
+          type: "FeatureCollection",
+          features: raw.features.map((f: any) => {
+            const props = f.properties || {};
+            const provRaw = props.name || props.NAME_1 || props.prov_name || props.Province || props.provincie || props.provincienaam || props.NAME;
+            const provName = normalizeProvinceName(provRaw);
+            let regionName: string | null = null;
+            if (provName) {
+              for (const [rName, cfg] of Object.entries(REGIONS)) {
+                if (cfg.provinces.some((p) => normalizeProvinceName(p)?.toLowerCase() === provName.toLowerCase())) {
+                  regionName = rName;
+                  break;
+                }
+              }
+            }
+            return { ...f, properties: { ...props, name: provName || props.name, region: regionName || "" } } as any;
+          }),
+        };
+
+        if (!mapRef.current.getSource("provinces")) {
+          mapRef.current.addSource("provinces", { type: "geojson", data: processed });
+        }
+
+        const regionColorExpr: any = ["match", ["get", "region"]];
+        const regionPalette: Record<string, string> = {
+          "Noord-Nederland": "#4ade80",
+          "Oost-Nederland": "#60a5fa",
+          "Midden-Nederland": "#f59e0b",
+          "Randstad-Noord": "#f472b6",
+          "Randstad-Zuid": "#22d3ee",
+          "Zuid-Nederland": "#a78bfa",
+        };
+        Object.keys(REGIONS).forEach((name) => {
+          regionColorExpr.push(name, regionPalette[name] || "#cccccc");
+        });
+        regionColorExpr.push("#cccccc");
+
+        if (!mapRef.current.getLayer("provinces-fill")) {
+          mapRef.current.addLayer({ id: "provinces-fill", type: "fill", source: "provinces", paint: { "fill-color": regionColorExpr, "fill-opacity": 0.18 } });
+        }
+        if (!mapRef.current.getLayer("provinces-outline")) {
+          mapRef.current.addLayer({ id: "provinces-outline", type: "line", source: "provinces", paint: { "line-color": "#666", "line-width": 1.2, "line-opacity": 0.7 } });
+        }
+
+        // Regions outline as MultiPolygon per region
+        const regionsFC: FeatureCollection<Geometry> = { type: "FeatureCollection", features: [] };
+        for (const [regionName, cfg] of Object.entries(REGIONS)) {
+          const feats = processed.features.filter((f: any) => f.properties?.region === regionName);
+          if (!feats.length) continue;
+          const polys: Position[][][] = [];
+          for (const f of feats as any[]) {
+            if (f.geometry?.type === "Polygon") polys.push(f.geometry.coordinates);
+            else if (f.geometry?.type === "MultiPolygon") for (const p of f.geometry.coordinates) polys.push(p);
+          }
+          if (!polys.length) continue;
+          const geom: MultiPolygon = { type: "MultiPolygon", coordinates: polys };
+          const asFeature: Feature<MultiPolygon> = { type: "Feature", geometry: geom, properties: { name: regionName } };
+          regionsFC.features.push(asFeature);
+        }
+        if (!mapRef.current.getSource("regions")) {
+          mapRef.current.addSource("regions", { type: "geojson", data: regionsFC });
+        }
+        if (!mapRef.current.getLayer("regions-outline")) {
+          mapRef.current.addLayer({ id: "regions-outline", type: "line", source: "regions", paint: { "line-color": "#ffffff", "line-width": 3, "line-opacity": 0.9 } });
+        }
+      } catch (e) {
+        console.warn("Provinces overlay load failed", e);
+      }
+    };
+
     useEffect(() => {
       if (!mapContainerRef.current) return;
-  
+
       const initializeMap = () => {
         if (mapRef.current === null && mapContainerRef.current) {
           mapRef.current = new mapboxgl.Map({
@@ -107,12 +218,15 @@ import React, {
             zoom: 6,
             maxZoom: 18,
           });
-  
+
           mapRef.current.on("load", () => {
             setMapIsLoaded(true);
-            addLayersToMap();
-            dynamicZoom(mapRef, layers as LayerType[]);
-            setIsStyleloaded(true);
+            // Add provinces/regions first so they sit beneath other layers
+            addRegionsOverlay().finally(() => {
+              addLayersToMap();
+              dynamicZoom(mapRef, layers as LayerType[]);
+              setIsStyleloaded(true);
+            });
           });
   
           mapRef.current.on("zoom", () =>

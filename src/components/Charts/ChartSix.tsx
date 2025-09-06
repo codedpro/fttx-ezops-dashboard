@@ -27,7 +27,7 @@ interface ChartSixProps {
 async function fetchIBSNGOnlineCount(
   token: string,
   interval: string = "10m",
-  rowLimit: number = 1000
+  rowLimit: number = 144
 ): Promise<OnlineCountPayload[]> {
   const data = JSON.stringify({
     interval,
@@ -62,7 +62,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
   // STATE & REFS
   // --------------------
   const [interval, setIntervalState] = useState<string>("10m");
-  const [rowLimit, setRowLimit] = useState<number>(1000);
+  const [rowLimit, setRowLimit] = useState<number>(144);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [payloadData, setPayloadData] = useState<OnlineCountPayload[] | null>(
     null
@@ -191,7 +191,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
       },
       yaxis: {
         labels: {
-          formatter: (value: number) => value.toString(),
+          formatter: (value: number) => value.toLocaleString(),
         },
         title: { style: { fontSize: "0px" } },
       },
@@ -259,7 +259,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
               <div className="relative z-50">
                 {/* Ensures the dropdown is above the chart */}
                 <DefaultSelectOption
-                  options={["1m", "10m", "30m", "1H"]}
+                  options={["10m", "1m", "30m", "1H"]}
                   onChange={(val: string) => setIntervalState(val)}
                   defaultValue={interval}
                 />
@@ -272,7 +272,7 @@ const ChartSix: React.FC<ChartSixProps> = ({ exportid, header }) => {
               </p>
               <div className="relative z-50">
                 <DefaultSelectOption
-                  options={["10", "50", "100", "200", "1000"]}
+                  options={["144", "288", "1008", "10", "50", "100", "200", "1000"]}
                   onChange={(val: string) => setRowLimit(Number(val))}
                   defaultValue={rowLimit.toString()}
                 />

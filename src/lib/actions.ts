@@ -66,7 +66,8 @@ export const fetchFTTHDynamicExportList = async (
 };
 
 export const fetchFTTHACS = async (token: string): Promise<FTTHACS[]> => {
-  return mockFTTHACS(250);
+  // Use a larger sample for more stable manufacturer/model/RX distributions
+  return mockFTTHACS(3000);
 };
 
 export const fetchFTTHSalesDetails = async (

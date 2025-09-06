@@ -23,7 +23,7 @@ const CityPanel: React.FC<CityPanelProps> = ({
       error: state.error,
     }));
   
-    const initialCities = ["Babol", "Tehran", "ARAK", "Tabriz"];
+    const initialCities = ["Amsterdam", "Rotterdam", "The Hague", "Utrecht"];
   
     const cities = cityList.map((city) => ({
       name: city.Full_Name,

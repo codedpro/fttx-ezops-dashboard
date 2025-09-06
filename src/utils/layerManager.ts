@@ -20,6 +20,7 @@ import { useFATLayer } from "@/components/Maps/Main/Layers/FATLayer";
 import { useCPLayer } from "@/components/Maps/DesignDesk/Layers/CPLayer";
 import { useFTTHPowerLayer } from "@/components/Maps/PreOrders/Layers/FTTHPower";
 import { useAutoFATLayer } from "@/components/Maps/auto-plan/Layers/autoFATLayer";
+// Removed NL city/province layers per user request
 //import { usePostBlockPolygonLayer } from "@/components/Maps/auto-plan/Layers/PostBlockLayer";
 import { useOLTPowerAlarmLayer } from "@/components/Maps/Main/Layers/OLTPowerAlarmLayer";
 import { useOLTDownSiteAlarmLayer } from "@/components/Maps/Main/Layers/OLTDownSiteAlarmLayer";
@@ -194,6 +195,7 @@ export const useLayerManager = (
       visible: layerVisibility.IranFTTXAreasFill,
       toggle: () => toggleLayerVisibility("IranFTTXAreasFill"),
     },
+    
     ModemLayer: {
       ...useFTTHModemLayer(),
       label: "Modem",

@@ -48,6 +48,25 @@ const Dashboard = async ({
 
   const acsArray = Array.isArray(acsData) ? acsData : [];
 
+  // Helper to scale category series to match a target total while preserving proportions
+  const scaleSeriesToTotal = (values: number[], total: number) => {
+    const sum = values.reduce((a, b) => a + b, 0);
+    if (sum === 0 || total <= 0) return values;
+    const scaled = values.map((v) => (v / sum) * total);
+    const floored = scaled.map((v) => Math.floor(v));
+    let remainder = total - floored.reduce((a, b) => a + b, 0);
+    // Distribute remainder to largest fractional parts to keep sum exact
+    const fracIdx = scaled
+      .map((v, i) => ({ i, f: v - Math.floor(v) }))
+      .sort((a, b) => b.f - a.f)
+      .map((x) => x.i);
+    for (let k = 0; k < floored.length && remainder > 0; k++) {
+      floored[fracIdx[k]] += 1;
+      remainder -= 1;
+    }
+    return floored;
+  };
+
   const rootCwmpGponCounts = acsArray.reduce(
     (acc: { [key: string]: number }, item) => {
       const key = item.root_cwmp_GPON;
@@ -79,7 +98,7 @@ const Dashboard = async ({
   }
 
   const labels_root_cwmp_GPON = Object.keys(topRootCwmpGponCounts);
-  const series_root_cwmp_GPON = Object.values(topRootCwmpGponCounts);
+  let series_root_cwmp_GPON: number[] = Object.values(topRootCwmpGponCounts);
 
   const RXPowerRange = { min: -28, max: -8 };
 
@@ -102,9 +121,7 @@ const Dashboard = async ({
   const labels_RXPower = ordered_RXPowerLabels.filter((label) =>
     Object.keys(rxPowerCounts).includes(label)
   );
-  const series_RXPower = labels_RXPower.map(
-    (label) => rxPowerCounts[label] || 0
-  );
+  let series_RXPower: number[] = labels_RXPower.map((label) => rxPowerCounts[label] || 0);
 
   const predefinedColors = [
     "#feca00",
@@ -166,7 +183,7 @@ const Dashboard = async ({
   }
 
   const labels_modelName = Object.keys(topModelNameCounts);
-  const series_modelName = Object.values(topModelNameCounts);
+  let series_modelName: number[] = Object.values(topModelNameCounts);
 
   const colors_modelName = assignColors(labels_modelName);
 
@@ -188,6 +205,14 @@ const Dashboard = async ({
   const labels_Paid_to_modems = ["Delivered", "Not Delivered"];
   const totalClosed = dashboardData?.uT_Closed || 0;
   const totalRunning = dashboardData?.uT_Open || 0;
+
+  // Align category totals with total installed base (online + offline) for consistency
+  const totalInstalled = (dashboardData?.online_Count || 0) + (dashboardData?.offline_Count || 0);
+  if (totalInstalled > 0) {
+    series_root_cwmp_GPON = scaleSeriesToTotal(series_root_cwmp_GPON, totalInstalled);
+    series_RXPower = scaleSeriesToTotal(series_RXPower, totalInstalled);
+    series_modelName = scaleSeriesToTotal(series_modelName, totalInstalled);
+  }
 
   const cardData = [
     {

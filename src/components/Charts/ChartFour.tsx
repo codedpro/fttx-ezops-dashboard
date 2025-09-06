@@ -164,8 +164,10 @@ const ChartFour: React.FC<ChartFourProps> = ({
     return `${dt.getFullYear()}-${`0${dt.getMonth() + 1}`.slice(-2)}-${`0${dt.getDate()}`.slice(-2)}`;
   };
 
-  const humanUnits = (v: number) => {
-    const u = ["MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  // Formatters with correct base for our data shape
+  // Daily traffic values are provided in GB; format GB->TB->PB...
+  const humanUnitsFromGB = (v: number) => {
+    const u = ["GB", "TB", "PB", "EB", "ZB", "YB"] as const;
     let i = 0;
     while (v >= 1000 && i < u.length - 1) {
       v /= 1000;
@@ -173,8 +175,9 @@ const ChartFour: React.FC<ChartFourProps> = ({
     }
     return `${v.toFixed(2)} ${u[i]}`;
   };
-  const humanUnitsPerSecond = (v: number) => {
-    const u = ["MB/s", "GB/s", "TB/s", "PB/s", "EB/s", "ZB/s", "YB/s"];
+  // Throughput peaks are provided in Gbps; format Gbps->Tbps->Pbps...
+  const humanUnitsGbps = (v: number) => {
+    const u = ["Gbps", "Tbps", "Pbps", "Ebps", "Zbps", "Ybps"] as const;
     let i = 0;
     while (v >= 1000 && i < u.length - 1) {
       v /= 1000;
@@ -189,6 +192,7 @@ const ChartFour: React.FC<ChartFourProps> = ({
       {
         name: "Charged Traffic Usage", // TB-scale
         type: "area",
+        yAxisIndex: 0,
         data: filtered.map((p) => ({
           x: labelDate(p.Date),
           y: p.Value,
@@ -197,22 +201,25 @@ const ChartFour: React.FC<ChartFourProps> = ({
       {
         name: "Actual Traffic Usage", // TB-scale
         type: "area",
+        yAxisIndex: 0,
         data: filtered.map((p) => ({
           x: labelDate(p.Date),
           y: p.Value2,
         })),
       },
       {
-        name: "Throughput peak uplink", // GB-scale
+        name: "Throughput peak uplink (Gbps)", // Gbps-scale
         type: "line",
+        yAxisIndex: 1,
         data: filtered.map((p) => ({
           x: labelDate(p.Date),
           y: p.ValueUp,
         })),
       },
       {
-        name: "Throughput peak downlink", // GB-scale
+        name: "Throughput peak downlink (Gbps)", // Gbps-scale
         type: "line",
+        yAxisIndex: 1,
         data: filtered.map((p) => ({
           x: labelDate(p.Date),
           y: p.ValueDown,
@@ -274,12 +281,10 @@ const ChartFour: React.FC<ChartFourProps> = ({
           
     tooltip: {
       y: {
-        formatter: (val: number, { series, seriesIndex }: any) => {
-          if (seriesIndex === 2 || seriesIndex === 3) {
-            return humanUnitsPerSecond(val);  // Uplink / Downlink
-          } else {
-            return humanUnits(val);            // Charged / Actual
-          }
+        formatter: (val: number, { seriesIndex }: any) => {
+          return seriesIndex === 2 || seriesIndex === 3
+            ? humanUnitsGbps(val)
+            : humanUnitsFromGB(val);
         },
       },
     },
@@ -292,21 +297,32 @@ const ChartFour: React.FC<ChartFourProps> = ({
       },
       yaxis: [
         {
-          seriesName: [
-            "Charged Traffic Usage",
-            "Actual Traffic Usage",
-          ],
-          labels: { formatter: humanUnits },
-          title: { style: { fontSize: "0px" } },
+          // Left axis for both payload series
+          seriesName: "Charged Traffic Usage",
+          labels: { formatter: humanUnitsFromGB },
+          title: { text: "Daily Traffic (GB/TB/PB)", style: { fontSize: "12px" } },
         },
         {
+          // Hide duplicate left axis for Actual (shares same units)
+          seriesName: "Actual Traffic Usage",
+          show: false,
+          labels: { formatter: humanUnitsFromGB },
+          title: { text: "", style: { fontSize: "0px" } },
+        },
+        {
+          // Right axis for throughput uplink
+          seriesName: "Throughput peak uplink (Gbps)",
           opposite: true,
-          seriesName: [
-            "Throughput peak uplink",
-            "Throughput peak downlink",
-          ],
-          labels: { formatter: humanUnitsPerSecond },
-          title: { style: { fontSize: "0px" } },
+          labels: { formatter: humanUnitsGbps },
+          title: { text: "Peak Throughput (Gbps/Tbps)", style: { fontSize: "12px" } },
+        },
+        {
+          // Hide duplicate right axis for throughput downlink (same units)
+          seriesName: "Throughput peak downlink (Gbps)",
+          opposite: true,
+          show: false,
+          labels: { formatter: humanUnitsGbps },
+          title: { text: "", style: { fontSize: "0px" } },
         },
       ],
     }),

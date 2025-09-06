@@ -24,6 +24,7 @@ import {
   mockFTTHTabrizFATs,
   mockFTTHPreorders,
   mockSuggestedFAT,
+  mockNLRegions,
   NL_BASE_LAT,
   NL_BASE_LONG,
 } from "@/lib/mocks/data";
@@ -97,6 +98,8 @@ export async function GET(request: Request, context: { params: { slug?: string[]
       return ok(mockFTTHSalesDetails());
     case "FTTHCities":
       return ok(mockFTTHCities());
+    case "NLRegions":
+      return ok(mockNLRegions());
     case "FTTHModems":
       return ok(mockFTTHModems(200));
     case "FTTHPoints":
@@ -121,7 +124,7 @@ export async function GET(request: Request, context: { params: { slug?: string[]
     case "FTTHGetTabrizFATs":
       return ok(mockFTTHTabrizFATs(100));
     case "FTTHPreorders":
-      return ok(mockFTTHPreorders(200));
+      return ok(mockFTTHPreorders());
     case "SuggestedFAT":
       return ok(mockSuggestedFAT(80));
     case "IranMapDashboardSummary": {
@@ -209,7 +212,7 @@ export async function POST(request: Request, context: { params: { slug?: string[
     }
     case "FTTHGetIBSNGOnlineCount": {
       const body = await request.json().catch(() => ({} as any));
-      const rows = typeof body?.RowLimit === "number" ? body.RowLimit : 100;
+      const rows = typeof body?.RowLimit === "number" ? body.RowLimit : 144; // default to one day @ 10m
       return ok(mockIBSNGOnlineCount(Math.min(rows, 2000)));
     }
     case "GetFTTHDashboardUTDailyChart": {
